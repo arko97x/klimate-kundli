@@ -1,0 +1,21 @@
+{
+  "name": "klimate-kundli",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Klimate Kundli — exhibition piece. PoC: web form → fetch climate data per visitor → render kundli.",
+  "workspaces": [
+    "apps/server",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:server": "npm run dev --workspace apps/server",
+    "dev:web": "npm run dev --workspace apps/web",
+    "build": "npm run build --workspaces --if-present",
+    "prefetch": "npm run prefetch --workspace apps/server",
+    "load:bundled": "npm run load:bundled --workspace apps/server"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
