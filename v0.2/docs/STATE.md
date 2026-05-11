@@ -29,7 +29,7 @@ CDS / IMD / GHCN  →  Python ingest workers  →  Cloudflare R2 (raw + Parquet)
 | 3 | Aggregate builder (annual_extremes, annual_rain, decade_rain, monthly_normals, season_prefix) | done, verified on India 2020 |
 | 4 | Hono serving API on top of aggregates | done (10 endpoints + bundled `/api/kundli`) |
 | 4.5 | Global indices ingest (emissions, sea level, CO2 ppm, 2050 projection) | pending — fills cells 8/10/11/12 |
-| 5 | Web app on shadcn/ui that talks only to v0.2 API | pending |
+| 5 | Web app on shadcn/ui that talks only to v0.2 API | done — Vite + React + Tailwind + shadcn, parchment-ink almanac theme, 3×4 grid with skeletons on pending cells |
 | 6 | IMD India layer (rainfall grid + station/sub-station) | pending — IMD approval received |
 | 7 | NOAA GHCN-Daily station overlay | pending |
 | 8 | Optional 20CRv3 1926–1939 lower-confidence layer | pending |
@@ -60,6 +60,7 @@ Phases 2–3 verified on India 2020; phase 4 first slice live.
 - `annual_extremes` 37, `annual_rain` 37, `monthly_normals` 444 (baseline = (2020, 2020)), `season_prefix` 13,542, `decade_rain` 0 (will fill once ≥3 years are loaded).
 - 24 rows in `source_provenance` mapping each chunk back to its R2 URI + checksum.
 - R2 bucket `klimate-archive` has matching `raw/era5/.../...nc` and `daily/era5/.../...parquet` objects.
+- Vite + React web app live on `http://localhost:5174`, proxying `/api/*` → `:3002`. Parchment-and-ink almanac theme (CSS variables driven, dark "planetarium" variant deferred), Fraunces + Switzer + JetBrains Mono. Single form: birthplace combobox (debounced `/api/places`), birth date, repeatable lived-in stay rows with a "still living here" checkbox that sends literal `"today"` to the API. On submit POSTs `/api/kundli`, then renders a 3×4 grid of 12 cells in `Cell.tsx` — Roman-numeral house number per cell, hot/cold/wet/dry tinted icon, `Skeleton` shimmer on `status: "pending_dataset"`, `ProvenancePill` (source · fallback · quality% · partial-days) on cells that ship one. Prod bundle 91 kB gzipped JS / 6 kB CSS.
 - Hono API live on `http://localhost:3002`. Endpoints:
   - `GET /api/health`
   - `GET /api/places?q=&limit=`
@@ -72,7 +73,14 @@ Phases 2–3 verified on India 2020; phase 4 first slice live.
   - `GET /api/kundli?birth_slug=&birth_date=&lived=slug:start:end,...` (and POST with a JSON body)
 - `/api/kundli` returns a fixed 12-cell array. Cells 1, 2, 3, 4, 5, 6, 7, 9 are answered from Supabase; cells 8 (country emissions), 10 (sea level), 11 (CO₂ ppm), 12 (2050 projection) return `status: "pending_dataset"` until phase 4.5 lands. Cell 4/5 (latest birthday extremes) falls back to `monthly_normals` when the exact day isn't in `daily_weather`.
 
-**Next session, first action:** scaffold phase 5 web app — Vite + React + TS + Tailwind + shadcn/ui, single form (birth date, birth place autocomplete via `/api/places`, lived-in stay rows), POST to `/api/kundli`, render 12-cell grid with skeleton states for `pending_dataset`. After that, phase 4.5 (global indices ingest) to fill the four pending cells.
+**Next session, first action:** phase 4.5 — global-indices ingest. Four small static datasets that fill the four `pending_dataset` cells:
+- cell 8 (country emissions): per-country cumulative CO₂ from Our World in Data / Global Carbon Budget — single CSV, per-country yearly tonnes, sum from birth year onward. Needs a `country_emissions(country_code, year, cumulative_t)` table or similar.
+- cell 10 (sea level): NASA / NOAA satellite altimetry global mean sea level — single yearly CSV.
+- cell 11 (CO₂ ppm): Mauna Loa annual mean — single CSV.
+- cell 12 (2050 projection): CMIP6 multi-model mean of tmax/precip for the birthplace, RCP/SSP scenario TBD. May ship a precomputed per-place lookup table rather than re-deriving at request time.
+Once 4.5 is live, the web cells already lay out correctly — flipping the four pending cells to `status: "ok"` server-side is the only change needed; no UI work required.
+
+**After 4.5 → phase 6:** IMD India (rainfall grid + station/sub-station), approval received.
 
 ## Where things live
 
@@ -103,6 +111,15 @@ Phases 2–3 verified on India 2020; phase 4 first slice live.
 | API /api/kundli route (GET + POST) | `v0.2/apps/api/src/routes/kundli.ts` |
 | Kundli 12-cell builder | `v0.2/apps/api/src/kundli/build.ts` |
 | Kundli wire types | `v0.2/apps/api/src/kundli/types.ts` |
+| Web entry / Vite config / Tailwind config | `v0.2/apps/web/{vite.config.ts,tailwind.config.ts,components.json}` |
+| Web theme (parchment-ink) + fonts | `v0.2/apps/web/src/styles.css` |
+| Web wire types (mirror of API kundli types) | `v0.2/apps/web/src/lib/types.ts` |
+| Web fetch helpers (places search, kundli POST) | `v0.2/apps/web/src/lib/api.ts` |
+| Place autocomplete (cmdk + Radix popover) | `v0.2/apps/web/src/components/PlaceCombobox.tsx` |
+| Form (birth + repeatable stays + still-here checkbox) | `v0.2/apps/web/src/components/{KundliForm,StayRow}.tsx` |
+| 3×4 grid + per-cell render + provenance pill | `v0.2/apps/web/src/components/{KundliGrid,Cell,ProvenancePill}.tsx` |
+| shadcn primitives | `v0.2/apps/web/src/components/ui/*` |
+| App shell, intro placard, view-state machine | `v0.2/apps/web/src/App.tsx` |
 
 ## Accounts and secrets
 
@@ -125,7 +142,7 @@ Phases 2–3 verified on India 2020; phase 4 first slice live.
 
 Paste this into the new chat as the first message:
 
-> Continuing the Klimate Kundli v0.2 build. Read `v0.2/docs/STATE.md` first for context. Phases 1–4 are done. The serving API exposes 10 endpoints including `GET/POST /api/kundli`, which bundles all 12 cells (8 backed by real data, 4 returning `status: "pending_dataset"`). Run with `npm --workspace apps/api run dev`. Next: scaffold phase 5 web app (Vite + React + Tailwind + shadcn/ui, single form, 12-cell grid). After that, phase 4.5 (global indices: emissions, sea level, CO₂ ppm, 2050 projection) to clear the four pending cells.
+> Continuing the Klimate Kundli v0.2 build. Read `v0.2/docs/STATE.md` first for context. Phases 1–5 are done end-to-end: ingest → Supabase aggregates → Hono API (10 endpoints + bundled `/api/kundli`) → Vite/React/Tailwind/shadcn web on parchment-ink almanac theme at `:5174` (proxies `/api/*` to API at `:3002`). 12-cell grid renders 8 cells from real data and 4 `pending_dataset` cells as skeleton placeholders. Next: phase 4.5 — global-indices ingest (country emissions, sea level, Mauna Loa CO₂ ppm, 2050 projection) to fill cells 8/10/11/12. After that: phase 6 (IMD India, approval received).
 
 That's enough for any new assistant session to read the doc, scan the code, and continue without backtracking.
 
@@ -149,6 +166,15 @@ curl 'http://localhost:3002/api/places/mumbai-in/monthly'
 curl 'http://localhost:3002/api/places/delhi-in/daily?date=2020-05-26'
 curl 'http://localhost:3002/api/places/mumbai-in/seasonal-range?season=summer&start=2020-04-01&end=2020-09-30'
 curl 'http://localhost:3002/api/kundli?birth_slug=delhi-in&birth_date=1990-06-15&lived=mumbai-in:2014-06-01:2020-05-31,bengaluru-in:2020-06-01:today'
+
+# phase 5: web
+cd v0.2 && npm --workspace apps/web run dev               # http://localhost:5174
+# Vite proxies /api/* to :3002, so the same canonical POST also works through the dev server:
+curl -X POST 'http://localhost:5174/api/kundli' \
+  -H 'Content-Type: application/json' \
+  -d '{"birth_slug":"delhi-in","birth_date":"1990-06-15","lived":[{"slug":"mumbai-in","start":"2014-06-01","end":"2020-05-31"},{"slug":"bengaluru-in","start":"2020-06-01","end":"today"}]}'
+# Production build smoke (writes apps/web/dist):
+npm --workspace apps/web run build
 ```
 
 ```sql

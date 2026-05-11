@@ -1,7 +1,136 @@
-html, body, #root {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-  background: #fafafa;
-  color: #111;
+/* ==========================================================================
+   Klimate Kundli v0.2 — almanac / printed-broadside theme
+   --------------------------------------------------------------------------
+   Aesthetic brief: this is an exhibition piece, not a SaaS dashboard. The
+   reference is a printed Indian almanac (panchanga) or a broadside engraved
+   weather chart — parchment cream, deep walnut ink, two warm/cool accents
+   for hot and cold extremes. Heavy serif display (Fraunces) for numerals
+   and a clean grotesque (Switzer) for chrome. Numbers use JetBrains Mono so
+   columns of data line up.
+
+   All colours are HSL channels so we can drop in a dark "planetarium"
+   variant later without changing component code.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&display=swap");
+@import url("https://api.fontshare.com/v2/css?f[]=switzer@300,400,500,600,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* parchment surface */
+    --background: 38 35% 94%;            /* warm cream paper */
+    --foreground: 24 18% 14%;            /* walnut ink */
+
+    --card: 38 40% 96%;                  /* card slightly lighter than page */
+    --card-foreground: 24 18% 14%;
+
+    --popover: 38 38% 97%;
+    --popover-foreground: 24 18% 14%;
+
+    --primary: 18 56% 28%;               /* burnt sienna primary */
+    --primary-foreground: 38 50% 96%;
+
+    --secondary: 36 22% 86%;             /* aged paper secondary */
+    --secondary-foreground: 24 18% 14%;
+
+    --muted: 36 18% 88%;
+    --muted-foreground: 24 12% 38%;
+
+    --accent: 36 30% 80%;                /* slightly warmer parchment */
+    --accent-foreground: 24 18% 14%;
+
+    --destructive: 8 70% 38%;
+    --destructive-foreground: 38 50% 96%;
+
+    --border: 24 14% 78%;
+    --input: 24 14% 78%;
+    --ring: 18 56% 28%;
+
+    /* domain palette */
+    --ember: 12 76% 42%;                 /* hot extremes */
+    --frost: 208 56% 36%;                /* cold extremes */
+    --monsoon: 188 48% 32%;              /* rainfall */
+    --ochre: 38 78% 44%;                 /* CO2 / projection */
+
+    --radius: 0.25rem;
+  }
+
+  /* very mild paper grain — a layered radial of warm/cool noise that reads
+     as "printed" without distracting from data. Pure CSS, GPU-friendly. */
+  html {
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(at 22% 18%, hsl(36 60% 88% / 0.6) 0px, transparent 50%),
+      radial-gradient(at 78% 86%, hsl(28 50% 86% / 0.55) 0px, transparent 55%),
+      radial-gradient(at 5% 90%, hsl(40 55% 90% / 0.45) 0px, transparent 60%);
+    background-attachment: fixed;
+  }
+
+  body {
+    @apply text-foreground antialiased;
+    font-feature-settings: "ss01", "cv11";
+    font-family: theme("fontFamily.sans");
+    letter-spacing: -0.005em;
+  }
+
+  /* Display serif gets optical sizing for its huge numerals on cells. */
+  .font-display {
+    font-feature-settings: "ss01", "ss02", "lnum", "tnum";
+    font-optical-sizing: auto;
+    letter-spacing: -0.02em;
+  }
+
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  ::selection {
+    background: hsl(var(--ember) / 0.22);
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer components {
+  /* ------------------------------------------------------------------------
+     .almanac-rule — thin walnut hairline used between page sections. Two
+     stacked borders give a faint debossed feel without resorting to images.
+     ------------------------------------------------------------------------ */
+  .almanac-rule {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      hsl(var(--foreground) / 0.18) 12%,
+      hsl(var(--foreground) / 0.3) 50%,
+      hsl(var(--foreground) / 0.18) 88%,
+      transparent 100%
+    );
+  }
+
+  /* Small-caps eyebrow used on cell labels and section headers. */
+  .eyebrow {
+    @apply font-sans uppercase tracking-[0.18em] text-[0.68rem] font-medium text-muted-foreground;
+  }
+
+  /* The shimmery sweep on pending cells. Slow, slightly warm — feels like
+     unfinished engraving rather than a SaaS skeleton. */
+  .pending-shimmer {
+    background-image: linear-gradient(
+      110deg,
+      hsl(var(--muted) / 0.0) 25%,
+      hsl(var(--foreground) / 0.06) 50%,
+      hsl(var(--muted) / 0.0) 75%
+    );
+    background-size: 200% 100%;
+    @apply animate-shimmer;
+  }
 }
