@@ -1,116 +1,68 @@
-# Klimate Kundli — PoC
+# Klimate Kundli
 
-All-digital PoC. Localhost only. Web form collects visitor inputs → backend computes the 12-cell climate kundli (cells 2–12 from the concept) → renders to the page.
+Exhibition piece for *Data, Otherwise* (VizChitra 2026). Visitors enter their birth date, birth city, and cities they have lived in; the system returns a 12-cell climate "kundli" situating their life inside the planet's recent climate history.
 
-Stack: **npm workspaces** + **Vite + React + TS** (`apps/web`) + **Hono + better-sqlite3 + TS** (`apps/server`). Aggressive pre-cache so generation hits SQLite first; live Open-Meteo only on cache miss.
+This repository is versioned. The current latest active build is **v0.2**. The original PoC is preserved as **v0.1** for reference and curatorial walkthroughs.
 
-## What's where
+## Versions
 
-```
-apps/
-  server/   Hono API, SQLite cache, prefetch + bundled-CSV scripts
-  web/      Vite + React form and kundli renderer
-data/       Bundled CSVs + cities.json + cache.db (gitignored)
-scripts/    download-bundled.sh — pulls the 3 static CSVs
-```
+| Version | Status | Folder | Notes |
+|---|---|---|---|
+| 0.1 | Frozen | [`v0.1/`](v0.1/) | Localhost-only PoC. Open-Meteo + NASA POWER live cache. Tagged `v0.1.0`. |
+| 0.2 | Active (alpha) | [`v0.2/`](v0.2/) | Aggregate-first DB. Supabase serving + R2 archive + Python ingest workers. |
 
-## One-time setup
+Source of truth for "what is latest": [`versions.json`](versions.json).
 
-```bash
-npm install
-bash scripts/download-bundled.sh     # NOAA CO2, OWID emissions, NASA GMSL → data/
-npm run prefetch -w @klimate-kundli/server   # geocode + Open-Meteo historical + CMIP6 for top ~110 cities
-```
+## Routing
 
-The prefetch run takes 10–20 minutes on a decent connection. Edit `data/cities.json` to add/remove cities. Re-running is idempotent — uncached date ranges are filled in, existing rows are upserted.
+`Caddyfile` at the repo root routes both versions:
 
-Useful prefetch flags:
+- `/` → v0.2 (latest)
+- `/0.2/` and `/0.2/...` → 301 → `/` (canonical at root)
+- `/0.1/` and `/0.1/...` → frozen v0.1 web
+- `/api/...` → v0.2 API
+- `/0.1/api/...` → v0.1 API (proxied through Vite under the `/0.1/` base)
 
-- `--only-bundled` — only load the 3 CSVs into SQLite, no network
-- `--no-bundled` — only fetch weather, skip CSV ingest
-- `--no-climate` — skip CMIP6 (cell 12), faster
-- `--tier1-only` — full prefetch (weather + CMIP6) for the ~190 tier-1 cities only
-- `--tier2-only` — weather-only prefetch for the ~270 tier-2 cities only
+The same Caddyfile is used for local dev (port `8080`) and production (drop-in friendly). Production tweaks live in [`v0.2/infra/`](v0.2/infra/).
 
-Example: full first-run on a fast connection:
+## Local dev
+
+You'll need [Caddy](https://caddyserver.com/docs/install) on your path.
+
+In four terminals:
 
 ```bash
-npm run prefetch -w @klimate-kundli/server                  # everything
-# or split across runs:
-npm run prefetch -w @klimate-kundli/server -- --tier1-only  # ~15-25 min
-npm run prefetch -w @klimate-kundli/server -- --tier2-only  # ~30-60 min
+# v0.1 (frozen)
+cd v0.1 && npm install
+npm run dev:server   # http://localhost:3001
+npm run dev:web      # http://localhost:5173 (served under /0.1/ base)
+
+# v0.2 (active)
+cd v0.2 && npm install
+npm run dev:api      # http://localhost:3002
+npm run dev:web      # http://localhost:5174
+
+# Caddy fronting both
+caddy run --config Caddyfile
+# open http://localhost:8080
 ```
 
-## Run
+You don't need to run v0.1 unless you want `/0.1/` to work. v0.2 alone is enough for active development.
 
-Two terminals:
+## Reference materials
 
-```bash
-npm run dev:server     # http://localhost:3001
-npm run dev:web        # http://localhost:5173
-```
+These live at the repo root and are version-agnostic:
 
-Open <http://localhost:5173>. Vite proxies `/api/*` to the server.
+- `prelim-proposal/` — original concept ideation.
+- `revised_clarified-concept-note.pdf` — current concept note.
+- `feedback-from-curatorial-team.png` — feedback from curatorial team.
+- `guide/` — supporting reference imagery.
+- `docs/` — cross-version working documents.
 
-Health check: <http://localhost:3001/api/health> shows row counts per table.
+## Contributing
 
-## How the cells map to data
+For the time being:
 
-| # | Cell | Source |
-|---|------|--------|
-| 1 | "You" header | form input |
-| 2 | Highest temp in birth year | Open-Meteo Historical (ERA5) |
-| 3 | Lowest temp in birth year | Open-Meteo Historical |
-| 4 | Highest temp on latest birthday | Open-Meteo Historical |
-| 5 | Lowest temp on latest birthday | Open-Meteo Historical |
-| 6 | Summer temp range across cities | Open-Meteo Historical, all stays |
-| 7 | Winter temp range across cities | Open-Meteo Historical, all stays |
-| 8 | Δ national CO₂ emissions (lifetime) | OWID `owid-co2-data.csv` |
-| 9 | Δ rainfall in birth city (lifetime) | Open-Meteo Historical (precip) |
-| 10 | Sea-level rise (lifetime) | NASA GMSL altimetry CSV |
-| 11 | CO₂ ppm: birth year vs today | NOAA Mauna Loa CSV |
-| 12 | Projected temp on 2050 birthday | Open-Meteo Climate API (CMIP6) |
-
-## Cache architecture
-
-SQLite, single file at `data/cache.db`. Tables:
-
-- `geocode` — PK `query` (lower(city|country))
-- `weather_daily` — PK `(lat, lon, date)`. Lat/lon rounded to 4 decimals so different geocoder results for the same city collapse onto the same key.
-- `climate_proj_daily` — same shape, holds CMIP6 projection.
-- `co2_annual`, `emissions_annual`, `sea_level_monthly` — bundled.
-
-Cache-first fetch: `cache.ts` checks coverage of the requested date range; if ≥98% covered → return cached, otherwise fetch from Open-Meteo and upsert.
-
-## Live-fetch fallback
-
-If a visitor enters a city that wasn't in `data/cities.json`, the first request lives ~2–4s while Open-Meteo fills the cache. Every subsequent request for that city is sub-100ms.
-
-If offline + uncached: the request will fail. The full system spec calls for a "collect in 5 min" job queue — out of scope for this PoC.
-
-## API
-
-```
-POST /api/generate
-  body: {
-    "birthDate": "1995-03-21",
-    "birthCity": "Kolkata",
-    "birthCountry": "India",
-    "citiesLivedIn": [
-      { "city": "Mumbai", "country": "India", "start": "2017-08-01", "end": "2022-06-30" }
-    ]
-  }
-  → 200 { visitor, cells: Cell[12], generatedAt, elapsedMs }
-
-GET /api/health   row counts per cache table
-GET /api/geocode?city=...&country=...   debugging
-```
-
-## Caveats / known limits
-
-- ERA5 has ~5-day publish lag. Latest-birthday cells may be empty if today's birthday is <5 days ago.
-- Open-Meteo rainfall is biased low vs IMD over the Indian monsoon. Adequate for PoC.
-- CMIP6 cell uses up to 5 models (`MRI_AGCM3_2_S`, `EC_Earth3P_HR`, `CMCC_CM2_VHR4`, `FGOALS_f3_H`, `MPI_ESM1_2_XR`) and picks the first non-null per day. This routes around individual-model spatial gaps (we hit nulls with EC_Earth3P_HR at Kolkata and MRI alone at São Paulo). Switch to a true ensemble mean for the show if needed.
-- Cell 8 (national emissions) uses ISO alpha-3 lookup against OWID. Bypasses country-name aliasing. Falls back to name match only if ISO is missing.
-- Sea-level CSV is the EPA/CSIRO compilation: CSIRO reconstruction 1880-1992 + NOAA altimetry 1993+. Inches → mm conversion in the loader.
-- Open-Meteo free tier has ~600 req/min and ~10k req/day caps. Plenty for normal exhibition use after prefetch, but during dev/prefetch you can hit it. For show day, consider Open-Meteo Standard API (€29/mo) for headroom.
+- Don't modify `v0.1/`. It's frozen at `v0.1.0`.
+- All new work goes under `v0.2/`.
+- See [`v0.2/README.md`](v0.2/README.md) for the active build's architecture and roadmap.

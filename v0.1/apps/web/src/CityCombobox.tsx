@@ -41,7 +41,7 @@ export function CityCombobox({ value, onChange, onSelect, placeholder, id, autoF
     if (q.length < 2 || q === lastQueryRef.current) return;
     const handle = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/geocode/search?q=${encodeURIComponent(q)}&limit=8`);
+        const res = await fetch(`${import.meta.env.BASE_URL}api/geocode/search?q=${encodeURIComponent(q)}&limit=8`);
         const json = await res.json();
         if (q !== value.trim()) return;
         lastQueryRef.current = q;

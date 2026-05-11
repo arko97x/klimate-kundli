@@ -1,0 +1,35 @@
+{
+	admin off
+}
+
+# Local dev entrypoint. Run `caddy run` from repo root, then open
+# http://localhost:8080 in a browser. Caddy fronts both versions, redirecting
+# /0.2 to / and proxying /0.1/* to the v0.1 dev server.
+#
+# Expected upstreams:
+#   v0.1 web : http://localhost:5173 (Vite dev, base /0.1/)
+#   v0.1 api : http://localhost:3001 (Hono, proxied through Vite under /0.1)
+#   v0.2 web : http://localhost:5174 (Vite dev, latest)
+#   v0.2 api : http://localhost:3002 (Hono)
+:8080 {
+	# /0.2 and /0.2/* → canonical root (redirect style).
+	redir /0.2 / 301
+
+	@v02sub path_regexp v02sub ^/0\.2(/.+)$
+	redir @v02sub {re.v02sub.1} 301
+
+	# Frozen v0.1 web (Vite serves under base /0.1/).
+	handle /0.1/* {
+		reverse_proxy localhost:5173
+	}
+
+	# v0.2 API (latest).
+	handle /api/* {
+		reverse_proxy localhost:3002
+	}
+
+	# v0.2 web (latest).
+	handle {
+		reverse_proxy localhost:5174
+	}
+}

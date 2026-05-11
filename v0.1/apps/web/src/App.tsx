@@ -63,7 +63,7 @@ export function App() {
     setError(null);
     setResult(null);
     try {
-      const res = await fetch("/api/generate", {
+      const res = await fetch(`${import.meta.env.BASE_URL}api/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

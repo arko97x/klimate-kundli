@@ -4,12 +4,23 @@ build/
 .DS_Store
 *.log
 
-# local data — regenerate via npm run prefetch
-data/cache.db
-data/cache.db-journal
-data/cache.db-wal
-data/cache.db-shm
+# python
+.venv/
+__pycache__/
+*.pyc
+.uv-cache/
 
 # env
 .env
 .env.local
+
+# v0.1 local cache (regenerate via prefetch)
+v0.1/data/cache.db
+v0.1/data/cache.db-journal
+v0.1/data/cache.db-wal
+v0.1/data/cache.db-shm
+
+# v0.2 scratch
+v0.2/ingest/scratch/
+v0.2/data/raw/
+v0.2/data/processed/

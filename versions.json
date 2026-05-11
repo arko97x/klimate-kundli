@@ -1,0 +1,17 @@
+{
+  "latest": "0.2",
+  "available": ["0.1", "0.2"],
+  "versions": {
+    "0.1": {
+      "status": "frozen",
+      "label": "PoC",
+      "tag": "v0.1.0",
+      "note": "Localhost-only PoC. Open-Meteo + NASA POWER live cache. Frozen reference."
+    },
+    "0.2": {
+      "status": "active",
+      "label": "alpha",
+      "note": "Aggregate-first build. Supabase serving DB, R2 archive, Python ingest workers."
+    }
+  }
+}

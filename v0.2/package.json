@@ -1,0 +1,19 @@
+{
+  "name": "klimate-kundli-v0.2",
+  "private": true,
+  "version": "0.2.0-alpha.0",
+  "description": "Klimate Kundli v0.2 — aggregate-first climate database + serving API + web app.",
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:web": "npm run dev --workspace apps/web",
+    "dev:api": "npm run dev --workspace apps/api",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
