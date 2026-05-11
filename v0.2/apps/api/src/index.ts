@@ -12,13 +12,16 @@ import { closeDb, sql } from "./db.js";
 import { env } from "./env.js";
 import { placesRouter } from "./routes/places.js";
 import { annualRouter } from "./routes/annual.js";
+import { timeseriesRouter } from "./routes/timeseries.js";
+import { kundliRouter } from "./routes/kundli.js";
 
 const app = new Hono();
 
 app.use(logger());
 app.use("/api/*", cors({
   origin: env.WEB_ORIGIN === "*" ? "*" : [env.WEB_ORIGIN],
-  allowMethods: ["GET", "OPTIONS"],
+  allowMethods: ["GET", "POST", "OPTIONS"],
+  allowHeaders: ["Content-Type"],
 }));
 
 // --- health -----------------------------------------------------------------
@@ -70,7 +73,9 @@ app.get("/api/health", async (c) => {
 // --- routers ---------------------------------------------------------------
 
 app.route("/api/places", placesRouter);
-app.route("/api/places", annualRouter); // mounts /:slug/annual under /api/places
+app.route("/api/places", annualRouter);      // mounts /:slug/annual
+app.route("/api/places", timeseriesRouter);  // mounts /:slug/{monthly,daily,decade,seasonal-range}
+app.route("/api/kundli", kundliRouter);
 
 // --- shutdown --------------------------------------------------------------
 

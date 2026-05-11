@@ -27,9 +27,10 @@ CDS / IMD / GHCN  →  Python ingest workers  →  Cloudflare R2 (raw + Parquet)
 | 1 | Schema + place loader + CDS connector + queue + worker download | done |
 | 2 | R2 upload + hourly→daily transform + write daily_weather + stamp source_provenance | done, verified end-to-end on 2020 India temp + Jan precip |
 | 3 | Aggregate builder (annual_extremes, annual_rain, decade_rain, monthly_normals, season_prefix) | done, verified on India 2020 |
-| 4 | Hono serving API on top of aggregates | first slice done: /api/health, /api/places, /api/places/:slug, /api/places/:slug/annual |
+| 4 | Hono serving API on top of aggregates | done (10 endpoints + bundled `/api/kundli`) |
+| 4.5 | Global indices ingest (emissions, sea level, CO2 ppm, 2050 projection) | pending — fills cells 8/10/11/12 |
 | 5 | Web app on shadcn/ui that talks only to v0.2 API | pending |
-| 6 | IMD India layer (rainfall grid + station/sub-station) | pending (account in verification) |
+| 6 | IMD India layer (rainfall grid + station/sub-station) | pending — IMD approval received |
 | 7 | NOAA GHCN-Daily station overlay | pending |
 | 8 | Optional 20CRv3 1926–1939 lower-confidence layer | pending |
 | 9 | Event-readiness snapshot + rehearsal | pending |
@@ -59,9 +60,19 @@ Phases 2–3 verified on India 2020; phase 4 first slice live.
 - `annual_extremes` 37, `annual_rain` 37, `monthly_normals` 444 (baseline = (2020, 2020)), `season_prefix` 13,542, `decade_rain` 0 (will fill once ≥3 years are loaded).
 - 24 rows in `source_provenance` mapping each chunk back to its R2 URI + checksum.
 - R2 bucket `klimate-archive` has matching `raw/era5/.../...nc` and `daily/era5/.../...parquet` objects.
-- Hono API live on `http://localhost:3002` exposing `/api/health`, `/api/places?q=`, `/api/places/:slug`, `/api/places/:slug/annual?year=&source=`. Spot-check: Delhi 2020 → tmax 44.76 °C on 2020-05-26, tmin 2.59 °C on 2020-01-01, annual rain 702.85 mm.
+- Hono API live on `http://localhost:3002`. Endpoints:
+  - `GET /api/health`
+  - `GET /api/places?q=&limit=`
+  - `GET /api/places/:slug`
+  - `GET /api/places/:slug/annual?year=&source=`
+  - `GET /api/places/:slug/monthly?baseline_start=&baseline_end=&source=`
+  - `GET /api/places/:slug/daily?date=&source=`
+  - `GET /api/places/:slug/decade?start=&source=`
+  - `GET /api/places/:slug/seasonal-range?season=&start=&end=&source=`
+  - `GET /api/kundli?birth_slug=&birth_date=&lived=slug:start:end,...` (and POST with a JSON body)
+- `/api/kundli` returns a fixed 12-cell array. Cells 1, 2, 3, 4, 5, 6, 7, 9 are answered from Supabase; cells 8 (country emissions), 10 (sea level), 11 (CO₂ ppm), 12 (2050 projection) return `status: "pending_dataset"` until phase 4.5 lands. Cell 4/5 (latest birthday extremes) falls back to `monthly_normals` when the exact day isn't in `daily_weather`.
 
-**Next session, first action:** add the remaining kundli endpoints to `apps/api` — at minimum `monthly_normals`, `daily_weather` by date (birthday cell), and a `/api/kundli` aggregate endpoint that bundles cells 1–12 into one response. After that, scaffold the web app (phase 5).
+**Next session, first action:** scaffold phase 5 web app — Vite + React + TS + Tailwind + shadcn/ui, single form (birth date, birth place autocomplete via `/api/places`, lived-in stay rows), POST to `/api/kundli`, render 12-cell grid with skeleton states for `pending_dataset`. After that, phase 4.5 (global indices ingest) to fill the four pending cells.
 
 ## Where things live
 
@@ -88,6 +99,10 @@ Phases 2–3 verified on India 2020; phase 4 first slice live.
 | API DB client (postgres-js, session pooler) | `v0.2/apps/api/src/db.ts` |
 | API places routes (search + resolve) | `v0.2/apps/api/src/routes/places.ts` |
 | API annual route | `v0.2/apps/api/src/routes/annual.ts` |
+| API timeseries routes (monthly, daily, decade, seasonal-range) | `v0.2/apps/api/src/routes/timeseries.ts` |
+| API /api/kundli route (GET + POST) | `v0.2/apps/api/src/routes/kundli.ts` |
+| Kundli 12-cell builder | `v0.2/apps/api/src/kundli/build.ts` |
+| Kundli wire types | `v0.2/apps/api/src/kundli/types.ts` |
 
 ## Accounts and secrets
 
@@ -110,7 +125,7 @@ Phases 2–3 verified on India 2020; phase 4 first slice live.
 
 Paste this into the new chat as the first message:
 
-> Continuing the Klimate Kundli v0.2 build. Read `v0.2/docs/STATE.md` first for context. Phases 1–3 are verified end-to-end on India 2020. Phase 4 has a first slice: Hono API serving `/api/health`, `/api/places`, `/api/places/:slug`, `/api/places/:slug/annual?year=`. Run with `npm --workspace apps/api run dev` (reads `v0.2/ingest/.env`). Next: add `monthly_normals`, `daily_weather` by date, `decade_rain`, and a bundled `/api/kundli` endpoint, then move to phase 5 (web app).
+> Continuing the Klimate Kundli v0.2 build. Read `v0.2/docs/STATE.md` first for context. Phases 1–4 are done. The serving API exposes 10 endpoints including `GET/POST /api/kundli`, which bundles all 12 cells (8 backed by real data, 4 returning `status: "pending_dataset"`). Run with `npm --workspace apps/api run dev`. Next: scaffold phase 5 web app (Vite + React + Tailwind + shadcn/ui, single form, 12-cell grid). After that, phase 4.5 (global indices: emissions, sea level, CO₂ ppm, 2050 projection) to clear the four pending cells.
 
 That's enough for any new assistant session to read the doc, scan the code, and continue without backtracking.
 
@@ -130,6 +145,10 @@ curl http://localhost:3002/api/health
 curl 'http://localhost:3002/api/places?q=mumbai'
 curl http://localhost:3002/api/places/mumbai-in
 curl 'http://localhost:3002/api/places/delhi-in/annual?year=2020'
+curl 'http://localhost:3002/api/places/mumbai-in/monthly'
+curl 'http://localhost:3002/api/places/delhi-in/daily?date=2020-05-26'
+curl 'http://localhost:3002/api/places/mumbai-in/seasonal-range?season=summer&start=2020-04-01&end=2020-09-30'
+curl 'http://localhost:3002/api/kundli?birth_slug=delhi-in&birth_date=1990-06-15&lived=mumbai-in:2014-06-01:2020-05-31,bengaluru-in:2020-06-01:today'
 ```
 
 ```sql
