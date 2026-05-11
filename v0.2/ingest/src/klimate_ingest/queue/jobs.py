@@ -90,7 +90,7 @@ def claim_one(source: str | None = None, lease_minutes: int = DEFAULT_LEASE_MINU
             WITH next_job AS (
               SELECT id
               FROM ingest_jobs
-              WHERE (%(source)s IS NULL OR source = %(source)s)
+              WHERE (%(source)s::text IS NULL OR source = %(source)s::text)
                 AND attempts < max_attempts
                 AND (
                      status = 'pending'
@@ -177,7 +177,7 @@ def status_summary(source: str | None = None) -> dict[str, int]:
             """
             SELECT status, COUNT(*) AS n
               FROM ingest_jobs
-             WHERE (%s IS NULL OR source = %s)
+             WHERE (%s::text IS NULL OR source = %s::text)
              GROUP BY status
             """,
             (source, source),

@@ -23,7 +23,7 @@ from .logging import configure as configure_logging, get_logger
 from .places import read_csv, upsert as upsert_places
 from .queue import jobs as q
 from .sources.cds_era5 import CdsEra5Source
-from .transform.place_map import GridSpec, map_places_to_grid, populate_grid
+from .transform.place_map import GridSpec, map_places_to_grid, populate_grid_at_places
 
 log = get_logger(__name__)
 
@@ -69,21 +69,19 @@ def places_load(csv_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-@main.command("grid-build", help="Populate a grid for a source and map places to it.")
+@main.command("grid-build", help="Insert grid cells near every place and map each place to its nearest cell.")
 @click.option("--source", required=True, type=click.Choice(["era5", "era5land"]))
-@click.option("--region", default="global", type=click.Choice(["global", "india"]))
-def grid_build(source: str, region: str) -> None:
+@click.option(
+    "--window",
+    type=int,
+    default=1,
+    show_default=True,
+    help="3x3 window per place when window=1; 5x5 when window=2; etc.",
+)
+def grid_build(source: str, window: int) -> None:
     resolution = 0.25 if source == "era5" else 0.1
-    bbox = INDIA_BBOX if region == "india" else GLOBAL_BBOX
-    spec = GridSpec(
-        source=source,
-        resolution_deg=resolution,
-        lat_min=bbox["s"],
-        lat_max=bbox["n"],
-        lon_min=bbox["w"],
-        lon_max=bbox["e"],
-    )
-    inserted = populate_grid(spec)
+    spec = GridSpec(source=source, resolution_deg=resolution, window=window)
+    inserted = populate_grid_at_places(spec)
     mapped = map_places_to_grid(source, source_priority=cfg.SOURCE_PRIORITY[source])
     click.echo(json.dumps({"cells_inserted": inserted, "places_mapped": mapped}, indent=2))
 
@@ -146,18 +144,24 @@ def status(source: str | None) -> None:
 def worker(source: str, max_jobs: int | None, scratch: Path, idle_sleep: int) -> None:
     scratch.mkdir(parents=True, exist_ok=True)
     src = CdsEra5Source(name=source)
-    done = 0
-    while max_jobs is None or done < max_jobs:
+    # Count every attempt (success or failure) against --max-jobs. Without
+    # this, a stream of 403s would silently churn through every pending row.
+    attempts = 0
+    succeeded = 0
+    failed = 0
+    while max_jobs is None or attempts < max_jobs:
         job = q.claim_one(source=source)
         if job is None:
+            if max_jobs is not None:
+                # nothing left to do; bail rather than sit idle forever
+                break
             log.info("worker.idle", sleep=idle_sleep)
             time.sleep(idle_sleep)
             continue
+        attempts += 1
         log.info("worker.claim", job_id=job.id, variable=job.variable, year=job.year, month=job.month)
         try:
             with tempfile.TemporaryDirectory(prefix=f"job-{job.id}-", dir=scratch) as tmp:
-                # The worker maps job.variable (CDS name) → our short name for
-                # the source connector. Both are wired through CDS_VARIABLE_NAMES.
                 short = _short_name_for(job.variable)
                 result = src.fetch_chunk(
                     variable=short,
@@ -166,19 +170,20 @@ def worker(source: str, max_jobs: int | None, scratch: Path, idle_sleep: int) ->
                     area_bbox=job.area_bbox,
                     scratch_dir=Path(tmp),
                 )
-                # Upload to R2 / write daily Parquet / etc. — wired in pass 2.
+                # R2 upload + daily transform: wired in phase 2.
                 q.mark_done(
                     job.id,
                     bytes_=result.bytes,
                     checksum=result.checksum,
                     storage_uri=result.storage_uri,
                 )
-                done += 1
+                succeeded += 1
                 log.info("worker.done", job_id=job.id, bytes=result.bytes)
         except Exception as e:  # noqa: BLE001
             log.exception("worker.failed", job_id=job.id, error=str(e))
             q.mark_failed(job.id, error=str(e), retry_in_seconds=300)
-    click.echo(json.dumps({"completed": done}))
+            failed += 1
+    click.echo(json.dumps({"attempts": attempts, "succeeded": succeeded, "failed": failed}))
 
 
 def _short_name_for(cds_variable: str) -> str:

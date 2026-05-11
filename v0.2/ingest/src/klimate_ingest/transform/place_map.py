@@ -2,19 +2,26 @@
 
 Workflow:
 
-1. Walk a (lat, lon) grid covering the world (or a region) at the source's
-   native resolution.
-2. Insert one row per cell into `grid_cells` (idempotent on (source, lat, lon)).
-3. For every place, find the nearest cell via PostGIS `<->` and write a
-   `place_grid_map` row with the great-circle distance in metres.
+1. Read every place from the `places` table.
+2. For each place, analytically snap to the source's native grid resolution
+   (e.g. 0.25° for ERA5, 0.1° for ERA5-Land) and insert a 3×3 window of
+   `grid_cells` rows around it. The window protects against edge cases at
+   irregular boundaries and gives PostGIS multiple candidates for the
+   nearest-neighbour search.
+3. After cells are inserted, the second pass links each place to its
+   nearest cell via PostGIS `<->` and stores the great-circle distance.
 
 This is a one-shot maintenance job: re-run after the place gazetteer
-expands or after adding a new source.
+expands or after adding a new source. Cell rows dedup via the UNIQUE
+(source, lat, lon) constraint, so re-runs are idempotent.
+
+Note: this is intentionally **place-sparse**. Filling the entire globe at
+ERA5-Land's 0.1° grid would be ~13M rows; we only need cells near the
+places we actually serve.
 """
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 
 from ..db import transaction
@@ -27,40 +34,57 @@ log = get_logger(__name__)
 class GridSpec:
     source: str
     resolution_deg: float
-    lat_min: float = -90.0
-    lat_max: float = 90.0
-    lon_min: float = -180.0
-    lon_max: float = 180.0
+    window: int = 1  # number of cells either side; 1 => 3x3 around each place
 
 
-def _frange(start: float, stop: float, step: float) -> list[float]:
-    n = int(math.floor((stop - start) / step + 1e-9)) + 1
-    return [round(start + i * step, 6) for i in range(n)]
+def _snap(value: float, resolution: float) -> float:
+    """Round to the nearest cell-centre at `resolution` degrees."""
+    return round(round(value / resolution) * resolution, 6)
 
 
-def populate_grid(spec: GridSpec) -> int:
-    """Insert grid cells covering [lat_min..lat_max] × [lon_min..lon_max].
-
-    Returns the number of new rows inserted (idempotent thanks to the
-    UNIQUE (source, lat, lon) constraint).
-    """
-    lats = _frange(spec.lat_min, spec.lat_max, spec.resolution_deg)
-    lons = _frange(spec.lon_min, spec.lon_max, spec.resolution_deg)
+def populate_grid_at_places(spec: GridSpec) -> int:
+    """Insert cells near every place. Returns number of new rows."""
+    res = spec.resolution_deg
+    w = spec.window
     inserted = 0
     with transaction() as conn, conn.cursor() as cur:
-        for la in lats:
-            for lo in lons:
-                cur.execute(
-                    """
-                    INSERT INTO grid_cells (source, resolution_deg, lat, lon)
-                    VALUES (%s, %s, %s, %s)
-                    ON CONFLICT (source, lat, lon) DO NOTHING
-                    """,
-                    (spec.source, spec.resolution_deg, la, lo),
-                )
-                if cur.rowcount:
-                    inserted += 1
-    log.info("grid.populate.done", source=spec.source, inserted=inserted)
+        cur.execute("SELECT id, lat, lon FROM places")
+        places = cur.fetchall()
+        seen: set[tuple[float, float]] = set()
+        for p in places:
+            la0 = _snap(float(p["lat"]), res)
+            lo0 = _snap(float(p["lon"]), res)
+            for di in range(-w, w + 1):
+                for dj in range(-w, w + 1):
+                    la = round(la0 + di * res, 6)
+                    lo = round(lo0 + dj * res, 6)
+                    # clip to valid earth coords
+                    if not (-90.0 <= la <= 90.0):
+                        continue
+                    if lo < -180.0:
+                        lo += 360.0
+                    elif lo > 180.0:
+                        lo -= 360.0
+                    if (la, lo) in seen:
+                        continue
+                    seen.add((la, lo))
+                    cur.execute(
+                        """
+                        INSERT INTO grid_cells (source, resolution_deg, lat, lon)
+                        VALUES (%s, %s, %s, %s)
+                        ON CONFLICT (source, lat, lon) DO NOTHING
+                        """,
+                        (spec.source, res, la, lo),
+                    )
+                    if cur.rowcount:
+                        inserted += 1
+    log.info(
+        "grid.populate.done",
+        source=spec.source,
+        resolution=res,
+        candidates=len(seen),
+        inserted=inserted,
+    )
     return inserted
 
 
