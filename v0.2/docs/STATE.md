@@ -25,9 +25,9 @@ CDS / IMD / GHCN  →  Python ingest workers  →  Cloudflare R2 (raw + Parquet)
 | # | Phase | Status |
 |---|---|---|
 | 1 | Schema + place loader + CDS connector + queue + worker download | done |
-| 2 | R2 upload + hourly→daily transform + write daily_weather + stamp source_provenance | next |
-| 3 | Aggregate builder (annual_extremes, annual_rain, decade_rain, monthly_normals, season_prefix) | pending |
-| 4 | Hono serving API on top of aggregates | pending |
+| 2 | R2 upload + hourly→daily transform + write daily_weather + stamp source_provenance | done, verified end-to-end on 2020 India temp + Jan precip |
+| 3 | Aggregate builder (annual_extremes, annual_rain, decade_rain, monthly_normals, season_prefix) | done, verified on India 2020 |
+| 4 | Hono serving API on top of aggregates | first slice done: /api/health, /api/places, /api/places/:slug, /api/places/:slug/annual |
 | 5 | Web app on shadcn/ui that talks only to v0.2 API | pending |
 | 6 | IMD India layer (rainfall grid + station/sub-station) | pending (account in verification) |
 | 7 | NOAA GHCN-Daily station overlay | pending |
@@ -43,16 +43,25 @@ CDS / IMD / GHCN  →  Python ingest workers  →  Cloudflare R2 (raw + Parquet)
   - `grid-build --source era5|era5land [--window 1]` — place-aware sparse grid; populates `grid_cells` and `place_grid_map`.
   - `plan --source --region --year-start --year-end --variables` — enqueues monthly jobs into `ingest_jobs`.
   - `status --source` — counts by status.
-  - `worker --source --max-jobs --scratch --idle-sleep` — claims jobs, downloads from CDS, writes checksum + bytes to job row.
-  - `aggregate` — skeleton only.
+  - `r2-init` — verifies R2 creds and creates the archive bucket if missing.
+  - `worker --source --max-jobs --scratch --idle-sleep [--no-upload]` — claims jobs, fetches from CDS, uploads raw NetCDF + daily Parquet to R2, upserts `daily_weather`, stamps `source_provenance`, marks job done.
+  - `transform --source --cds-variable --year --month --file <nc>` — phase-2 backfill for a local NetCDF. Looks up `area_bbox` from the matching `ingest_jobs` row.
+  - `requeue --id <id> | --status done|failed|running [--source ...]` — resets jobs to pending so the worker can re-run them.
+  - `aggregate --source <s> --what all|annual_extremes|annual_rain|decade_rain|monthly_normals|season_prefix [--baseline-start --baseline-end]` — set-based SQL upserts into the five serving tables. `monthly_normals` auto-detects a baseline window when daily_weather doesn't cover 1991–2020; `decade_rain` requires ≥3 years per decade and silently produces 0 rows on a single-year build.
 
 ## Current data state
 
-User has run end-to-end through phase 1 successfully:
+Phases 2–3 verified on India 2020; phase 4 first slice live.
 
 - Supabase has 69 places, 23 aliases, 619 ERA5 grid cells, 69 place→cell mappings.
-- 1 CDS job done: ERA5 `2m_temperature`, India bbox, 2020-01 — 21 MB NetCDF in local scratch, SHA-256 stamped.
-- 11 jobs still pending for the remaining months of 2020 (India bbox, `2m_temperature`).
+- 24 ERA5 jobs done for India 2020 (12 × `2m_temperature` + 12 × `total_precipitation`).
+- `daily_weather` 13,542 rows = 37 India places × 366 days, every row carrying tmax/tmin + precip.
+- `annual_extremes` 37, `annual_rain` 37, `monthly_normals` 444 (baseline = (2020, 2020)), `season_prefix` 13,542, `decade_rain` 0 (will fill once ≥3 years are loaded).
+- 24 rows in `source_provenance` mapping each chunk back to its R2 URI + checksum.
+- R2 bucket `klimate-archive` has matching `raw/era5/.../...nc` and `daily/era5/.../...parquet` objects.
+- Hono API live on `http://localhost:3002` exposing `/api/health`, `/api/places?q=`, `/api/places/:slug`, `/api/places/:slug/annual?year=&source=`. Spot-check: Delhi 2020 → tmax 44.76 °C on 2020-05-26, tmin 2.59 °C on 2020-01-01, annual rain 702.85 mm.
+
+**Next session, first action:** add the remaining kundli endpoints to `apps/api` — at minimum `monthly_normals`, `daily_weather` by date (birthday cell), and a `/api/kundli` aggregate endpoint that bundles cells 1–12 into one response. After that, scaffold the web app (phase 5).
 
 ## Where things live
 
@@ -68,28 +77,40 @@ User has run end-to-end through phase 1 successfully:
 | Job queue | `v0.2/ingest/src/klimate_ingest/queue/jobs.py` |
 | CDS source | `v0.2/ingest/src/klimate_ingest/sources/cds_era5.py` |
 | Grid mapping | `v0.2/ingest/src/klimate_ingest/transform/place_map.py` |
+| R2 client | `v0.2/ingest/src/klimate_ingest/storage/r2.py` |
+| Hourly→daily transform | `v0.2/ingest/src/klimate_ingest/transform/daily.py` |
+| daily_weather + provenance upsert | `v0.2/ingest/src/klimate_ingest/transform/upsert.py` |
+| Phase-2 chunk pipeline | `v0.2/ingest/src/klimate_ingest/pipeline.py` |
+| Phase-3 aggregate builders | `v0.2/ingest/src/klimate_ingest/aggregate/builder.py` |
 | CLI | `v0.2/ingest/src/klimate_ingest/cli.py` |
+| API entrypoint | `v0.2/apps/api/src/index.ts` |
+| API env loader (walks to ingest/.env) | `v0.2/apps/api/src/env.ts` |
+| API DB client (postgres-js, session pooler) | `v0.2/apps/api/src/db.ts` |
+| API places routes (search + resolve) | `v0.2/apps/api/src/routes/places.ts` |
+| API annual route | `v0.2/apps/api/src/routes/annual.ts` |
 
 ## Accounts and secrets
 
 - Copernicus CDS: free account; ERA5 licences accepted; `~/.cdsapirc` configured.
 - Supabase: project provisioned; **Session Pooler** URL in `.env` (Direct connection is IPv6-only and fails on the user's network).
-- Cloudflare R2: account ready, payment not set up yet, no bucket created — needed for phase 2.
+- Cloudflare R2: account credentials live in `v0.2/ingest/.env`. Bucket `klimate-archive` is created via `klimate-ingest r2-init` on first run. If payment/billing isn't yet enabled on the account, `r2-init` will fail with a clear ClientError — enable R2 in the Cloudflare dashboard, then re-run.
 - IMD: account pending verification — phase 6.
 
 ## Known issues / TODOs
 
-- Worker's Ctrl-C path doesn't mark the running job back to pending; the job stays `running` until lease expires (30 min) or we manually reset. Could catch `KeyboardInterrupt` and release the lease.
+- Worker's Ctrl-C path now marks the in-flight job failed with `retry_in_seconds=0` so it's immediately re-claimable. Lease-expiry fallback still applies if the worker dies hard.
 - `grid-build` always reads from a fresh transaction; for large place lists, switch to a single fetchall and batched insert.
 - ERA5-Land licence not yet accepted on CDS — accept when we move to phase 6 land-resolution upgrade.
+- Precip daily totals are summed over UTC hours 00..23, which is offset one hour vs. midnight-to-midnight (ERA5 hourly TP is accumulated in the (t−1, t] window). Acceptable for the kundli's daily aggregates; document at the API edge.
+- `daily_weather.source_version` is currently NULL for ERA5; ECMWF doesn't publish a stable version string per chunk. Revisit when adding NOAA GHCN / IMD where versions matter.
 - `aggregate` subcommand is a skeleton.
-- No tests yet. Add a smoke test for `places.read_csv` and a roundtrip test for the queue once we have a sandbox DB.
+- No tests yet. Add a smoke test for `places.read_csv`, a roundtrip test for the queue, and a fixture-based test for `transform.daily.netcdf_to_daily` once we have a sandbox DB.
 
 ## How to resume in a new chat
 
 Paste this into the new chat as the first message:
 
-> Continuing the Klimate Kundli v0.2 build. Read `v0.2/docs/STATE.md` first for context. Latest commits are on `main`; phase 1 is done (schema + CDS ingest verified end-to-end with one job); next is phase 2 (R2 upload + hourly→daily transform). Please pick up from there.
+> Continuing the Klimate Kundli v0.2 build. Read `v0.2/docs/STATE.md` first for context. Phases 1–3 are verified end-to-end on India 2020. Phase 4 has a first slice: Hono API serving `/api/health`, `/api/places`, `/api/places/:slug`, `/api/places/:slug/annual?year=`. Run with `npm --workspace apps/api run dev` (reads `v0.2/ingest/.env`). Next: add `monthly_normals`, `daily_weather` by date, `decade_rain`, and a bundled `/api/kundli` endpoint, then move to phase 5 (web app).
 
 That's enough for any new assistant session to read the doc, scan the code, and continue without backtracking.
 
@@ -98,11 +119,48 @@ That's enough for any new assistant session to read the doc, scan the code, and 
 ```bash
 # in v0.2/ingest, with venv active
 klimate-ingest status --source era5
+klimate-ingest r2-init                                   # phase 2 prereq
+klimate-ingest requeue --id <stale_done_job_id>          # if needed
+klimate-ingest worker --source era5 --max-jobs 1         # process one chunk end-to-end
+klimate-ingest aggregate --source era5 --what all        # phase 3 rollups
 
-# in Supabase SQL editor
+# phase 4: API
+cd v0.2 && npm --workspace apps/api run dev               # http://localhost:3002
+curl http://localhost:3002/api/health
+curl 'http://localhost:3002/api/places?q=mumbai'
+curl http://localhost:3002/api/places/mumbai-in
+curl 'http://localhost:3002/api/places/delhi-in/annual?year=2020'
+```
+
+```sql
+-- in Supabase SQL editor
 SELECT count(*) FROM places;
 SELECT count(*) FROM place_aliases;
-SELECT count(*) FROM grid_cells WHERE source='era5';
+SELECT count(*) FROM grid_cells     WHERE source='era5';
 SELECT count(*) FROM place_grid_map WHERE source='era5';
 SELECT status, count(*) FROM ingest_jobs GROUP BY status;
+
+-- phase 2 sanity:
+SELECT count(*), min(date), max(date) FROM daily_weather;
+SELECT count(*) FROM daily_weather WHERE tmax_c IS NOT NULL;
+SELECT count(*) FROM daily_weather WHERE precip_mm IS NOT NULL;
+SELECT id, source, variable, date_start, date_end, storage_uri, bytes
+  FROM source_provenance ORDER BY id DESC LIMIT 5;
+
+-- phase 3 sanity (after `aggregate --what all`):
+SELECT count(*) FROM annual_extremes;          -- 37 (India places with full 2020)
+SELECT count(*) FROM annual_rain;              -- 37 (assuming full-year precip)
+SELECT count(*) FROM decade_rain;              -- 0 until 3+ years are loaded
+SELECT count(*) FROM monthly_normals;          -- 37 * 12 = 444 (degenerate baseline = (2020, 2020))
+SELECT count(*) FROM season_prefix;            -- ~13.5k (one row per place per day)
+
+SELECT p.slug, ae.max_temp_c, ae.max_temp_date, ae.min_temp_c, ae.min_temp_date, ae.valid_days
+  FROM annual_extremes ae JOIN places p ON p.id=ae.place_id
+ WHERE ae.year = 2020
+ ORDER BY ae.max_temp_c DESC LIMIT 10;
+
+SELECT p.slug, ar.rain_mm, ar.valid_days
+  FROM annual_rain ar JOIN places p ON p.id=ar.place_id
+ WHERE ar.year = 2020
+ ORDER BY ar.rain_mm DESC LIMIT 10;
 ```
