@@ -1,0 +1,70 @@
+slug,name,country_code,country,admin1,lat,lon,population,tier,aliases
+mumbai-in,Mumbai,IN,India,Maharashtra,19.0760,72.8777,20411000,1,"Bombay"
+delhi-in,Delhi,IN,India,Delhi,28.6139,77.2090,28514000,1,"New Delhi"
+bengaluru-in,Bengaluru,IN,India,Karnataka,12.9716,77.5946,12327000,1,"Bangalore"
+chennai-in,Chennai,IN,India,Tamil Nadu,13.0827,80.2707,10456000,1,"Madras"
+kolkata-in,Kolkata,IN,India,West Bengal,22.5726,88.3639,14681000,1,"Calcutta"
+hyderabad-in,Hyderabad,IN,India,Telangana,17.3850,78.4867,9482000,1,
+pune-in,Pune,IN,India,Maharashtra,18.5204,73.8567,6629000,1,"Poona"
+ahmedabad-in,Ahmedabad,IN,India,Gujarat,23.0225,72.5714,7681000,1,"Amdavad"
+jaipur-in,Jaipur,IN,India,Rajasthan,26.9124,75.7873,3046000,1,
+lucknow-in,Lucknow,IN,India,Uttar Pradesh,26.8467,80.9462,2901000,1,
+kanpur-in,Kanpur,IN,India,Uttar Pradesh,26.4499,80.3319,2920000,1,
+nagpur-in,Nagpur,IN,India,Maharashtra,21.1458,79.0882,2406000,1,
+indore-in,Indore,IN,India,Madhya Pradesh,22.7196,75.8577,1964000,1,
+bhopal-in,Bhopal,IN,India,Madhya Pradesh,23.2599,77.4126,1798000,1,
+patna-in,Patna,IN,India,Bihar,25.5941,85.1376,2046000,1,
+chandigarh-in,Chandigarh,IN,India,Chandigarh,30.7333,76.7794,1055000,1,
+guwahati-in,Guwahati,IN,India,Assam,26.1445,91.7362,963000,1,
+bhubaneswar-in,Bhubaneswar,IN,India,Odisha,20.2961,85.8245,837000,1,
+thiruvananthapuram-in,Thiruvananthapuram,IN,India,Kerala,8.5241,76.9366,957000,1,"Trivandrum"
+kochi-in,Kochi,IN,India,Kerala,9.9312,76.2673,677000,1,"Cochin,Ernakulam"
+coimbatore-in,Coimbatore,IN,India,Tamil Nadu,11.0168,76.9558,1601000,1,"Kovai"
+madurai-in,Madurai,IN,India,Tamil Nadu,9.9252,78.1198,1017000,1,
+visakhapatnam-in,Visakhapatnam,IN,India,Andhra Pradesh,17.6868,83.2185,2035000,1,"Vizag"
+vijayawada-in,Vijayawada,IN,India,Andhra Pradesh,16.5062,80.6480,1048000,1,
+surat-in,Surat,IN,India,Gujarat,21.1702,72.8311,4502000,1,
+vadodara-in,Vadodara,IN,India,Gujarat,22.3072,73.1812,1675000,1,"Baroda"
+panaji-in,Panaji,IN,India,Goa,15.4909,73.8278,114000,1,"Panjim"
+shillong-in,Shillong,IN,India,Meghalaya,25.5788,91.8933,143000,1,
+srinagar-in,Srinagar,IN,India,Jammu and Kashmir,34.0837,74.7973,1180000,1,
+leh-in,Leh,IN,India,Ladakh,34.1526,77.5770,30000,1,
+dehradun-in,Dehradun,IN,India,Uttarakhand,30.3165,78.0322,578000,1,
+shimla-in,Shimla,IN,India,Himachal Pradesh,31.1048,77.1734,170000,1,
+darjeeling-in,Darjeeling,IN,India,West Bengal,27.0360,88.2627,118000,1,
+tokyo-jp,Tokyo,JP,Japan,Tokyo,35.6895,139.6917,37400068,1,
+new-york-us,New York,US,United States,New York,40.7128,-74.0060,18804000,1,"NYC"
+los-angeles-us,Los Angeles,US,United States,California,34.0522,-118.2437,12459000,1,"LA"
+chicago-us,Chicago,US,United States,Illinois,41.8781,-87.6298,8901000,1,
+london-gb,London,GB,United Kingdom,England,51.5074,-0.1278,9304000,1,
+paris-fr,Paris,FR,France,Île-de-France,48.8566,2.3522,11017000,1,
+berlin-de,Berlin,DE,Germany,Berlin,52.5200,13.4050,3669000,1,
+madrid-es,Madrid,ES,Spain,Community of Madrid,40.4168,-3.7038,6642000,1,
+rome-it,Rome,IT,Italy,Lazio,41.9028,12.4964,4257000,1,"Roma"
+amsterdam-nl,Amsterdam,NL,Netherlands,North Holland,52.3676,4.9041,1149000,1,
+stockholm-se,Stockholm,SE,Sweden,Stockholm,59.3293,18.0686,1633000,1,
+moscow-ru,Moscow,RU,Russia,Moscow,55.7558,37.6173,12506000,1,"Moskva"
+istanbul-tr,Istanbul,TR,Türkiye,Istanbul,41.0082,28.9784,15029000,1,
+beijing-cn,Beijing,CN,China,Beijing,39.9042,116.4074,21893000,1,"Peking"
+shanghai-cn,Shanghai,CN,China,Shanghai,31.2304,121.4737,28517000,1,
+hong-kong-hk,Hong Kong,HK,Hong Kong,Hong Kong,22.3193,114.1694,7482000,1,
+singapore-sg,Singapore,SG,Singapore,Singapore,1.3521,103.8198,5896000,1,
+bangkok-th,Bangkok,TH,Thailand,Bangkok,13.7563,100.5018,10539000,1,
+jakarta-id,Jakarta,ID,Indonesia,Jakarta,-6.2088,106.8456,10770000,1,
+manila-ph,Manila,PH,Philippines,Metro Manila,14.5995,120.9842,13923000,1,
+karachi-pk,Karachi,PK,Pakistan,Sindh,24.8607,67.0011,16094000,1,
+dhaka-bd,Dhaka,BD,Bangladesh,Dhaka,23.8103,90.4125,21006000,1,
+kathmandu-np,Kathmandu,NP,Nepal,Bagmati,27.7172,85.3240,1442000,1,
+colombo-lk,Colombo,LK,Sri Lanka,Western,6.9271,79.8612,5648000,1,
+dubai-ae,Dubai,AE,United Arab Emirates,Dubai,25.2048,55.2708,3331000,1,
+cairo-eg,Cairo,EG,Egypt,Cairo,30.0444,31.2357,20485000,1,
+nairobi-ke,Nairobi,KE,Kenya,Nairobi,-1.2921,36.8219,4735000,1,
+lagos-ng,Lagos,NG,Nigeria,Lagos,6.5244,3.3792,14368000,1,
+johannesburg-za,Johannesburg,ZA,South Africa,Gauteng,-26.2041,28.0473,5635000,1,"Joburg"
+cape-town-za,Cape Town,ZA,South Africa,Western Cape,-33.9249,18.4241,4618000,1,
+toronto-ca,Toronto,CA,Canada,Ontario,43.6532,-79.3832,6197000,1,
+mexico-city-mx,Mexico City,MX,Mexico,Mexico City,19.4326,-99.1332,21581000,1,"Ciudad de México,CDMX"
+buenos-aires-ar,Buenos Aires,AR,Argentina,Buenos Aires,-34.6037,-58.3816,15154000,1,
+sao-paulo-br,São Paulo,BR,Brazil,São Paulo,-23.5505,-46.6333,21847000,1,"Sao Paulo"
+sydney-au,Sydney,AU,Australia,New South Wales,-33.8688,151.2093,5312000,1,
+auckland-nz,Auckland,NZ,New Zealand,Auckland,-36.8485,174.7633,1657000,1,

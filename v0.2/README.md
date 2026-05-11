@@ -58,8 +58,43 @@ v0.2/
 
 ## Status
 
-This is the skeleton commit. Each subsystem has a placeholder; real implementation lands in subsequent passes per the middle-path plan.
+Phase 1 (this pass) — schema + place loader + ingest scaffolding:
 
-## Next steps
+- [`data/places/pilot.csv`](data/places/pilot.csv) — hand-curated pilot list (33 Indian + 34 global cities).
+- [`infra/supabase/migrations/`](infra/supabase/migrations/) — places, grid mapping, aggregates, provenance, jobs.
+- [`ingest/`](ingest/) — Python CLI with `places-load`, `grid-build`, `plan`, `status`, `worker`, `aggregate`.
 
-See repo-root [`docs/`](../docs/) working document and the middle-path plan for ordered build steps.
+CDS ERA5 / ERA5-Land downloads work end-to-end through the worker. R2 upload, the hourly-to-daily transform, and the aggregate builder are the next pass.
+
+## Phase plan
+
+1. **Phase 1 (done):** schema + place loader + ingest scaffolding + CDS connector + job queue.
+2. **Phase 2:** R2 upload + hourly-to-daily transform + per-place daily series in Parquet.
+3. **Phase 3:** aggregate builder (`annual_extremes`, `annual_rain`, `decade_rain`, `monthly_normals`, `season_prefix`).
+4. **Phase 4:** serving API (Hono) reads aggregates + place lookup.
+5. **Phase 5:** web UI on shadcn/ui that talks only to the v0.2 API.
+6. **Phase 6:** IMD India layer (rainfall grid + station/sub-station).
+7. **Phase 7:** GHCN station provenance overlay.
+8. **Phase 8:** optional 20CRv3 1926–1939 lower-confidence layer.
+9. **Phase 9:** event-readiness snapshot + rehearsal.
+
+## Quickstart (Phase 1)
+
+```bash
+cd v0.2/ingest
+uv venv && uv pip install -e ".[dev]"
+cp ../infra/.env.example .env   # fill in SUPABASE_DB_URL, R2_*, CDSAPI_KEY
+
+# apply Supabase schema
+for f in ../infra/supabase/migrations/*.sql; do
+  psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "$f"
+done
+
+# load pilot gazetteer (~67 places)
+klimate-ingest places-load
+
+# build a 0.25° ERA5 grid and map every place to its nearest cell
+klimate-ingest grid-build --source era5 --region global
+```
+
+See [`ingest/README.md`](ingest/README.md) for the full command map and what's wired vs. pending.
