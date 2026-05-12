@@ -4,7 +4,6 @@ import type { Cache } from "../cache/store.js";
 import { Budget } from "../lib/budget.js";
 import { gridKey } from "../lib/grid.js";
 import { haversineKm } from "../lib/haversine.js";
-import { applyOpenMeteoCredentials } from "../lib/openmeteo.js";
 import type { City, Confidence, Source } from "../types.js";
 
 export interface WeatherDaily {
@@ -111,7 +110,6 @@ async function fetchOpenMeteo(
   url.searchParams.set("end_date", endDate);
   url.searchParams.set("daily", "temperature_2m_max,temperature_2m_min,precipitation_sum");
   url.searchParams.set("timezone", "auto");
-  applyOpenMeteoCredentials(url);
 
   try {
     const body = await fetchJsonWithRetry<OpenMeteoArchiveResponse>(url, fetchImpl, budget.signal(timeoutMs));

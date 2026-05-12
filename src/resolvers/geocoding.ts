@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Cache } from "../cache/store.js";
 import { Budget } from "../lib/budget.js";
-import { applyOpenMeteoCredentials } from "../lib/openmeteo.js";
 import type { City } from "../types.js";
 
 export interface GeocodeResult extends City {
@@ -119,7 +118,6 @@ async function geocodeOpenMeteo(
   url.searchParams.set("count", "5");
   url.searchParams.set("language", "en");
   url.searchParams.set("format", "json");
-  applyOpenMeteoCredentials(url);
 
   try {
     const body = await fetchJsonWithRetry<{ results?: OpenMeteoPlace[] }>(url, fetchImpl, budget.signal(1500));
