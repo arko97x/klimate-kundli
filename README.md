@@ -13,7 +13,7 @@ The complete tree — `v0.1/`, `v0.2/`, `docs/`, reference PDFs/images, `Caddyfi
 | Ref | Purpose |
 |-----|---------|
 | **Branch `retired-0.1-0.2`** | Day-to-day checkout of the retired codebase and assets. |
-| **Tag `archive/v0.1-v0.2-final`** | Immutable pointer to the exact snapshot before `main` was cleared (same commit as the branch tip at archive time). |
+| **Tag `archive/v0.1-v0.2-final`** | Immutable pointer to the exact snapshot before `main` was cleared. |
 
 Release **v0.1.0** remains reachable on that history for the frozen PoC.
 
