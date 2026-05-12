@@ -2,22 +2,22 @@
 
 Exhibition piece for *Data, Otherwise* (VizChitra 2026). Visitors enter their birth date, birth city, and cities they have lived in; the system returns a 12-cell climate "kundli" situating their life inside the planet's recent climate history.
 
-This repository is versioned. The current latest active build is **v0.2**. The original PoC is preserved as **v0.1** for reference and curatorial walkthroughs.
+This repository is versioned. **v0.1 and v0.2 are retired** (archived in-repo, not under active development). Rationale: [`docs/RETIREMENT-v0.1-v0.2.md`](docs/RETIREMENT-v0.1-v0.2.md).
 
 ## Versions
 
 | Version | Status | Folder | Notes |
 |---|---|---|---|
-| 0.1 | Frozen | [`v0.1/`](v0.1/) | Localhost-only PoC. Open-Meteo + NASA POWER live cache. Tagged `v0.1.0`. |
-| 0.2 | Active (alpha) | [`v0.2/`](v0.2/) | Aggregate-first DB. Supabase serving + R2 archive + Python ingest workers. |
+| 0.1 | Retired | [`v0.1/`](v0.1/) | Localhost-only PoC. Open-Meteo + SQLite cache; bundled CSVs. Tagged `v0.1.0`. |
+| 0.2 | Retired | [`v0.2/`](v0.2/) | Precomputed DB path: Supabase + R2 + Python ingest. See retirement note. |
 
-Source of truth for "what is latest": [`versions.json`](versions.json).
+Machine-readable copy: [`versions.json`](versions.json) (`latest` is `null` until a new track ships).
 
 ## Routing
 
-`Caddyfile` at the repo root routes both versions:
+`Caddyfile` at the repo root routes both versions (unchanged; useful only if you still run the archived stacks locally):
 
-- `/` → v0.2 (latest)
+- `/` → v0.2 (last routed “default”)
 - `/0.2/` and `/0.2/...` → 301 → `/` (canonical at root)
 - `/0.1/` and `/0.1/...` → frozen v0.1 web
 - `/api/...` → v0.2 API
@@ -32,12 +32,12 @@ You'll need [Caddy](https://caddyserver.com/docs/install) on your path.
 In four terminals:
 
 ```bash
-# v0.1 (frozen)
+# v0.1 (retired archive)
 cd v0.1 && npm install
 npm run dev:server   # http://localhost:3001
 npm run dev:web      # http://localhost:5173 (served under /0.1/ base)
 
-# v0.2 (active)
+# v0.2 (retired archive)
 cd v0.2 && npm install
 npm run dev:api      # http://localhost:3002
 npm run dev:web      # http://localhost:5174
@@ -47,7 +47,7 @@ caddy run --config Caddyfile
 # open http://localhost:8080
 ```
 
-You don't need to run v0.1 unless you want `/0.1/` to work. v0.2 alone is enough for active development.
+You don't need to run v0.1 unless you want `/0.1/` to work. v0.2 alone is enough to exercise the v0.2 stack locally.
 
 ## Reference materials
 
@@ -57,12 +57,10 @@ These live at the repo root and are version-agnostic:
 - `revised_clarified-concept-note.pdf` — current concept note.
 - `feedback-from-curatorial-team.png` — feedback from curatorial team.
 - `guide/` — supporting reference imagery.
-- `docs/` — cross-version working documents.
+- `docs/` — cross-version working documents (includes [`RETIREMENT-v0.1-v0.2.md`](docs/RETIREMENT-v0.1-v0.2.md)).
 
 ## Contributing
 
-For the time being:
-
-- Don't modify `v0.1/`. It's frozen at `v0.1.0`.
-- All new work goes under `v0.2/`.
-- See [`v0.2/README.md`](v0.2/README.md) for the active build's architecture and roadmap.
+- **v0.1** — frozen at `v0.1.0`; treat as read-only archive unless you are fixing typos or doc links.
+- **v0.2** — retired; no expectation of new feature work in this folder. [`v0.2/README.md`](v0.2/README.md) and [`v0.2/docs/STATE.md`](v0.2/docs/STATE.md) describe what was built.
+- **Next direction** — not defined in this repo; a future version would replace `versions.json` `latest` when it exists.

@@ -1,17 +1,18 @@
 {
-  "latest": "0.2",
+  "latest": null,
   "available": ["0.1", "0.2"],
+  "note": "v0.1 and v0.2 retired; see docs/RETIREMENT-v0.1-v0.2.md",
   "versions": {
     "0.1": {
-      "status": "frozen",
+      "status": "retired",
       "label": "PoC",
       "tag": "v0.1.0",
-      "note": "Localhost-only PoC. Open-Meteo + NASA POWER live cache. Frozen reference."
+      "note": "Localhost-only PoC. Open-Meteo + SQLite cache + bundled CSVs. Archived reference."
     },
     "0.2": {
-      "status": "active",
+      "status": "retired",
       "label": "alpha",
-      "note": "Aggregate-first build. Supabase serving DB, R2 archive, Python ingest workers."
+      "note": "Aggregate-first build. Supabase, R2, Python ingest. Archived; incomplete vs original roadmap."
     }
   }
 }
