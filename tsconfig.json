@@ -10,7 +10,7 @@
     "resolveJsonModule": true,
     "outDir": "dist",
     "rootDir": ".",
-    "types": ["node", "vitest/globals"]
+    "types": ["node", "vitest/globals"],
   },
   "include": ["src/**/*.ts", "tests/**/*.ts"]
 }
