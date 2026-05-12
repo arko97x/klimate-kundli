@@ -1,6 +1,7 @@
 import type { Cache } from "../cache/store.js";
 import { Budget } from "../lib/budget.js";
 import { gridKey } from "../lib/grid.js";
+import { applyOpenMeteoCredentials } from "../lib/openmeteo.js";
 import type { HistoricalWeatherResult } from "./historical.js";
 import type { City, Confidence, Source } from "../types.js";
 
@@ -77,6 +78,7 @@ async function fetchCmip6(
   url.searchParams.set("end_date", endDate);
   url.searchParams.set("daily", "temperature_2m_max,temperature_2m_min");
   url.searchParams.set("models", MODELS.join(","));
+  applyOpenMeteoCredentials(url);
 
   try {
     const body = await fetchJsonWithRetry<ClimateResponse>(url, fetchImpl, budget.signal(3000));
