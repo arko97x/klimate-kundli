@@ -1,7 +1,7 @@
 const HOST_REWRITES: Record<string, string> = {
-  "archive-api.open-meteo.com": "customer-archive-api.open-meteo.com",
-  "climate-api.open-meteo.com": "customer-climate-api.open-meteo.com",
-  "geocoding-api.open-meteo.com": "customer-geocoding-api.open-meteo.com",
+  "archive-api.open-meteo.com": "customer-api.open-meteo.com",
+  "climate-api.open-meteo.com": "customer-api.open-meteo.com",
+  "geocoding-api.open-meteo.com": "customer-api.open-meteo.com",
   "api.open-meteo.com": "customer-api.open-meteo.com",
 };
 
