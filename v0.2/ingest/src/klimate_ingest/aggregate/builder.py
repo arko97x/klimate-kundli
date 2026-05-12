@@ -113,13 +113,12 @@ SELECT v.place_id, v.year,
   JOIN hi USING (place_id, year, source)
   JOIN lo USING (place_id, year, source)
  WHERE v.valid_days >= %(min_days)s
-ON CONFLICT (place_id, year) DO UPDATE SET
+ON CONFLICT (place_id, year, source) DO UPDATE SET
   max_temp_c     = EXCLUDED.max_temp_c,
   max_temp_date  = EXCLUDED.max_temp_date,
   min_temp_c     = EXCLUDED.min_temp_c,
   min_temp_date  = EXCLUDED.min_temp_date,
   valid_days     = EXCLUDED.valid_days,
-  source         = EXCLUDED.source,
   source_version = EXCLUDED.source_version,
   quality        = EXCLUDED.quality
 """
@@ -154,10 +153,9 @@ SELECT place_id,
    AND precip_mm IS NOT NULL
  GROUP BY place_id, EXTRACT(YEAR FROM date), source
 HAVING COUNT(*) FILTER (WHERE precip_mm IS NOT NULL) >= %(min_days)s
-ON CONFLICT (place_id, year) DO UPDATE SET
+ON CONFLICT (place_id, year, source) DO UPDATE SET
   rain_mm        = EXCLUDED.rain_mm,
   valid_days     = EXCLUDED.valid_days,
-  source         = EXCLUDED.source,
   source_version = EXCLUDED.source_version,
   quality        = EXCLUDED.quality
 """
@@ -192,10 +190,9 @@ SELECT place_id,
  WHERE source = %(source)s
  GROUP BY place_id, (FLOOR(year / 10) * 10), source
 HAVING COUNT(*) >= %(min_years)s
-ON CONFLICT (place_id, decade_start) DO UPDATE SET
+ON CONFLICT (place_id, decade_start, source) DO UPDATE SET
   avg_annual_rain_mm = EXCLUDED.avg_annual_rain_mm,
   years_used         = EXCLUDED.years_used,
-  source             = EXCLUDED.source,
   source_version     = EXCLUDED.source_version,
   quality            = EXCLUDED.quality
 """
@@ -235,11 +232,10 @@ SELECT place_id,
  WHERE source = %(source)s
    AND EXTRACT(YEAR FROM date) BETWEEN %(b_start)s AND %(b_end)s
  GROUP BY place_id, EXTRACT(MONTH FROM date), source
-ON CONFLICT (place_id, month, baseline_start, baseline_end) DO UPDATE SET
+ON CONFLICT (place_id, month, baseline_start, baseline_end, source) DO UPDATE SET
   tmax_avg_c     = EXCLUDED.tmax_avg_c,
   tmin_avg_c     = EXCLUDED.tmin_avg_c,
   rain_avg_mm    = EXCLUDED.rain_avg_mm,
-  source         = EXCLUDED.source,
   source_version = EXCLUDED.source_version,
   quality        = EXCLUDED.quality
 """
@@ -344,11 +340,10 @@ rolled AS (
 INSERT INTO season_prefix (place_id, date, season, tmax_cum, tmin_cum, count_cum, source)
 SELECT place_id, date, season, tmax_cum, tmin_cum, count_cum, source
   FROM rolled
-ON CONFLICT (place_id, date, season) DO UPDATE SET
+ON CONFLICT (place_id, date, season, source) DO UPDATE SET
   tmax_cum  = EXCLUDED.tmax_cum,
   tmin_cum  = EXCLUDED.tmin_cum,
-  count_cum = EXCLUDED.count_cum,
-  source    = EXCLUDED.source
+  count_cum = EXCLUDED.count_cum
 """
 
 

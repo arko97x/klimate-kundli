@@ -3,13 +3,32 @@
 Subcommands:
   places-load     Upsert places (and aliases) from CSV into Supabase.
   grid-build      Populate a grid for a source and map every place to it.
+  grid-build-imd  Populate IMD's native grid (rain 0.25°, temp 1°) and map
+                  Indian places to it.
   plan            Enqueue ingest_jobs for the pilot coverage window.
   status          Print job-queue counts.
   worker          Claim and run jobs (downloads, hashes, transforms, uploads).
   transform       Run phase-2 pipeline on a single local NetCDF (backfill).
   r2-init         Verify R2 credentials and create the archive bucket.
   requeue         Reset a finished/failed job back to pending.
-  aggregate       Build aggregate serving tables (skeleton).
+  aggregate       Build aggregate serving tables.
+  load-global     Phase 4.5 — load global indices, country emissions, and
+                  country 2050 projections from curated CSVs (+ OWID fetch).
+  imd-ingest      Phase 6 — pull IMD Pune gridded rainfall and temperature
+                  for a year range, transform, and upsert daily_weather.
+  grid-build-open-meteo
+                  Phase 6c — register one grid_cells row per place at its
+                  nominal lat/lon and map each place to its own cell for
+                  source='open_meteo'.
+  open-meteo-ingest
+                  Phase 6c — pull Open-Meteo Historical (ERA5-derived) daily
+                  archive per place for a year range and upsert daily_weather.
+                  Use as the universal global floor below IMD and direct ERA5.
+  ghcn-resolve    Phase 7 — pick the best GHCN-Daily station per place
+                  (within max_distance_km, carrying TMAX/TMIN/PRCP for the
+                  target window) and write grid_cells + place_grid_map.
+  ghcn-ingest     Phase 7 — download .dly per resolved station, parse, and
+                  upsert into daily_weather with source='ghcn'.
 """
 
 from __future__ import annotations
@@ -32,13 +51,30 @@ from .aggregate import (
     detect_baseline,
 )
 from .db import transaction
+from .global_indices import (
+    DATA_DIR_DEFAULT as GLOBAL_DATA_DIR_DEFAULT,
+    MIN_YEAR_DEFAULT as GLOBAL_MIN_YEAR_DEFAULT,
+    load_all as load_all_global,
+)
 from .logging import configure as configure_logging, get_logger
 from .pipeline import process_chunk
+from .pipeline_ghcn import process_ghcn_place, resolve_stations
+from .pipeline_imd import process_imd_year
+from .pipeline_open_meteo import process_open_meteo_place
 from .places import read_csv, upsert as upsert_places
 from .queue import jobs as q
 from .sources.cds_era5 import CdsEra5Source
+from .sources.ghcn_daily import GhcnDailySource
+from .sources.imd_grid import IMD_GRID_SPECS, IMD_SOURCE_FOR, IMD_VARIABLES, ImdGridSource
+from .sources.open_meteo import OPEN_METEO_MIN_YEAR, OpenMeteoSource
 from .storage.r2 import R2Client
-from .transform.place_map import GridSpec, map_places_to_grid, populate_grid_at_places
+from .transform.place_map import (
+    GridSpec,
+    map_places_to_grid,
+    populate_grid_at_places,
+    populate_imd_grid,
+    populate_open_meteo_cells,
+)
 
 log = get_logger(__name__)
 
@@ -99,6 +135,35 @@ def grid_build(source: str, window: int) -> None:
     inserted = populate_grid_at_places(spec)
     mapped = map_places_to_grid(source, source_priority=cfg.SOURCE_PRIORITY[source])
     click.echo(json.dumps({"cells_inserted": inserted, "places_mapped": mapped}, indent=2))
+
+
+@main.command(
+    "grid-build-imd",
+    help="Populate IMD's native grids (rain 0.25°, temp 1°) and map Indian places.",
+)
+@click.option(
+    "--source",
+    required=True,
+    type=click.Choice(["imd_rain", "imd_temp", "both"]),
+)
+def grid_build_imd(source: str) -> None:
+    targets = ["imd_rain", "imd_temp"] if source == "both" else [source]
+    out: dict[str, dict[str, int]] = {}
+    for s in targets:
+        spec = IMD_GRID_SPECS[s]
+        inserted = populate_imd_grid(
+            source=s,
+            resolution_deg=float(spec["resolution"]),
+            lat0=float(spec["lat0"]),
+            lat1=float(spec["lat1"]),
+            lon0=float(spec["lon0"]),
+            lon1=float(spec["lon1"]),
+        )
+        mapped = map_places_to_grid(
+            s, source_priority=cfg.SOURCE_PRIORITY[s], country_filter="IN",
+        )
+        out[s] = {"cells_inserted": inserted, "places_mapped": mapped}
+    click.echo(json.dumps(out, indent=2))
 
 
 # ---------------------------------------------------------------------------
@@ -464,6 +529,515 @@ def aggregate(
         },
         indent=2,
     ))
+
+
+# ---------------------------------------------------------------------------
+# IMD ingest (phase 6)
+# ---------------------------------------------------------------------------
+
+
+@main.command(
+    "imd-ingest",
+    help="Pull IMD Pune gridded data for a variable+year range, transform, and upsert.",
+)
+@click.option(
+    "--variable",
+    required=True,
+    type=click.Choice(list(IMD_VARIABLES) + ["all"]),
+    help="rain | tmax | tmin | all (loops over all three).",
+)
+@click.option("--year-start", required=True, type=int)
+@click.option("--year-end",   required=True, type=int)
+@click.option(
+    "--cache-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=Path("./scratch/imd"),
+    show_default=True,
+    help="Persistent .grd cache; re-runs skip already-downloaded files.",
+)
+@click.option(
+    "--scratch",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=Path("./scratch"),
+    show_default=True,
+)
+@click.option("--no-upload", is_flag=True, help="Skip R2 upload (dev / no creds).")
+@click.option("--quality", type=int, default=4, show_default=True,
+              help="quality stamp (IMD = 4: gridded, observation-derived).")
+def imd_ingest(
+    variable: str,
+    year_start: int,
+    year_end: int,
+    cache_dir: Path,
+    scratch: Path,
+    no_upload: bool,
+    quality: int,
+) -> None:
+    if year_end < year_start:
+        raise click.UsageError("--year-end must be >= --year-start")
+    vars_ = list(IMD_VARIABLES) if variable == "all" else [variable]
+    src = ImdGridSource()
+    r2 = None if no_upload else R2Client.from_env()
+    if r2 is not None:
+        r2.ensure_bucket()
+
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    scratch.mkdir(parents=True, exist_ok=True)
+
+    totals: dict[str, dict[str, int]] = {v: {"years": 0, "rows": 0, "failed": 0} for v in vars_}
+    for v in vars_:
+        for y in range(year_start, year_end + 1):
+            log.info("imd.year.start", variable=v, year=y)
+            try:
+                fetch = src.fetch_year(variable=v, year=y, cache_dir=cache_dir)
+                result = process_imd_year(
+                    cache_dir=cache_dir,
+                    scratch_dir=scratch,
+                    variable=v,
+                    year=y,
+                    grd_path=Path(fetch.storage_uri),
+                    bytes_=fetch.bytes,
+                    checksum=fetch.checksum,
+                    license=src.license,
+                    upload=(r2 is not None),
+                    r2=r2,
+                    quality=quality,
+                )
+                totals[v]["years"] += 1
+                totals[v]["rows"] += result.rows_written
+                log.info(
+                    "imd.year.done",
+                    variable=v,
+                    year=y,
+                    rows_written=result.rows_written,
+                    raw_uri=result.raw_uri,
+                )
+            except Exception as e:  # noqa: BLE001
+                log.exception("imd.year.failed", variable=v, year=y, error=str(e))
+                totals[v]["failed"] += 1
+
+    summary = {
+        "variables": vars_,
+        "year_start": year_start,
+        "year_end": year_end,
+        "totals": totals,
+        "source_for": {v: IMD_SOURCE_FOR[v] for v in vars_},
+    }
+    click.echo(json.dumps(summary, indent=2))
+
+
+# ---------------------------------------------------------------------------
+# Global indices (phase 4.5)
+# ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# Open-Meteo (phase 6c) — global per-place daily archive
+# ---------------------------------------------------------------------------
+
+
+@main.command(
+    "grid-build-open-meteo",
+    help="Register one grid_cells row per place for source='open_meteo' "
+         "and map each place to its own cell.",
+)
+def grid_build_open_meteo() -> None:
+    inserted = populate_open_meteo_cells(
+        source="open_meteo", resolution_deg=0.25,
+    )
+    mapped = map_places_to_grid(
+        "open_meteo", source_priority=cfg.SOURCE_PRIORITY["open_meteo"],
+    )
+    click.echo(json.dumps({"cells_inserted": inserted, "places_mapped": mapped}, indent=2))
+
+
+@main.command(
+    "open-meteo-ingest",
+    help="Pull Open-Meteo historical daily archive (ERA5-derived) per place "
+         "for a year range and upsert daily_weather.",
+)
+@click.option("--year-start", type=int, default=OPEN_METEO_MIN_YEAR, show_default=True)
+@click.option("--year-end",   type=int, default=None,
+              help="Defaults to last full year (today's year - 1).")
+@click.option(
+    "--countries",
+    default=None,
+    help="Comma-separated ISO alpha-2 codes; if omitted all places are pulled. "
+         "Useful for staged rollouts (e.g. --countries=IN to refresh India first).",
+)
+@click.option(
+    "--slugs",
+    default=None,
+    help="Comma-separated place slugs; if set, --countries is ignored.",
+)
+@click.option(
+    "--scratch",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=Path("./scratch"),
+    show_default=True,
+)
+@click.option("--no-upload", is_flag=True, help="Skip R2 upload (dev / no creds).")
+@click.option("--quality", type=int, default=3, show_default=True,
+              help="Quality stamp (3 = reanalysis-derived).")
+@click.option(
+    "--sleep-ms",
+    type=int,
+    default=2000,
+    show_default=True,
+    help="Politeness sleep between PLACE fetches. Open-Meteo throttles on "
+         "computational cost per request, so we slow the loop accordingly.",
+)
+@click.option(
+    "--chunk-years",
+    type=int,
+    default=10,
+    show_default=True,
+    help="Split each place's date range into chunks of this many years. "
+         "Smaller chunks are friendlier to Open-Meteo's per-IP throttle.",
+)
+@click.option(
+    "--chunk-sleep-ms",
+    type=int,
+    default=400,
+    show_default=True,
+    help="Politeness sleep between CHUNKS within one place.",
+)
+def open_meteo_ingest(
+    year_start: int,
+    year_end: int | None,
+    countries: str | None,
+    slugs: str | None,
+    scratch: Path,
+    no_upload: bool,
+    quality: int,
+    sleep_ms: int,
+    chunk_years: int,
+    chunk_sleep_ms: int,
+) -> None:
+    if year_start < OPEN_METEO_MIN_YEAR:
+        raise click.UsageError(
+            f"Open-Meteo archive starts {OPEN_METEO_MIN_YEAR}"
+        )
+    if year_end is None:
+        # Last full year by default; today's year often has incomplete data.
+        from datetime import date as _date
+        year_end = _date.today().year - 1
+    if year_end < year_start:
+        raise click.UsageError("--year-end must be >= --year-start")
+
+    scratch.mkdir(parents=True, exist_ok=True)
+    r2 = None if no_upload else R2Client.from_env()
+    if r2 is not None:
+        r2.ensure_bucket()
+
+    src = OpenMeteoSource()
+
+    # Resolve target place set from --slugs > --countries > all.
+    with transaction() as conn, conn.cursor() as cur:
+        if slugs:
+            wanted = [s.strip() for s in slugs.split(",") if s.strip()]
+            cur.execute(
+                "SELECT slug, name, country_code, lat, lon FROM places "
+                "WHERE slug = ANY(%s) ORDER BY slug",
+                (wanted,),
+            )
+        elif countries:
+            ccs = [c.strip().upper() for c in countries.split(",") if c.strip()]
+            cur.execute(
+                "SELECT slug, name, country_code, lat, lon FROM places "
+                "WHERE country_code = ANY(%s) ORDER BY country_code, slug",
+                (ccs,),
+            )
+        else:
+            cur.execute(
+                "SELECT slug, name, country_code, lat, lon FROM places "
+                "ORDER BY country_code, slug"
+            )
+        places = cur.fetchall()
+
+    if not places:
+        click.echo(json.dumps({"error": "no places matched filter"}, indent=2))
+        return
+
+    log.info(
+        "open_meteo.ingest.start",
+        places=len(places),
+        year_start=year_start,
+        year_end=year_end,
+        upload=(r2 is not None),
+    )
+
+    totals = {"places": 0, "rows": 0, "failed": 0}
+    failures: list[dict[str, str]] = []
+    for p in places:
+        slug = str(p["slug"])
+        try:
+            log.info(
+                "open_meteo.place.start",
+                slug=slug, lat=float(p["lat"]), lon=float(p["lon"]),
+            )
+            result = process_open_meteo_place(
+                slug=slug,
+                lat=float(p["lat"]),
+                lon=float(p["lon"]),
+                year_start=year_start,
+                year_end=year_end,
+                scratch_dir=scratch,
+                license=src.license,
+                citation=src.citation,
+                upload=(r2 is not None),
+                r2=r2,
+                quality=quality,
+                chunk_years=chunk_years,
+                inter_chunk_sleep_ms=chunk_sleep_ms,
+            )
+            totals["places"] += 1
+            totals["rows"]   += result.rows_written
+            log.info(
+                "open_meteo.place.done",
+                slug=slug,
+                rows=result.rows_written,
+                daily_uri=result.daily_uri,
+                snapped=(result.snapped_lat, result.snapped_lon),
+            )
+        except Exception as e:  # noqa: BLE001
+            log.exception("open_meteo.place.failed", slug=slug, error=str(e))
+            totals["failed"] += 1
+            failures.append({"slug": slug, "error": str(e)})
+        if sleep_ms > 0:
+            time.sleep(sleep_ms / 1000.0)
+
+    summary = {
+        "year_start": year_start,
+        "year_end": year_end,
+        "totals": totals,
+        "failures": failures,
+    }
+    click.echo(json.dumps(summary, indent=2))
+
+
+# ---------------------------------------------------------------------------
+# GHCN-Daily (phase 7) — global station observations
+# ---------------------------------------------------------------------------
+
+
+@main.command(
+    "ghcn-resolve",
+    help="Pick the best GHCN-Daily station per place and write grid_cells + place_grid_map.",
+)
+@click.option(
+    "--cache-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=Path("./scratch/ghcn"),
+    show_default=True,
+    help="Persistent cache for ghcnd-stations.txt / ghcnd-inventory.txt.",
+)
+@click.option("--max-distance-km", type=float, default=50.0, show_default=True)
+@click.option("--target-year-min",  type=int,   default=2010, show_default=True,
+              help="Stations must have data at least up to this year.")
+@click.option("--history-year-min", type=int,   default=1990, show_default=True,
+              help="Stations must have data starting at or before this year.")
+@click.option("--refresh-catalog",  is_flag=True,
+              help="Force re-download of stations + inventory.")
+def ghcn_resolve(
+    cache_dir: Path,
+    max_distance_km: float,
+    target_year_min: int,
+    history_year_min: int,
+    refresh_catalog: bool,
+) -> None:
+    picks = resolve_stations(
+        cache_dir=cache_dir,
+        max_distance_km=max_distance_km,
+        target_year_min=target_year_min,
+        history_year_min=history_year_min,
+        refresh_catalog=refresh_catalog,
+    )
+    out = [
+        {
+            "place_slug":   p.place_slug,
+            "station_id":   p.station_id,
+            "station_name": p.station_name,
+            "distance_km":  round(p.distance_km, 2),
+            "tmax_years":   [p.tmax_y_start, p.tmax_y_end],
+            "elev_m":       p.elev_m,
+        }
+        for p in picks
+    ]
+    click.echo(json.dumps({"picks": out, "count": len(out)}, indent=2))
+
+
+@main.command(
+    "ghcn-ingest",
+    help="Download .dly per resolved station and upsert daily_weather.",
+)
+@click.option(
+    "--cache-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=Path("./scratch/ghcn"),
+    show_default=True,
+)
+@click.option(
+    "--scratch",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=Path("./scratch"),
+    show_default=True,
+)
+@click.option("--no-upload", is_flag=True, help="Skip R2 upload (dev / no creds).")
+@click.option(
+    "--slugs",
+    default=None,
+    help="Comma-separated place slugs; if set, only ingest these.",
+)
+@click.option("--quality", type=int, default=5, show_default=True,
+              help="quality stamp (5 = station observations).")
+@click.option(
+    "--sleep-ms",
+    type=int,
+    default=300,
+    show_default=True,
+    help="Politeness sleep between station fetches.",
+)
+def ghcn_ingest(
+    cache_dir: Path,
+    scratch: Path,
+    no_upload: bool,
+    slugs: str | None,
+    quality: int,
+    sleep_ms: int,
+) -> None:
+    src = GhcnDailySource()
+    r2 = None if no_upload else R2Client.from_env()
+    if r2 is not None:
+        r2.ensure_bucket()
+
+    # Re-read picks from place_grid_map (so this command can run any time
+    # after `ghcn-resolve`, even in a new shell).
+    wanted_slugs = {s.strip() for s in slugs.split(",")} if slugs else None
+    with transaction() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT p.id AS place_id, p.slug, p.name, p.lat AS place_lat, p.lon AS place_lon,
+                   g.lat AS station_lat, g.lon AS station_lon,
+                   m.distance_m
+              FROM place_grid_map m
+              JOIN places p     ON p.id = m.place_id
+              JOIN grid_cells g ON g.id = m.grid_cell_id
+             WHERE m.source = 'ghcn'
+             ORDER BY p.slug
+            """
+        )
+        rows = cur.fetchall()
+
+    if not rows:
+        click.echo(json.dumps({"error": "no GHCN picks; run ghcn-resolve first"}, indent=2))
+        return
+
+    # We need the station_id per place: look it up from the cached
+    # inventory + nearest-by-coords. Cheaper: stash station_id in
+    # source_provenance during ingest. For now derive by reverse lookup
+    # against stations.txt — one extra parse but the file is local.
+    from .transform.ghcn_daily import parse_stations
+    stations_path = cache_dir / "ghcnd-stations.txt"
+    if not stations_path.exists():
+        # No catalog cached — fetch it now.
+        src.fetch_catalog(cache_dir)
+    stations_df = parse_stations(stations_path)
+    stations_by_coord = {
+        (round(float(r["lat"]), 6), round(float(r["lon"]), 6)): str(r["station_id"])
+        for _, r in stations_df.iterrows()
+    }
+
+    totals = {"places": 0, "rows": 0, "missing_station": 0, "failed": 0}
+    for r in rows:
+        slug = str(r["slug"])
+        if wanted_slugs and slug not in wanted_slugs:
+            continue
+        key = (round(float(r["station_lat"]), 6), round(float(r["station_lon"]), 6))
+        station_id = stations_by_coord.get(key)
+        if not station_id:
+            totals["missing_station"] += 1
+            log.warning("ghcn.ingest.unmapped_station", slug=slug, key=key)
+            continue
+        pick = type("P", (), {})()  # tiny ad-hoc shim
+        # Build StationPick from DB row + stations_df.
+        srow = stations_df[stations_df["station_id"] == station_id].iloc[0]
+        from .pipeline_ghcn import StationPick
+        pick = StationPick(
+            place_id=int(r["place_id"]),
+            place_slug=slug,
+            place_lat=float(r["place_lat"]),
+            place_lon=float(r["place_lon"]),
+            station_id=station_id,
+            station_lat=float(srow["lat"]),
+            station_lon=float(srow["lon"]),
+            station_name=str(srow["name"]),
+            distance_km=float(r["distance_m"]) / 1000.0,
+            elev_m=(None if srow["elev_m"] is None or _is_nan(srow["elev_m"]) else float(srow["elev_m"])),
+            tmax_y_start=0,
+            tmax_y_end=0,
+        )
+        try:
+            log.info("ghcn.place.start", slug=slug, station_id=station_id)
+            result = process_ghcn_place(
+                pick=pick,
+                cache_dir=cache_dir,
+                scratch_dir=scratch,
+                license=src.license,
+                citation=src.citation,
+                upload=(r2 is not None),
+                r2=r2,
+                quality=quality,
+            )
+            totals["places"] += 1
+            totals["rows"]   += result.rows_written
+            log.info(
+                "ghcn.place.done",
+                slug=slug, station_id=station_id, rows=result.rows_written,
+                daily_uri=result.daily_uri,
+            )
+        except FileNotFoundError as e:
+            totals["missing_station"] += 1
+            log.warning("ghcn.place.missing", slug=slug, error=str(e))
+        except Exception as e:  # noqa: BLE001
+            log.exception("ghcn.place.failed", slug=slug, error=str(e))
+            totals["failed"] += 1
+        if sleep_ms > 0:
+            time.sleep(sleep_ms / 1000.0)
+
+    click.echo(json.dumps({"totals": totals}, indent=2))
+
+
+def _is_nan(v: object) -> bool:
+    try:
+        return v != v  # type: ignore[comparison-overlap]
+    except Exception:  # noqa: BLE001
+        return False
+
+
+# ---------------------------------------------------------------------------
+# Global indices (phase 4.5)
+# ---------------------------------------------------------------------------
+
+
+@main.command("load-global",
+              help="Load global indices (CO2 ppm, sea level, country emissions, 2050 projections).")
+@click.option(
+    "--data-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=GLOBAL_DATA_DIR_DEFAULT,
+    show_default=True,
+    help="Directory holding the curated CSVs (defaults to v0.2/data/global/).",
+)
+@click.option("--refresh-owid", is_flag=True,
+              help="Force re-download of the OWID CO2 master CSV (otherwise reuses .cache).")
+@click.option("--min-year", type=int, default=GLOBAL_MIN_YEAR_DEFAULT,
+              show_default=True, help="Drop OWID rows older than this (kundli visitors are 1940+).")
+def load_global(data_dir: Path, refresh_owid: bool, min_year: int) -> None:
+    summary = load_all_global(
+        data_dir=data_dir, refresh_owid=refresh_owid, min_year=min_year,
+    )
+    click.echo(json.dumps(summary.as_dict(), indent=2))
 
 
 if __name__ == "__main__":

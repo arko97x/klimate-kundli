@@ -104,9 +104,11 @@ PILOT_YEAR_END = 2024
 # Lower = higher priority. Used by the aggregate builder when multiple
 # sources are available.
 SOURCE_PRIORITY: dict[str, int] = {
-    "imd_rain": 10,        # India-only: best for rainfall over India
-    "era5land": 20,        # global, higher land resolution, 1950+
-    "era5": 30,            # global, full atmosphere, 1940+
-    "20crv3": 80,          # global, 1836+, lower confidence
-    "ghcn": 90,            # station observations, sparse but authoritative where present
+    "ghcn":      5,        # global station obs; gold standard where a station exists (phase 7)
+    "imd_rain": 10,        # India-only: best for rainfall over India (0.25°, 1901+)
+    "imd_temp": 15,        # India-only: best for tmax/tmin over India (1.0°, 1951+)
+    "era5land": 20,        # global, higher land resolution, 1950+ (CDS-direct)
+    "era5":     30,        # global, full atmosphere, 1940+ (CDS-direct)
+    "open_meteo": 50,      # ERA5 archive via Open-Meteo HTTP API — universal floor, 1940+
+    "20crv3":   80,        # global, 1836+, lower confidence
 }

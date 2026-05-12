@@ -19,6 +19,7 @@ dependencies = [
   "tenacity>=8.5",
   "structlog>=24.1",
   "python-dotenv>=1.0",
+  "imdlib>=0.1.21",
 ]
 
 [project.optional-dependencies]

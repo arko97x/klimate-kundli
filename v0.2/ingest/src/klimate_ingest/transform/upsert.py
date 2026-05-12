@@ -226,15 +226,19 @@ def _nan_to_none(v: Any) -> Any:
     return float(v)
 
 
+# After migration 0007 the PK is (place_id, date, source). The COALESCE
+# semantics still hold *within* a single source row: re-ingesting precip
+# for the same source after tmax leaves tmax intact (and vice versa).
+# Cross-source preservation is now handled by the PK itself — IMD and
+# ERA5 own separate rows for the same (place, date).
 _UPSERT_SQL = """
 INSERT INTO daily_weather
   (place_id, date, tmax_c, tmin_c, precip_mm, source, source_version, quality)
 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-ON CONFLICT (place_id, date) DO UPDATE SET
+ON CONFLICT (place_id, date, source) DO UPDATE SET
   tmax_c         = COALESCE(EXCLUDED.tmax_c,         daily_weather.tmax_c),
   tmin_c         = COALESCE(EXCLUDED.tmin_c,         daily_weather.tmin_c),
   precip_mm      = COALESCE(EXCLUDED.precip_mm,      daily_weather.precip_mm),
-  source         = EXCLUDED.source,
   source_version = EXCLUDED.source_version,
   quality        = EXCLUDED.quality
 """
