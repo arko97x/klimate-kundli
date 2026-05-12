@@ -1,43 +1,89 @@
-# Klimate Kundli
+# Klimate Kundli Backend
 
-Exhibition piece for *Data, Otherwise* (VizChitra 2026). Visitors enter their birth date, birth city, and cities they have lived in; the system returns a twelve-cell climate “kundli” situating their life inside the planet’s recent climate history.
+Thin Node/Hono data pipeline for the Klimate Kundli exhibit. Visitors submit birth date, birth city, and lived cities; the API returns 12 climate cards with source and confidence metadata.
 
-## This branch (`main`)
-
-`main` is intentionally **README-only** while **v0.3** is bootstrapped (fresh backend direction: thin orchestration, disk-backed cache, tiered fallbacks — not checked in here yet).
-
-## Archive: v0.1 and v0.2 (retired)
-
-The complete tree — `v0.1/`, `v0.2/`, `docs/`, reference PDFs/images, `Caddyfile`, `versions.json`, etc. — is preserved on:
-
-| Ref | Purpose |
-|-----|---------|
-| **Branch `retired-0.1-0.2`** | Day-to-day checkout of the retired codebase and assets. |
-| **Tag `archive/v0.1-v0.2-final`** | Immutable pointer to the exact snapshot before `main` was cleared. |
-
-Release **v0.1.0** remains reachable on that history for the frozen PoC.
-
-### What they were
-
-- **v0.1** — Localhost-only proof of concept: Vite + React + **Hono + SQLite**; weather cells from **Open-Meteo** (ERA5, geocoding, CMIP6 climate API); global context cells from **bundled CSVs** (OWID emissions, sea level, Mauna Loa CO₂). Prefetch warmed the cache; otherwise cache-first live fetch on miss. Goal: validate the twelve-cell mapping and global coverage without operating a database service.
-
-- **v0.2** — Precomputed “climate database”: Python ingest (e.g. Copernicus ERA5, IMD gridded, global indices) → **Cloudflare R2** + **Supabase Postgres** → **Hono API** + **Vite/React/shadcn** web app so the UI did not call upstream APIs at read time. Goal: stability, reproducible numbers, India-faithful layers where ingested. Much of the pipeline shipped; planned depth was not finished; operating cost and tooling overshot what a short, non-commercial, low-QPS exhibit needed.
-
-### Why both are retired
-
-- **v0.1** was not a deployable, venue-ready system: localhost-only, prefetch-heavy, still dependent on live upstreams for uncached cities — fine as a PoC, wrong as the final technical bet for the show.
-
-- **v0.2** traded that for **ownership of the data plane**. For this use case that duplicated work **free, purpose-built APIs already solve** (especially Open-Meteo for city-scale historical and projections). The extra moving parts bought limited marginal value for a two-day installation while consuming budget, time, and cognitive load — a costly experiment, partially incomplete, and unnecessary in retrospect relative to a thin orchestration layer with **aggressive caching** (and explicit fallbacks) in front of upstream services.
-
-Neither stack is the chosen direction going forward; the **`retired-0.1-0.2`** branch is the **documented experiment** and source of truth for what was tried.
-
-### Check out the archive
+## Run
 
 ```bash
-git fetch origin
-git checkout retired-0.1-0.2
-# or, pinned to the snapshot commit:
-git checkout archive/v0.1-v0.2-final
+npm install
+npm run dev
 ```
 
-There is **no** requirement to serve v0.1/v0.2 over HTTP from this repo anymore; the old root **`Caddyfile`** lived only on the archive branch.
+Routes:
+
+- `GET /health`
+- `GET /geocode?q=mumbai`
+- `POST /kundli`
+- `GET /stats`
+
+## Data
+
+Static CSVs live in `src/data/`:
+
+- `emissions.csv`: OWID country CO2, cleaned to `country,year,co2_mt`
+- `sea_level.csv`: NOAA/NESDIS STAR global mean sea level, seasonal signal removed, rebased to 1993
+- `co2_ppm.csv`: NOAA Mauna Loa annual CO2 ppm
+- `prewarm_cities.json`: starter city list, currently 35 cities; expand before exhibit
+- `city_aliases.json`: old/new city names
+
+Refresh static CSVs yearly:
+
+```bash
+npm run fetch:static
+```
+
+Warm historical weather cache from 1940 through the latest complete year:
+
+```bash
+npm run prewarm
+```
+
+Prewarm intentionally waits between large Open-Meteo archive pulls to avoid `429` rate limits. Override only for small smoke tests:
+
+```bash
+PREWARM_REQUEST_DELAY_MS=5000 npm run prewarm
+```
+
+SQLite cache lives at `data/cache.sqlite`. Reset cache by stopping server and deleting `data/cache.sqlite*`.
+
+## Examples
+
+```bash
+curl http://localhost:8787/health
+curl "http://localhost:8787/geocode?q=Bombay"
+```
+
+```bash
+curl -X POST http://localhost:8787/kundli \
+  -H "content-type: application/json" \
+  -d '{
+    "birthDate": "1993-12-10",
+    "birthCity": {
+      "name": "New Delhi",
+      "displayName": "New Delhi, Delhi, India",
+      "lat": 28.6139,
+      "lon": 77.209,
+      "country": "IND"
+    },
+    "livedCities": [
+      {
+        "name": "New Delhi",
+        "displayName": "New Delhi, Delhi, India",
+        "lat": 28.6139,
+        "lon": 77.209,
+        "country": "IND",
+        "start": "1993-12-10",
+        "end": null
+      }
+    ]
+  }'
+```
+
+## Quality
+
+```bash
+npm run build
+npm test
+```
+
+Current implementation covers cache, static data, geocoding, historical weather fallback, projection fallback, all 12 card aggregations, `/kundli`, `/stats`, and prewarm scaffolding.
