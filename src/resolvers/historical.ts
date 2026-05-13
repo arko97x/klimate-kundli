@@ -83,6 +83,13 @@ export function createHistoricalResolver(options: HistoricalOptions) {
           options.cache.set(key, nasa);
           return nasa;
         }
+      } else {
+        // NASA POWER (MERRA-2) doesn't cover pre-1981 dates. Surface the skip so logs aren't mysterious.
+        options.onError?.({
+          city,
+          tier: "nasa-power",
+          error: `skipped: range.start ${range.start} predates NASA POWER's ${NASA_START} floor`,
+        });
       }
 
       return enableNearestFallback ? nearestPrewarmed(city, range.startYear, range.endYear, prewarmCities, options.cache) : null;
@@ -232,14 +239,26 @@ async function fetchJsonWithRetry<T>(url: URL, fetchImpl: typeof fetch, signal: 
 
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
-      return await fetchJson<T>(url, fetchImpl, signal);
+      const body = await fetchJson<T>(url, fetchImpl, signal);
+
+      // Open-Meteo returns rate-limit errors as HTTP 200 with {error:true, reason:"..."}.
+      // Detect this in-band error and throw so the catch block surfaces it via onError.
+      const maybeError = body as unknown as { error?: boolean; reason?: string };
+      if (maybeError && maybeError.error === true) {
+        throw new OpenMeteoError(maybeError.reason ?? "unknown Open-Meteo error");
+      }
+
+      return body;
     } catch (error) {
       lastError = error;
-      if (signal.aborted || attempt === 3) {
+      const wait = retryDelayMs(error, attempt);
+
+      // wait === null means: don't retry (quota errors won't pass until bucket refills).
+      if (wait === null || signal.aborted || attempt === 3) {
         throw error;
       }
 
-      await delay(retryDelayMs(error, attempt), signal);
+      await delay(wait, signal);
     }
   }
 
@@ -267,9 +286,20 @@ class HttpError extends Error {
   }
 }
 
-function retryDelayMs(error: unknown, attempt: number): number {
+class OpenMeteoError extends Error {
+  constructor(readonly reason: string) {
+    super(reason);
+    this.name = "OpenMeteoError";
+  }
+}
+
+function retryDelayMs(error: unknown, attempt: number): number | null {
+  // Quota errors won't resolve via retry — bail out so the caller can decide what to do.
+  if (error instanceof OpenMeteoError && /limit exceeded/i.test(error.reason)) {
+    return null;
+  }
   if (error instanceof HttpError && error.status === 429) {
-    return Number.isFinite(error.retryAfterSec) ? error.retryAfterSec * 1000 : 65_000;
+    return null;
   }
 
   return 200 * attempt;
