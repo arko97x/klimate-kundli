@@ -1,0 +1,20 @@
+[Unit]
+Description=Klimate Kundli API (Hono)
+After=network.target
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/opt/klimate-kundli
+Environment=NODE_ENV=production
+EnvironmentFile=-/opt/klimate-kundli/.env
+ExecStart=/usr/bin/node dist/index.js
+Restart=on-failure
+RestartSec=5
+
+# Hono /kundli can run up to ~8s; give headroom for slow cache misses.
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

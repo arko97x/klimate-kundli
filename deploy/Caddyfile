@@ -1,0 +1,6 @@
+# Replace api.example.com with your real subdomain before enabling.
+# DNS A record must point at this droplet before Caddy can issue a cert.
+
+api.example.com {
+	reverse_proxy 127.0.0.1:8787
+}
