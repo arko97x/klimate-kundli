@@ -10,6 +10,7 @@ import { loadStaticData, type StaticData } from "./resolvers/statics.js";
 import { createGeocodeRoute } from "./routes/geocode.js";
 import { createHealthRoute } from "./routes/health.js";
 import { createKundliRoute } from "./routes/kundli.js";
+import { createMonthlyDeltaRoute } from "./routes/monthly-delta.js";
 import { createStatsRoute } from "./routes/stats.js";
 
 interface AppOptions {
@@ -36,6 +37,7 @@ export function createApp(options: AppOptions = {}): Hono {
   );
 
   app.route("/kundli", createKundliRoute({ cache, statics, telemetry, historical, projection }));
+  app.route("/monthly-delta", createMonthlyDeltaRoute({ historical, statics }));
   app.route("/geocode", createGeocodeRoute(geocoder));
   app.route("/stats", createStatsRoute(cache, telemetry));
   app.route("/health", createHealthRoute(true));

@@ -1,0 +1,127 @@
+{
+  "visitor": {
+    "birthSlug": "delhi-in",
+    "birthName": "New Delhi",
+    "birthCountry": "India",
+    "birthDate": "1990-06-15",
+    "birthYear": 1990,
+    "coords": { "lat": 28.6139, "lon": 77.209 }
+  },
+  "stays": [
+    { "slug": "delhi-in", "name": "New Delhi", "country": "India", "start": "1990-06-15", "end": "2014-06-01" },
+    { "slug": "mumbai-in", "name": "Mumbai", "country": "India", "start": "2014-06-01", "end": "2020-05-31" },
+    { "slug": "bengaluru-in", "name": "Bengaluru", "country": "India", "start": "2020-06-01", "end": "today" }
+  ],
+  "cells": [
+    {
+      "id": 1,
+      "kind": "you",
+      "status": "ok",
+      "label": "The native",
+      "primary": "New Delhi",
+      "detail": "born 1990-06-15",
+      "provenance": { "source": "input" }
+    },
+    {
+      "id": 2,
+      "kind": "birth_year_hi",
+      "status": "ok",
+      "label": "Hottest day in birth year",
+      "primary": "43.9°C",
+      "detail": "1990-05-26 · New Delhi",
+      "provenance": { "source": "imd_temp", "quality": 4, "validDays": 365 }
+    },
+    {
+      "id": 3,
+      "kind": "birth_year_lo",
+      "status": "ok",
+      "label": "Coldest day in birth year",
+      "primary": "3.7°C",
+      "detail": "1990-01-02 · New Delhi",
+      "provenance": { "source": "imd_temp", "quality": 4, "validDays": 365 }
+    },
+    {
+      "id": 4,
+      "kind": "latest_birthday_hi",
+      "status": "ok",
+      "label": "Latest birthday high",
+      "primary": "38.2°C",
+      "detail": "2024-06-15 · Bengaluru",
+      "provenance": { "source": "imd_temp", "quality": 4 }
+    },
+    {
+      "id": 5,
+      "kind": "latest_birthday_lo",
+      "status": "ok",
+      "label": "Latest birthday low",
+      "primary": "19.1°C",
+      "detail": "2024-06-15 · Bengaluru",
+      "provenance": { "source": "imd_temp", "quality": 4 }
+    },
+    {
+      "id": 6,
+      "kind": "seasonal_summer",
+      "status": "ok",
+      "label": "Summer range across cities",
+      "primary": "6,331 days",
+      "detail": "warmest mean tmax 38.2°C (New Delhi) · span 12.4°C",
+      "provenance": { "source": "imd_temp", "quality": 4 }
+    },
+    {
+      "id": 7,
+      "kind": "seasonal_winter",
+      "status": "ok",
+      "label": "Winter range across cities",
+      "primary": "6,289 days",
+      "detail": "coldest mean tmin 12.8°C (Bengaluru) · span 9.1°C",
+      "provenance": { "source": "imd_temp", "quality": 4 }
+    },
+    {
+      "id": 8,
+      "kind": "country_emissions",
+      "status": "ok",
+      "label": "National CO₂ emissions change",
+      "primary": "+248%",
+      "detail": "India · 1990 → 2023",
+      "provenance": { "source": "owid_co2" }
+    },
+    {
+      "id": 9,
+      "kind": "rain_compare",
+      "status": "ok",
+      "label": "Rainfall change in birth city",
+      "primary": "−7.4%",
+      "detail": "713 mm/yr (1990s) → 660 mm/yr (2020s)",
+      "provenance": { "source": "imd_rain", "quality": 4 }
+    },
+    {
+      "id": 10,
+      "kind": "sea_level",
+      "status": "ok",
+      "label": "Global sea-level rise",
+      "primary": "+94 mm",
+      "detail": "1990 → 2023 · global mean",
+      "provenance": { "source": "noaa_star" }
+    },
+    {
+      "id": 11,
+      "kind": "co2_ppm",
+      "status": "ok",
+      "label": "CO₂ in the air: then vs now",
+      "primary": "354 → 424 ppm",
+      "detail": "+70 ppm · Mauna Loa",
+      "provenance": { "source": "noaa_gml_mlo" }
+    },
+    {
+      "id": 12,
+      "kind": "projection_2050",
+      "status": "ok",
+      "label": "Your birthplace in 2050",
+      "primary": "+2.1°C / +8% rain",
+      "detail": "India · SSP2-4.5 mid · vs 1995–2014 baseline",
+      "provenance": { "source": "cmip6_ensemble" }
+    }
+  ],
+  "generatedAt": "2026-05-11T12:00:00.000Z",
+  "elapsedMs": 842
+}

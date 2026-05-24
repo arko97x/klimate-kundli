@@ -126,5 +126,124 @@
     }
   html {
     @apply font-sans;
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
     }
+}
+
+@layer components {
+  .doc-prose {
+    @apply text-[1.0625rem] leading-[1.75] text-foreground;
+  }
+
+  .doc-prose > :first-child {
+    @apply mt-0;
+  }
+
+  .doc-prose h1 {
+    @apply mb-6 font-heading text-4xl font-semibold tracking-tight sm:text-5xl;
+  }
+
+  .doc-prose h2 {
+    @apply mb-4 mt-14 scroll-mt-8 border-b border-border pb-2 font-heading text-2xl font-semibold tracking-tight sm:text-3xl;
+  }
+
+  .doc-prose h3 {
+    @apply mb-3 mt-10 scroll-mt-8 font-heading text-xl font-semibold tracking-tight;
+  }
+
+  .doc-prose h4 {
+    @apply mb-2 mt-8 font-medium;
+  }
+
+  .doc-prose p {
+    @apply my-5 text-pretty;
+  }
+
+  .doc-prose ul,
+  .doc-prose ol {
+    @apply my-5 space-y-2 pl-6;
+  }
+
+  .doc-prose ul {
+    @apply list-disc;
+  }
+
+  .doc-prose ol {
+    @apply list-decimal;
+  }
+
+  .doc-prose li {
+    @apply text-pretty;
+  }
+
+  .doc-prose strong {
+    @apply font-semibold text-foreground;
+  }
+
+  .doc-prose a {
+    @apply underline decoration-border underline-offset-4 hover:decoration-foreground;
+  }
+
+  .doc-prose hr {
+    @apply my-12 border-border;
+  }
+
+  .doc-prose blockquote {
+    @apply my-6 border-l-2 border-muted-foreground/40 pl-5 text-muted-foreground italic;
+  }
+
+  .doc-prose code {
+    @apply rounded bg-muted px-1.5 py-0.5 font-mono text-[0.9em];
+  }
+
+  .doc-prose pre {
+    @apply my-6 overflow-x-auto rounded-lg border border-border bg-muted/40 p-4 text-sm leading-relaxed;
+  }
+
+  .doc-prose pre code {
+    @apply bg-transparent p-0;
+  }
+
+  .doc-prose table {
+    @apply my-8 w-full border-collapse text-sm;
+  }
+
+  .doc-prose th,
+  .doc-prose td {
+    @apply border border-border px-3 py-2 text-left align-top;
+  }
+
+  .doc-prose th {
+    @apply bg-muted/50 font-medium;
+  }
+
+  .doc-prose .doc-lede {
+    @apply text-lg text-muted-foreground;
+  }
+
+  .doc-prose .doc-meta {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .doc-figure,
+  .doc-figure-wide {
+    @apply my-8;
+  }
+
+  .doc-figure img,
+  .doc-figure video,
+  .doc-figure-wide img,
+  .doc-figure-wide video {
+    @apply w-full rounded-lg border border-border bg-muted/20;
+  }
+
+  .doc-figure-wide {
+    @apply -mx-4 sm:-mx-8 lg:-mx-12;
+  }
+
+  .doc-figure figcaption,
+  .doc-figure-wide figcaption {
+    @apply mt-2 text-sm text-muted-foreground;
+  }
 }

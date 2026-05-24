@@ -1,0 +1,368 @@
+import { Figure } from './components/Figure'
+import { Video } from './components/Video'
+
+export const meta = {
+  title: 'Klimate Kundli — project documentation',
+}
+
+# Klimate Kundli
+
+<p className="doc-lede">
+  An exhibition piece for <em>Data, Otherwise</em> (VizChitra 2026). Visitors enter when and where they were born, plus the cities they have lived in. The system returns a climate reading that situates their life inside the planet's recent history.
+</p>
+
+<p className="doc-meta">
+  Internal working document. Not linked from the public UI. Last updated May 2026.
+</p>
+
+---
+
+## How to read this
+
+Four versions, three retired or superseded. Each section covers what we built, why we built it, how the data moved, and why we moved on. Screenshots and recordings live under `/documentation/` in `web/public/`.
+
+| Version | Status | Branch / location |
+| --- | --- | --- |
+| 0.1 | Retired | `retired-0.1-0.2` → `v0.1/` |
+| 0.2 | Retired | `retired-0.1-0.2` → `v0.2/` |
+| 0.3.1 | Superseded | `main` through 13 May 2026 |
+| 0.3.2 | Current | `main` (uncommitted UI work, 23 May 2026) |
+
+Archive rationale: `docs/RETIREMENT-v0.1-v0.2.md` on the `retired-0.1-0.2` branch.
+
+---
+
+## v0.1 — localhost proof of concept
+
+**Frozen:** `v0.1.0` · **May 2026**
+
+### What we were trying to prove
+
+The original brief was narrow on purpose: a digital-only, localhost-only web app that collects birth date, birth city, and lived cities, then renders twelve climate facts — a "kundli" — on the same page. No hardware, no print pipeline, no exhibition integrations yet.
+
+Two constraints shaped everything:
+
+1. Visitors could be born anywhere in the world.
+2. Venue Wi‑Fi quality was unknown.
+
+So the architecture had to be globally capable and cache-heavy.
+
+### What we built
+
+**Stack:** npm workspaces, Hono + SQLite server (`localhost:3001`), Vite + React web (`localhost:5173`), shared `data/` folder for bundled CSVs and cache.
+
+**UI:** Single-page form. Birth date picker, birth city autocomplete (`CityCombobox`), repeatable stay rows with month-precision dates. Submit → twelve-cell grid on the same page. No routing, no wizard — everything visible at once.
+
+<Figure
+  src="/documentation/v0-1/form-and-grid.png"
+  caption="v0.1 PoC — single-page form and live-generated 12-cell grid (Delhi 1993, with international stays). Captured from the archived build."
+  wide
+/>
+
+**Data pipeline:**
+
+```
+Browser → POST /api/generate
+  → geocode (SQLite cache → Open-Meteo Geocoding)
+  → per-cell builders in parallel
+      → weather (SQLite → Open-Meteo Historical ERA5, 1940→today)
+      → climate projection (SQLite → Open-Meteo CMIP6, 2020→2050)
+      → bundled CSVs (CO₂ ppm, national emissions, sea level)
+  → 12 cells with source + confidence metadata
+```
+
+**Twelve cells:**
+
+| # | Type | Source |
+| --- | --- | --- |
+| 1 | You (birth city + date) | Input |
+| 2–3 | Birth year high/low temp | ERA5 via Open-Meteo |
+| 4–5 | Latest birthday high/low | ERA5 |
+| 6–7 | Summer/winter span across lived cities | ERA5 |
+| 8 | National CO₂ emissions change | OWID CSV |
+| 9 | Birth city rainfall change | ERA5 |
+| 10 | Sea level rise | NOAA/CSIRO CSV |
+| 11 | Atmospheric CO₂ ppm change | Mauna Loa CSV |
+| 12 | Projected 2050 birthday temp | CMIP6 via Open-Meteo |
+
+**Caching:** `better-sqlite3`, cache-first with live fetch on miss. Optional `prefetch` script could warm hundreds of cities ahead of time.
+
+**Not built:** Deployment story, offline exhibit reliability, graceful degradation labels in the UI (backend had some confidence metadata but the frontend was thin).
+
+### Why we scrapped it
+
+v0.1 did its job — we validated the twelve-cell mapping and confirmed global coverage was feasible with Open-Meteo. But it was never venue-ready:
+
+- Localhost-only, no production deploy path.
+- Prefetch-heavy; uncached cities still hit live upstream APIs during the show.
+- Single-page form felt like a developer tool, not an exhibition experience.
+- No provenance surfaced to visitors; numbers appeared without context.
+
+We archived it at `v0.1.0` and moved on. The code and a full build note live in `v0.1/docs/HOW-IT-WAS-BUILT.md` on `retired-0.1-0.2`.
+
+---
+
+## v0.2 — the precomputed climate database
+
+**May 2026** · Retired before v0.3 started
+
+### What we were trying to prove
+
+If v0.1 was "call APIs at read time," v0.2 was "own the data plane." The bet: batch ingest once, serve from Postgres at exhibit time, never call upstream APIs from the kiosk.
+
+**Stack:**
+
+- **Ingest:** Python CLI (`klimate-ingest`) — Copernicus CDS / ERA5, IMD Pune gridded rainfall (1901–2024) and temperature (1951–2024), global indices (CO₂, sea level, emissions).
+- **Storage:** Cloudflare R2 for raw artifacts, Supabase Postgres for places, grid mapping, `daily_weather`, rollups, provenance.
+- **API:** Hono on `localhost:3002` — places search, annual/monthly/daily timeseries, bundled `POST /api/kundli`.
+- **Web:** Vite + React + Tailwind + shadcn, parchment-ink almanac theme on `localhost:5174`.
+
+### What we built
+
+Phases 1–5, 4.5, and 6a shipped end-to-end:
+
+1. Schema + place loader + CDS ingest scaffolding
+2. R2 upload + hourly→daily transform + `daily_weather` upsert
+3. Per-source aggregates (annual, monthly, seasonal)
+4. Full API + bundled `/api/kundli` (all 12 cells)
+4.5. Global indices (OWID, Mauna Loa, sea level) loaded into Postgres
+5. Web UI — form, 3×4 kundli grid, provenance pills
+6a. IMD gridded layer with per-variable source preference (`imd_temp` / `imd_rain` → ERA5 fallback)
+
+<Figure
+  src="/documentation/v0-2/form.png"
+  caption="v0.2 intake form — birth date, birth place autocomplete, repeatable stays with 'still here' checkbox."
+/>
+
+<Figure
+  src="/documentation/v0-2/kundli-grid.png"
+  caption="v0.2 result — 3×4 almanac grid with per-cell provenance pills (source, quality, coverage)."
+  wide
+/>
+
+**UI details worth keeping:**
+
+- Parchment-ink visual language — felt like an almanac, not a dashboard.
+- `PlaceCombobox` with cmdk + Radix popover for city search against the preloaded place table.
+- `ProvenancePill` on every cell — source tier, quality score, date coverage.
+- View-state machine: form → loading → result, with "Start over" returning to form.
+
+**Data pipeline (read path):**
+
+```
+Browser → POST /api/kundli
+  → resolve place slugs (delhi-in, mumbai-in, …)
+  → query precomputed aggregates per cell
+      → imd_temp / imd_rain for Indian cities where loaded
+      → era5 fallback
+      → global_indices for cells 8, 10, 11
+  → 12 cells with status (ok / no_data / partial) + provenance
+```
+
+**Canonical test case** (verified in `v0.2/docs/STATE.md`):
+
+Delhi born 1990-06-15, Mumbai 2014–2020, Bengaluru 2020→today. All 12 cells `ok`. Cells 2/3 from IMD temp (43.9°C / 3.7°C). Cell 9 from IMD rain (−7.4% over lifetime).
+
+### What never shipped
+
+- Phase 6b: IMD station / sub-station observations (blocked on IMDDS credentials).
+- GHCN overlay, event snapshots.
+- Production deploy beyond local Caddy routing.
+- Automated tests.
+
+### Why we scrapped it
+
+v0.2 bought reproducible numbers and India-faithful IMD layers. It also bought:
+
+- Supabase + R2 + Copernicus ingest time + Python tooling + cognitive load.
+- A pipeline that was **partially incomplete** yet **fully operational** — meaning we were paying ops cost for marginal gain over what Open-Meteo already gives us for city-scale queries.
+- Duplicate work that free, purpose-built APIs solve at exhibit QPS.
+
+For a two-day, non-commercial, low-traffic installation, a thin orchestration layer with aggressive SQLite caching (v0.3's direction) was the better bet. v0.2 remains on `retired-0.1-0.2` as documented reference — schema, ingest CLI, API shapes, UI patterns we may borrow from.
+
+---
+
+## v0.3.1 — backend reboot + placeholder UI
+
+**12–13 May 2026** · Commits on `main`
+
+### What changed in thinking
+
+After retiring v0.1 and v0.2, we cleared `main` and started fresh. The new prompt (`klimate-kundli-pipeline-prompt.md`) reframed the backend as a standalone Hono server:
+
+- Open-Meteo + NASA POWER + Nominatim fallback chains
+- SQLite cache (disk-backed, survives restart)
+- Twelve-card `/kundli` endpoint with confidence labels
+- No Supabase, no R2, no Python ingest at runtime
+- 8-second global request budget, graceful partial responses
+
+This was explicitly "backend first, UI later."
+
+### What we built
+
+**Backend (`src/`):**
+
+- Hono app on port 8787
+- Routes: `GET /health`, `GET /geocode`, `POST /kundli`, `GET /stats`
+- Resolvers: geocoding chain, historical weather (ERA5 → NASA POWER → nearest pre-warmed city), CMIP6 projection, static CSV lookups
+- Aggregations for all 12 cards
+- `npm run prewarm` — warm cache for ~35 starter cities (expandable)
+- `npm run fetch:static` — refresh bundled CSVs
+- Vitest tests for cache, aggregations, resolver chains
+
+**Open-Meteo paid tier:** Added `OPEN_METEO_API_KEY` support (Standard customer host) after hitting free-tier rate limits during prewarm. Later simplified routing when quota errors needed hardening.
+
+<Figure
+  src="/documentation/v0-3-1/dummy-ui.png"
+  caption="v0.3.1 web — placeholder layout only. Six dashed boxes inside a centered column to test responsive margins."
+/>
+
+**Web (`web/`):**
+
+- Vite + React + shadcn scaffold
+- `PageLayout` with max-width column
+- Dummy preview page — header copy + six dashed placeholder blocks. No form, no API wiring.
+
+### Why the UI stayed dummy
+
+We wanted the pipeline solid before designing the exhibit interaction. The twelve-card model from v0.1/v0.2 was still the backend contract, but product conversations were shifting toward a **monthly temperature comparison** narrative — childhood vs today — rather than a dense 3×4 grid.
+
+v0.3.1 was the foundation layer. Everything after 13 May is v0.3.2.
+
+---
+
+## v0.3.2 — wizard + monthly delta chart
+
+**23 May 2026** · Current work (not yet committed)
+
+### Product shift
+
+Instead of twelve equal cells, the primary output became a single story: **how does the climate of your childhood compare to today?**
+
+Inputs simplified:
+
+- Birth **year** (not full date) + birth city
+- Lived cities with year ranges on a horizontal timeline
+
+Output: monthly temperature chart comparing a ±2-year window around birth against the most recent five complete years, plus derived insights and "remedies."
+
+### What we built
+
+**New backend route:** `POST /monthly-delta`
+
+Accepts `birthCity`, `birthYear`, `livedCities[]`. Returns:
+
+- Monthly mean temperatures for birth window and recent window
+- Per-month deltas
+- Hottest months in each window
+- India national emissions change (birth year vs latest)
+- Parents' generation comparison year (birth year − 25)
+- City stint metadata for timeline rendering
+
+Implementation in `src/routes/monthly-delta.ts` — sequential weather fetches per unique city stint, 45s budget, ERA5 via existing historical resolver.
+
+**Web — two-step wizard:**
+
+<Figure
+  src="/documentation/v0-3-2/birth-step.png"
+  caption="Step 1 — birth city search + year wheel picker. Split layout: brand panel left, form right."
+/>
+
+<Figure
+  src="/documentation/v0-3-2/lived-cities-step.png"
+  caption="Step 2 — lived cities on a horizontal year axis. Drag handles, add/remove stints, generate footer."
+  wide
+/>
+
+**Components:**
+
+| Component | Role |
+| --- | --- |
+| `WizardLayout` | Split panel — muted brand aside + form/results column |
+| `BirthStep` | City combobox + `BirthYearPicker` (wheel) |
+| `LivedCitiesStep` | Timeline with `TimelineYearAxis`, stint rows |
+| `CitySearchCombobox` | Geocode typeahead against `/geocode` |
+| `MonthlyDeltaChart` | SVG area chart, headline, insights, remedies |
+| `EmissionsRingsChart` | Concentric rings for national CO₂ change |
+| `InsightsSection` | Auto-generated copy from delta data |
+| `RemediesSection` | Tongue-in-cheek "remedies" based on largest shifts |
+
+<Figure
+  src="/documentation/v0-3-2/chart-result.png"
+  caption="Result view — monthly temperature areas (birth window in blue, recent in coral), delta band, emissions rings below."
+  wide
+/>
+
+**Visual language:**
+
+- Inter Variable, neutral oklch palette (shadcn defaults)
+- Birth window: `#6b8eb8`, recent: `#d3674a`, delta accent: `#e9a560`
+- SVG chart with gradient fills, range bars per month, responsive viewBox
+- "Sima Aunty matches people. We match you to your climate." — brand copy in the aside
+
+<Video
+  src="/documentation/v0-3-2/wizard-flow.mp4"
+  caption="Full wizard flow — birth step, lived cities timeline, chart generation. Captured via CDP screencast + ffmpeg."
+/>
+
+### What's still open
+
+- `/kundli` twelve-card endpoint exists but the UI no longer calls it
+- Prewarm city list still at ~35; needs expansion before exhibit
+- No print / kiosk / offline mode
+- Documentation page you're reading now — first pass
+
+---
+
+## Architecture comparison
+
+```
+v0.1   Browser ──► Hono+SQLite ──► Open-Meteo (live + cache)
+v0.2   Browser ──► Hono ──► Supabase ◄── Python ingest ◄── CDS/IMD/R2
+v0.3   Browser ──► Hono+SQLite ──► Open-Meteo (live + cache, paid tier)
+                      │
+                      └── POST /monthly-delta (primary UI path)
+```
+
+The through-line: **Open-Meteo keeps winning for city-scale exhibit queries.** v0.2's IMD gridded accuracy was real for Indian monsoon rainfall, but the ops cost wasn't proportional to a two-day show. If we revisit IMD, the v0.3 prompt already sketches a static parquet tier — offline preprocessing, runtime JS lookup, no Python at exhibit time.
+
+---
+
+## Repository map (current `main`)
+
+```
+klimate-kundli/
+├── src/                    # v0.3 Hono backend
+│   ├── routes/             # kundli, monthly-delta, geocode, stats, health
+│   ├── resolvers/          # geocoding, historical, projection, statics
+│   ├── aggregations/       # 12-card compute (legacy contract)
+│   └── scripts/            # prewarm, fetch_static_data
+├── web/                    # v0.3 React frontend
+│   ├── src/documentation/  # this page (MDX)
+│   └── public/documentation/  # screenshots + recordings
+├── klimate-kundli-pipeline-prompt.md
+└── README.md
+```
+
+Archived experiments: `git checkout retired-0.1-0.2` → `v0.1/`, `v0.2/`, `docs/RETIREMENT-v0.1-v0.2.md`.
+
+---
+
+## Capture pipeline
+
+Screenshots and screen recordings regenerate via `scripts/capture/`. Static PNGs use Puppeteer `page.screenshot()`. Recordings use CDP `Page.startScreencast` → PNG sequence → ffmpeg, following the [screen capture pipeline write-up](https://www.arccc.co/words/screen-capture-pipeline/).
+
+```bash
+# from repo root — requires dev servers or archived branch worktrees running
+npm run capture:docs
+```
+
+Outputs land in `web/public/documentation/{version}/`.
+
+---
+
+## Credits & context
+
+Built for *Data, Otherwise* at VizChitra 2026. Concept materials at repo root: `prelim-proposal/`, `revised_clarified-concept-note.pdf`, curatorial feedback in `feedback-from-curatorial-team.png`.
+
+This document is for us — the people building it — not for booth visitors. If you're reading it, you already have the link.

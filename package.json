@@ -9,7 +9,8 @@
     "start": "node dist/index.js",
     "test": "vitest run tests",
     "fetch:static": "tsx src/scripts/fetch_static_data.ts",
-    "prewarm": "tsx src/scripts/prewarm.ts"
+    "prewarm": "tsx src/scripts/prewarm.ts",
+    "capture:docs": "node scripts/capture/capture.mjs"
   },
   "dependencies": {
     "@hono/node-server": "latest",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@types/better-sqlite3": "latest",
     "@types/node": "^25.7.0",
+    "puppeteer": "^25.0.4",
     "tsx": "latest",
     "typescript": "latest",
     "vitest": "latest"
