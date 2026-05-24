@@ -62,7 +62,9 @@ fi
 
 echo "==> Building backend in $APP_DIR"
 cd "$APP_DIR"
-sudo -u "$APP_USER" npm ci
+# Skip postinstall scripts (puppeteer browser download is dev-only doc capture).
+sudo -u "$APP_USER" npm ci --ignore-scripts
+sudo -u "$APP_USER" npm rebuild better-sqlite3
 sudo -u "$APP_USER" npm run build
 
 if [[ ! -f "$APP_DIR/.env" ]]; then

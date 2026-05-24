@@ -1,6 +1,8 @@
 import { serve } from "@hono/node-server";
 import { cors } from "hono/cors";
 import { Hono } from "hono";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createCache, type Cache } from "./cache/store.js";
 import { Telemetry } from "./lib/telemetry.js";
 import { createGeocoder, type Geocoder } from "./resolvers/geocoding.js";
@@ -47,7 +49,11 @@ export function createApp(options: AppOptions = {}): Hono {
 
 const app = createApp();
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+const isMain =
+  typeof process.argv[1] === "string" &&
+  fileURLToPath(import.meta.url) === resolve(process.argv[1]);
+
+if (isMain) {
   const port = Number(process.env.PORT ?? 8787);
 
   serve({ fetch: app.fetch, port }, (info) => {
