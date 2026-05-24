@@ -2,7 +2,24 @@
 
 Regenerates screenshots and screen recordings for `/documentation`.
 
-## v0.3.2 (current)
+## v0.3.3 (current)
+
+```bash
+# terminal 1 — API
+npm run dev
+
+# terminal 2 — web
+cd web && npm run dev
+
+# terminal 3 — capture (three result screenshots, distinct birth years + cities)
+npm run capture:docs -- --only v0-3-3
+```
+
+Captures load each scenario with `?birthYear=` (docs capture only) and puppeteer timeline edits for lived cities.
+
+Outputs: `web/public/documentation/v0-3-3/` — `delhi-1988-mumbai.png`, `mumbai-1995-bengaluru.png`, `chennai-1970-delhi-kolkata.png`
+
+## v0.3.2
 
 ```bash
 # terminal 1 — API

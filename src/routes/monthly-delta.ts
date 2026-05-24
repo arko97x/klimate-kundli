@@ -102,6 +102,11 @@ export function createMonthlyDeltaRoute(deps: MonthlyDeltaRouteDeps): Hono {
       const largest = largestDeltaMonth(birthStats.monthly, recentStats.monthly);
       const hottestYears = buildHottestYearsInsight(stints, weatherByKey, birthYear, latestCompleteYear);
       const indiaEmissions = buildIndiaEmissionsRings(deps.statics, birthYear, latestCompleteYear);
+      const parentsBirthYear = birthYear - PARENTS_GENERATION_OFFSET;
+      const parentsIndiaEmissions =
+        parentsBirthYear >= RECORD_START_YEAR
+          ? buildIndiaEmissionsRings(deps.statics, parentsBirthYear, latestCompleteYear)
+          : null;
       const parentsBirthWindow = buildParentsBirthWindow(birthWeather.daily, birthYear, latestCompleteYear);
       const globalContext = buildGlobalContext(deps.statics, birthYear, latestCompleteYear);
 
@@ -125,6 +130,7 @@ export function createMonthlyDeltaRoute(deps: MonthlyDeltaRouteDeps): Hono {
         largestDelta: largest,
         hottestYears,
         indiaEmissions,
+        parentsIndiaEmissions,
         parentsBirthWindow,
         globalContext,
         source: birthWeather.source,

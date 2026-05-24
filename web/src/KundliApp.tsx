@@ -10,16 +10,31 @@ import { WizardLayout } from '@/components/WizardLayout'
 import { defaultBirthYear } from '@/components/BirthYearPicker'
 import { fetchMonthlyDelta, type MonthlyDeltaResponse } from '@/lib/api'
 import { createInitialRows, isLivedFormValid, rowsToLivedCities } from '@/lib/lived-cities'
-import { latestCompleteYearUtc } from '@/lib/years'
+import { latestCompleteYearUtc, MIN_BIRTH_YEAR } from '@/lib/years'
 import type { City, ResidenceRow } from '@/types'
 
 type Step = 'birth' | 'lived'
+
+function initialBirthYear(): number {
+  const param = new URLSearchParams(window.location.search).get('birthYear')
+  if (!param) {
+    return defaultBirthYear()
+  }
+
+  const year = Number(param)
+  const latest = latestCompleteYearUtc()
+  if (!Number.isInteger(year) || year < MIN_BIRTH_YEAR || year > latest) {
+    return defaultBirthYear()
+  }
+
+  return year
+}
 
 export default function KundliApp() {
   const latestCompleteYear = useMemo(() => latestCompleteYearUtc(), [])
   const [step, setStep] = useState<Step>('birth')
   const [birthCity, setBirthCity] = useState<City | null>(null)
-  const [birthYear, setBirthYear] = useState(defaultBirthYear)
+  const [birthYear, setBirthYear] = useState(initialBirthYear)
   const [rows, setRows] = useState<ResidenceRow[]>([])
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)

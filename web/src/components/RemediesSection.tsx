@@ -132,7 +132,7 @@ export function RemediesSection({ data }: RemediesSectionProps) {
             className="italic"
             style={{ color: '#c4832a' }}
           >
-            upay
+            upaay
           </span>
           .
         </h2>

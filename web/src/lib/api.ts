@@ -86,6 +86,7 @@ export interface MonthlyDeltaResponse {
   largestDelta: { month: number; delta: number } | null
   hottestYears: HottestYearsInsight | null
   indiaEmissions: IndiaEmissionsRings | null
+  parentsIndiaEmissions: IndiaEmissionsRings | null
   parentsBirthWindow: MonthlyDeltaWindow | null
   globalContext: GlobalContext | null
   source: string

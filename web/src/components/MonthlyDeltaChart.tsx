@@ -185,7 +185,11 @@ export function MonthlyDeltaChart({ data, onReset }: MonthlyDeltaChartProps) {
       {data.indiaEmissions ? (
         <>
           <hr className="border-border" />
-          <EmissionsRingsChart birthYear={data.birthYear} data={data.indiaEmissions} />
+          <EmissionsRingsChart
+            birthYear={data.birthYear}
+            data={data.indiaEmissions}
+            parentsData={data.parentsIndiaEmissions}
+          />
         </>
       ) : null}
 

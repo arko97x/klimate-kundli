@@ -19,14 +19,15 @@ export const meta = {
 
 ## How to read this
 
-Four versions, three retired or superseded. Each section covers what we built, why we built it, how the data moved, and why we moved on. Screenshots and recordings live under `/documentation/` in `web/public/`.
+Four shipped iterations plus v0.3.3 in progress — three retired or superseded. Each section covers what we built, why we built it, how the data moved, and why we moved on. Screenshots and recordings live under `/documentation/` in `web/public/`.
 
 | Version | Status | Branch / location |
 | --- | --- | --- |
 | 0.1 | Retired | `retired-0.1-0.2` → `v0.1/` |
 | 0.2 | Retired | `retired-0.1-0.2` → `v0.2/` |
 | 0.3.1 | Superseded | `main` through 13 May 2026 |
-| 0.3.2 | Current | `main` (uncommitted UI work, 23 May 2026) |
+| 0.3.2 | Superseded | `main` (committed 24 May 2026) |
+| 0.3.3 | Current | `main` (emissions rings comparison, 24 May 2026) |
 
 Archive rationale: `docs/RETIREMENT-v0.1-v0.2.md` on the `retired-0.1-0.2` branch.
 
@@ -233,7 +234,7 @@ v0.3.1 was the foundation layer. Everything after 13 May is v0.3.2.
 
 ## v0.3.2 — wizard + monthly delta chart
 
-**23 May 2026** · Current work (not yet committed)
+**23–24 May 2026** · Superseded by v0.3.3
 
 ### Product shift
 
@@ -305,12 +306,75 @@ Implementation in `src/routes/monthly-delta.ts` — sequential weather fetches p
   caption="Full wizard flow — birth step, lived cities timeline, chart generation. Captured via CDP screencast + ffmpeg."
 />
 
+### What's still open (at v0.3.2)
+
+- `/kundli` twelve-card endpoint exists but the UI no longer calls it
+- Prewarm city list still at ~35; needs expansion before exhibit
+- No print / kiosk / offline mode
+- Single emissions ring chart (no generational comparison)
+
+---
+
+## v0.3.3 — generational emissions rings + tooltips
+
+**24 May 2026** · Current work
+
+### Product addition
+
+v0.3.3 extends the result view without changing wizard inputs. After the monthly temperature chart, **India national CO₂ emissions** now render as **two side-by-side tree-ring charts**:
+
+1. **You** — rings from your birth year to the latest complete data year
+2. **Your parents' generation** — same endpoint, starting at birth year − 25 (same offset as the temperature "parents' childhood" window elsewhere)
+
+Both charts share one **absolute color scale** so the same Mt value maps to the same hue on either side. Ring **thickness** still encodes each year's share of that lifetime's total emissions — so a parent's chart has more rings (longer span) and the outer years dominate visually.
+
+**Hover tooltips** on each ring show the calendar year and national CO₂ in Mt (OWID). Radial hit-testing keeps thin outer rings easy to target; the hovered ring stays full opacity while others dim.
+
+### Backend
+
+`POST /monthly-delta` response adds `parentsIndiaEmissions` — same shape as `indiaEmissions`, built with `buildIndiaEmissionsRings(statics, birthYear - 25, latestCompleteYear)` when the parents' birth year is ≥ 1940.
+
+### Web
+
+| Component | Change |
+| --- | --- |
+| `EmissionsRingsChart` | Two-column ring panels, shared color scale, pointer tooltips |
+| `MonthlyDeltaChart` | Passes `parentsData` into rings section |
+
+### Screenshot fixtures (three attendee profiles)
+
+Captures use three distinct birth years and multi-city timelines so rings, insights, and remedies differ materially:
+
+| File | Birth | Lived / travelled |
+| --- | --- | --- |
+| `delhi-1988-mumbai.png` | Delhi, 1988 | Mumbai from 2014 |
+| `mumbai-1995-bengaluru.png` | Mumbai, 1995 | Bengaluru from 2008 |
+| `chennai-1970-delhi-kolkata.png` | Chennai, 1970 | Delhi from 1992, Kolkata from 2005 |
+
+<Figure
+  src="/documentation/v0-3-3/delhi-1988-mumbai.png"
+  caption="Delhi 1988 → Mumbai 2014 — dual emissions rings (you vs parents' generation), monthly chart above."
+  wide
+/>
+
+<Figure
+  src="/documentation/v0-3-3/mumbai-1995-bengaluru.png"
+  caption="Mumbai 1995 → Bengaluru 2008 — longer parent span (1970 start) shows more rings and higher outer-year thickness."
+  wide
+/>
+
+<Figure
+  src="/documentation/v0-3-3/chennai-1970-delhi-kolkata.png"
+  caption="Chennai 1970 with Delhi and Kolkata stints — three-city timeline, generational CO₂ comparison below."
+  wide
+/>
+
 ### What's still open
 
 - `/kundli` twelve-card endpoint exists but the UI no longer calls it
 - Prewarm city list still at ~35; needs expansion before exhibit
 - No print / kiosk / offline mode
-- Documentation page you're reading now — first pass
+- Tooltip copy not yet localized for exhibit kiosk language
 
 ---
 
@@ -357,7 +421,7 @@ Screenshots and screen recordings regenerate via `scripts/capture/`. Static PNGs
 npm run capture:docs
 ```
 
-Outputs land in `web/public/documentation/{version}/`.
+Outputs land in `web/public/documentation/{version}/` (v0.3.3 adds three full-result PNGs under `v0-3-3/`).
 
 ---
 

@@ -1,46 +1,173 @@
-import { useMemo } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 import type { IndiaEmissionsRings } from '@/lib/api'
 
-const SIZE = 420
+const SIZE = 360
 const CENTER = SIZE / 2
-const MIN_RADIUS = 36
-const MAX_RADIUS = 196
+const MIN_RADIUS = 32
+const MAX_RADIUS = 168
 /** Slightly >1 exaggerates recent high-emission years while staying data-driven */
 const WIDTH_EXPONENT = 1.2
 
 type EmissionsRingsChartProps = {
   birthYear: number
   data: IndiaEmissionsRings
+  parentsData?: IndiaEmissionsRings | null
 }
 
-export function EmissionsRingsChart({ birthYear, data }: EmissionsRingsChartProps) {
-  const rings = useMemo(() => buildRingGeometry(data.years), [data.years])
-  const growthLabel =
+export function EmissionsRingsChart({ birthYear, data, parentsData }: EmissionsRingsChartProps) {
+  const parentsBirthYear = birthYear - 25
+  const hasComparison = parentsData != null && parentsData.years.length > 0
+
+  const colorScale = useMemo(
+    () => buildSharedColorScale([data, ...(hasComparison ? [parentsData] : [])]),
+    [data, hasComparison, parentsData],
+  )
+
+  const attendeeRings = useMemo(
+    () => buildRingGeometry(data.years, colorScale.min, colorScale.max),
+    [colorScale.max, colorScale.min, data.years],
+  )
+  const parentsRings = useMemo(
+    () =>
+      hasComparison
+        ? buildRingGeometry(parentsData.years, colorScale.min, colorScale.max)
+        : [],
+    [colorScale.max, colorScale.min, hasComparison, parentsData],
+  )
+
+  const attendeeGrowth =
     data.growthFactor != null
       ? `${data.growthFactor}× higher than the year you were born`
       : 'higher now than when you were born'
+  const parentsGrowth =
+    parentsData?.growthFactor != null
+      ? `${parentsData.growthFactor}× higher than when they were born`
+      : 'higher now than when they were born'
 
   return (
     <section className="space-y-6 pb-6">
       <div className="space-y-3">
         <p className="text-sm text-muted-foreground">India&apos;s emissions across your lifetime</p>
         <p className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-          Every ring is a year you were alive.
+          {hasComparison ? 'Your rings vs your parents\' rings.' : 'Every ring is a year you were alive.'}
         </p>
-        <p className="max-w-2xl text-pretty text-muted-foreground">
-          National CO₂ from {data.startYear} to {data.endYear} — {formatMt(data.firstCo2Mt)} Mt in{' '}
-          {data.startYear}, {formatMt(data.lastCo2Mt)} Mt in {data.endYear}. India&apos;s emissions are{' '}
-          {growthLabel}.
+        <p className="max-w-3xl text-pretty text-muted-foreground">
+          {hasComparison ? (
+            <>
+              Same national CO₂ story, two starting years — you from {data.startYear}, your parents&apos; generation
+              from {parentsData.startYear}. Both run to {data.endYear}. India&apos;s emissions are {attendeeGrowth}{' '}
+              for you and {parentsGrowth} for them.
+            </>
+          ) : (
+            <>
+              National CO₂ from {data.startYear} to {data.endYear} — {formatMt(data.firstCo2Mt)} Mt in{' '}
+              {data.startYear}, {formatMt(data.lastCo2Mt)} Mt in {data.endYear}. India&apos;s emissions are{' '}
+              {attendeeGrowth}.
+            </>
+          )}
         </p>
       </div>
 
-      <div className="flex justify-center">
+      <div
+        className={
+          hasComparison
+            ? 'mx-auto grid max-w-4xl gap-8 sm:grid-cols-2 sm:gap-6'
+            : 'flex justify-center'
+        }
+      >
+        <RingChartPanel
+          label="You"
+          subtitle={`Born ${birthYear}`}
+          birthYear={birthYear}
+          data={data}
+          rings={attendeeRings}
+        />
+        {hasComparison ? (
+          <RingChartPanel
+            label="Your parents' generation"
+            subtitle={`Born ~${parentsBirthYear}`}
+            birthYear={parentsBirthYear}
+            data={parentsData}
+            rings={parentsRings}
+          />
+        ) : null}
+      </div>
+
+      <div className="mx-auto flex max-w-2xl flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+        <span className="flex items-center gap-2">
+          <span className="inline-block h-2 w-6 rounded-sm bg-[#f5d547]" aria-hidden />
+          Lower emissions
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="inline-block h-2 w-6 rounded-sm bg-[#d45a3a]" aria-hidden />
+          Higher emissions
+        </span>
+        <span>
+          Ring thickness = that year&apos;s share of lifetime emissions
+          {hasComparison ? ' · color = same scale on both charts' : ' · color = same scale'}
+        </span>
+      </div>
+
+      <p className="text-center text-xs text-muted-foreground">
+        Inner ring = birth year · outer ring = {data.endYear} ({formatMt(data.lastCo2Mt)} Mt) · color scale{' '}
+        {formatMt(colorScale.min)}–{formatMt(colorScale.max)} Mt (OWID)
+      </p>
+    </section>
+  )
+}
+
+type RingChartPanelProps = {
+  label: string
+  subtitle: string
+  birthYear: number
+  data: IndiaEmissionsRings
+  rings: RingGeometry[]
+}
+
+function RingChartPanel({ label, subtitle, birthYear, data, rings }: RingChartPanelProps) {
+  const svgRef = useRef<SVGSVGElement>(null)
+  const [hoveredRing, setHoveredRing] = useState<RingGeometry | null>(null)
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
+
+  function handlePointerMove(event: { clientX: number; clientY: number }) {
+    const svg = svgRef.current
+    if (!svg) {
+      return
+    }
+
+    const rect = svg.getBoundingClientRect()
+    const x = ((event.clientX - rect.left) / rect.width) * SIZE
+    const y = ((event.clientY - rect.top) / rect.height) * SIZE
+    const radius = Math.hypot(x - CENTER, y - CENTER)
+    const ring = findRingAtRadius(rings, radius)
+
+    setHoveredRing(ring)
+    setTooltipPos({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    })
+  }
+
+  function handlePointerLeave() {
+    setHoveredRing(null)
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="text-center">
+        <p className="text-sm font-medium">{label}</p>
+        <p className="text-xs text-muted-foreground">{subtitle}</p>
+      </div>
+      <div className="relative mx-auto w-full max-w-xs">
         <svg
+          ref={svgRef}
           viewBox={`0 0 ${SIZE} ${SIZE}`}
-          className="h-auto w-full max-w-md"
+          className="h-auto w-full cursor-crosshair touch-none"
           role="img"
-          aria-label={`Tree rings of India's yearly CO2 emissions from ${data.startYear} to ${data.endYear}. Thicker rings mean higher emissions.`}
+          aria-label={`Tree rings of India's yearly CO2 emissions from ${data.startYear} to ${data.endYear} for ${label}. Thicker rings mean higher emissions.`}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={handlePointerLeave}
         >
           <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS + 4} fill="#f4efe6" />
           <circle cx={CENTER} cy={CENTER} r={MAX_RADIUS + 4} fill="none" stroke="#e8dfd0" strokeWidth={1} />
@@ -52,11 +179,12 @@ export function EmissionsRingsChart({ birthYear, data }: EmissionsRingsChartProp
               fill={ring.color}
               stroke="#1a102820"
               strokeWidth={0.35}
+              opacity={hoveredRing == null || hoveredRing.year === ring.year ? 1 : 0.55}
             />
           ))}
 
-          <circle cx={CENTER} cy={CENTER} r={MIN_RADIUS - 4} fill="#f5d547" />
-          <circle cx={CENTER} cy={CENTER} r={MIN_RADIUS - 4} fill="none" stroke="#c4832a44" strokeWidth={1} />
+          <circle cx={CENTER} cy={CENTER} r={MIN_RADIUS - 4} fill="#f5d547" pointerEvents="none" />
+          <circle cx={CENTER} cy={CENTER} r={MIN_RADIUS - 4} fill="none" stroke="#c4832a44" strokeWidth={1} pointerEvents="none" />
           <text
             x={CENTER}
             y={CENTER - 5}
@@ -65,6 +193,7 @@ export function EmissionsRingsChart({ birthYear, data }: EmissionsRingsChartProp
             fill="#1a1028"
             fontSize={10}
             fontWeight={600}
+            pointerEvents="none"
           >
             {birthYear}
           </text>
@@ -76,30 +205,27 @@ export function EmissionsRingsChart({ birthYear, data }: EmissionsRingsChartProp
             fill="#1a102899"
             fontSize={8}
             className="tabular-nums"
+            pointerEvents="none"
           >
             {formatMt(data.firstCo2Mt)} Mt
           </text>
         </svg>
-      </div>
 
-      <div className="mx-auto flex max-w-md flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-        <span className="flex items-center gap-2">
-          <span className="inline-block h-2 w-6 rounded-sm bg-[#f5d547]" aria-hidden />
-          Lower emissions
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="inline-block h-2 w-6 rounded-sm bg-[#d45a3a]" aria-hidden />
-          Higher emissions
-        </span>
-        <span>Ring thickness = that year&apos;s share of lifetime emissions · color = same scale</span>
+        {hoveredRing ? (
+          <div
+            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs shadow-md"
+            style={{ left: tooltipPos.x, top: tooltipPos.y - 8 }}
+          >
+            <p className="font-medium tabular-nums">{hoveredRing.year}</p>
+            <p className="text-muted-foreground tabular-nums">{formatMt(hoveredRing.co2Mt)} Mt CO₂</p>
+          </div>
+        ) : null}
       </div>
-
-      <p className="text-center text-xs text-muted-foreground">
-        Inner ring = {data.startYear} ({formatMt(data.firstCo2Mt)} Mt) · outer ring = {data.endYear} (
-        {formatMt(data.lastCo2Mt)} Mt) · {data.growthFactor ?? '—'}× = {formatMt(data.lastCo2Mt)} ÷{' '}
-        {formatMt(data.firstCo2Mt)} (OWID, Mt)
+      <p className="text-center text-xs text-muted-foreground tabular-nums">
+        {data.startYear} ({formatMt(data.firstCo2Mt)} Mt) → {data.endYear} ({formatMt(data.lastCo2Mt)} Mt)
+        {data.growthFactor != null ? ` · ${data.growthFactor}×` : null}
       </p>
-    </section>
+    </div>
   )
 }
 
@@ -107,22 +233,34 @@ type YearPoint = { year: number; co2Mt: number }
 
 type RingGeometry = {
   year: number
+  co2Mt: number
+  innerR: number
+  outerR: number
   d: string
   color: string
 }
 
-function buildRingGeometry(years: YearPoint[]): RingGeometry[] {
+type ColorScale = {
+  min: number
+  max: number
+}
+
+function buildSharedColorScale(datasets: IndiaEmissionsRings[]): ColorScale {
+  const values = datasets.flatMap((dataset) => dataset.years.map((point) => point.co2Mt))
+  if (values.length === 0) {
+    return { min: 0, max: 1 }
+  }
+  return { min: Math.min(...values), max: Math.max(...values) }
+}
+
+function buildRingGeometry(years: YearPoint[], colorMin: number, colorMax: number): RingGeometry[] {
   if (years.length === 0) {
     return []
   }
 
-  const minCo2 = years[0]!.co2Mt
-  const maxCo2 = years[years.length - 1]!.co2Mt
-  const span = maxCo2 - minCo2
+  const colorSpan = colorMax - colorMin
   const availableSpan = MAX_RADIUS - MIN_RADIUS
 
-  // Each ring's radial thickness = its weighted share of the full radius.
-  // No global scale-down — outer high-emission years naturally dominate.
   const weights = years.map((point) => Math.pow(point.co2Mt, WIDTH_EXPONENT))
   const totalWeight = weights.reduce((sum, weight) => sum + weight, 0)
 
@@ -134,10 +272,13 @@ function buildRingGeometry(years: YearPoint[]): RingGeometry[] {
     const width = totalWeight > 0 ? (weights[index]! / totalWeight) * availableSpan : availableSpan / years.length
     const inner = radius
     const outer = inner + width
-    const norm = span > 0 ? (point.co2Mt - minCo2) / span : 0.5
+    const norm = colorSpan > 0 ? (point.co2Mt - colorMin) / colorSpan : 0.5
 
     rings.push({
       year: point.year,
+      co2Mt: point.co2Mt,
+      innerR: inner,
+      outerR: outer,
       d: describeAnnulus(CENTER, CENTER, inner, outer),
       color: emissionColor(norm),
     })
@@ -156,6 +297,21 @@ function emissionColor(norm: number): string {
     return mixHex('#f0a040', '#d45a3a', (norm - 0.35) / 0.35)
   }
   return mixHex('#d45a3a', '#8e3a7a', (norm - 0.7) / 0.3)
+}
+
+function findRingAtRadius(rings: RingGeometry[], radius: number): RingGeometry | null {
+  if (radius < MIN_RADIUS - 4 || radius > MAX_RADIUS + 4) {
+    return null
+  }
+
+  for (let index = rings.length - 1; index >= 0; index -= 1) {
+    const ring = rings[index]!
+    if (radius >= ring.innerR && radius <= ring.outerR) {
+      return ring
+    }
+  }
+
+  return null
 }
 
 function formatMt(value: number): string {

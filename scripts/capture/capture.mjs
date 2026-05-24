@@ -140,6 +140,160 @@ async function encodeVideo(framesDir, output, width, height, frameCount) {
   })
 }
 
+async function selectCity(page, query, selector = '#birth-city') {
+  const cityInput = await page.waitForSelector(selector)
+  await cityInput.click({ clickCount: 3 })
+  await cityInput.type(query, { delay: 35 })
+  await sleep(700)
+  const option = await page.waitForSelector('[role="option"]', { timeout: 12_000 }).catch(() => null)
+  if (option) await option.click()
+}
+
+async function dragSliderThumb(page, rowIndex, thumbIndex, targetYear, birthYear, latestYear) {
+  const thumbs = await page.$$('[data-slot="slider-thumb"]')
+  const thumb = thumbs[rowIndex * 2 + thumbIndex]
+  if (!thumb) {
+    return
+  }
+
+  const sliders = await page.$$('[data-slot="slider"]')
+  const slider = sliders[rowIndex]
+  if (!slider) {
+    return
+  }
+
+  const sliderBox = await slider.boundingBox()
+  const thumbBox = await thumb.boundingBox()
+  if (!sliderBox || !thumbBox) {
+    return
+  }
+
+  const pct = (targetYear - birthYear) / (latestYear - birthYear)
+  const targetX = sliderBox.x + sliderBox.width * Math.max(0, Math.min(1, pct))
+  const y = thumbBox.y + thumbBox.height / 2
+
+  await page.mouse.move(thumbBox.x + thumbBox.width / 2, y)
+  await page.mouse.down()
+  await page.mouse.move(targetX, y, { steps: 12 })
+  await page.mouse.up()
+  await sleep(400)
+}
+
+async function addLivedCity(page, cityQuery) {
+  await page.click('[aria-label="Add another city"]')
+  await sleep(400)
+  const inputs = await page.$$('input[placeholder="Search city"]')
+  const input = inputs[inputs.length - 1]
+  if (!input) {
+    return
+  }
+  await input.click()
+  await input.type(cityQuery, { delay: 35 })
+  await sleep(700)
+  const option = await page.waitForSelector('[role="option"]', { timeout: 12_000 }).catch(() => null)
+  if (option) await option.click()
+  await sleep(300)
+}
+
+async function generateKundliResult(page) {
+  const generateButton = await page.evaluateHandle(() =>
+    [...document.querySelectorAll('button')].find((b) => /generate/i.test(b.textContent ?? '')),
+  )
+  const genEl = generateButton.asElement()
+  if (!genEl) {
+    throw new Error('generate button not found')
+  }
+  await genEl.click()
+  await page.waitForSelector('svg[role="img"]', { timeout: 90_000 })
+  await sleep(1500)
+  await expandScrollContainers(page)
+}
+
+const V033_SCENARIOS = [
+  {
+    slug: 'delhi-1988-mumbai',
+    birthCity: 'Delhi',
+    birthYear: 1988,
+    splits: [{ rowIndex: 0, endYear: 2014 }],
+    extraCities: ['Mumbai'],
+  },
+  {
+    slug: 'mumbai-1995-bengaluru',
+    birthCity: 'Mumbai',
+    birthYear: 1995,
+    splits: [{ rowIndex: 0, endYear: 2008 }],
+    extraCities: ['Bengaluru'],
+  },
+  {
+    slug: 'chennai-1970-delhi-kolkata',
+    birthCity: 'Chennai',
+    birthYear: 1970,
+    splits: [
+      { rowIndex: 0, endYear: 1992 },
+      { rowIndex: 1, endYear: 2005 },
+    ],
+    extraCities: ['Delhi', 'Kolkata'],
+  },
+]
+
+async function runV033Scenario(page, scenario, latestYear) {
+  await page.goto(`${WEB_URL}?birthYear=${scenario.birthYear}`, {
+    waitUntil: 'networkidle0',
+    timeout: 30_000,
+  })
+  await page.waitForSelector('h1', { timeout: 10_000 })
+
+  await selectCity(page, scenario.birthCity)
+  await page.click('button[aria-label="Continue"]')
+  await sleep(600)
+
+  for (let i = 0; i < scenario.extraCities.length; i += 1) {
+    const split = scenario.splits[i]
+    if (split) {
+      await dragSliderThumb(
+        page,
+        split.rowIndex,
+        1,
+        split.endYear,
+        scenario.birthYear,
+        latestYear,
+      )
+    }
+    await addLivedCity(page, scenario.extraCities[i])
+  }
+
+  await generateKundliResult(page)
+
+  await page.evaluate(() => {
+    const heading = [...document.querySelectorAll('p')].find(
+      (p) =>
+        p.textContent?.includes('rings vs your parents') ||
+        p.textContent?.includes('Every ring is a year'),
+    )
+    heading?.scrollIntoView({ block: 'start', behavior: 'instant' })
+    window.scrollBy(0, -24)
+  })
+  await sleep(400)
+}
+
+async function captureV033(browser) {
+  console.log('\nv0.3.3 — generational emissions rings')
+  const latestYear = new Date().getUTCFullYear() - 1
+
+  for (const scenario of V033_SCENARIOS) {
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1280, height: 900, deviceScaleFactor: 2 })
+    try {
+      console.log(`  scenario ${scenario.slug}`)
+      await runV033Scenario(page, scenario, latestYear)
+      await screenshot(page, path.join(OUT, `v0-3-3/${scenario.slug}.png`), { fullPage: true })
+    } catch (err) {
+      console.log(`  failed ${scenario.slug} — ${err.message}`)
+    }
+    await page.close()
+  }
+}
+
 async function selectDelhi(page) {
   const cityInput = await page.waitForSelector('#birth-city')
   await cityInput.click({ clickCount: 3 })
@@ -345,6 +499,7 @@ async function main() {
   })
 
   try {
+    if (!only || only === 'v0-3-3') await captureV033(browser)
     if (!only || only === 'v0-3-2') await captureV032(browser)
     if (!only || only === 'v0-3-1') await captureV031(browser)
     if (!only || only === 'v0-2') await captureV02(browser)
