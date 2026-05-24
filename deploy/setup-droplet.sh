@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
 # Run on the DigitalOcean droplet as root (or with sudo).
 #
-# Usage:
+# Usage (custom domain):
 #   sudo bash deploy/setup-droplet.sh \
 #     --domain api.yourdomain.com \
+#     --user deploy \
+#     --app-dir /opt/klimate-kundli
+#
+# Usage (no domain — sslip.io hostname from droplet IP 157.245.1.2):
+#   sudo bash deploy/setup-droplet.sh \
+#     --domain 157-245-1-2.sslip.io \
 #     --user deploy \
 #     --app-dir /opt/klimate-kundli
 #
 # Prerequisites:
 #   - Repo cloned to APP_DIR (git pull before re-running)
 #   - Node.js 20+ and npm installed
-#   - DNS A record for DOMAIN → droplet IP
+#   - DOMAIN resolves to this droplet (DNS A record, or sslip.io auto)
 
 set -euo pipefail
 
@@ -100,6 +106,14 @@ EOF
 systemctl enable caddy
 systemctl reload caddy
 
+echo "==> Firewall (443/80 public; 8787 localhost only)"
+if command -v ufw >/dev/null 2>&1; then
+	ufw allow OpenSSH
+	ufw allow 80/tcp
+	ufw allow 443/tcp
+	ufw --force enable
+fi
+
 echo "==> Smoke test (local)"
 sleep 1
 curl -sf "http://127.0.0.1:8787/health" >/dev/null
@@ -108,4 +122,5 @@ echo "Local health OK"
 echo ""
 echo "Done. Next:"
 echo "  curl https://$DOMAIN/health"
+echo "  Vercel env: VITE_API_URL=https://$DOMAIN"
 echo "  journalctl -u klimate-kundli -f"
