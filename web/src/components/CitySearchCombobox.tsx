@@ -13,6 +13,9 @@ import {
 } from '@/components/ui/command'
 import { Input } from '@/components/ui/input'
 
+/** cmdk auto-highlights first item when value is ""; use a non-matching sentinel instead. */
+const CMDK_NO_SELECTION = '__city_combobox_no_selection__'
+
 type CitySearchComboboxProps = {
   value: City | null
   onValueChange: (city: City | null) => void
@@ -44,8 +47,16 @@ export function CitySearchCombobox({
   const [activeIndex, setActiveIndex] = useState(-1)
 
   const inputValue = open ? query : (value?.displayName ?? query)
-  const showList = open && query.trim().length >= 2
+  const queryTrimmed = query.trim()
+  const committedLabel = value?.displayName.trim() ?? ''
+  const isActivelySearching =
+    open &&
+    queryTrimmed.length >= 2 &&
+    (value === null || queryTrimmed !== committedLabel)
+  const showList = isActivelySearching
   const canNavigate = showList && !loading && !error && results.length > 0
+
+  const isSameCity = (a: City, b: City) => a.lat === b.lat && a.lon === b.lon
 
   const close = (keepQuery = false) => {
     setOpen(false)
@@ -57,8 +68,9 @@ export function CitySearchCombobox({
 
   const selectCity = (city: City) => {
     onValueChange(city)
-    close()
-    inputRef.current?.focus({ preventScroll: true })
+    setQuery(city.displayName)
+    close(true)
+    inputRef.current?.blur()
   }
 
   useEffect(() => {
@@ -86,8 +98,14 @@ export function CitySearchCombobox({
       return
     }
 
-    const q = query.trim()
+    const q = queryTrimmed
     if (q.length < 2) {
+      setResults([])
+      setError(null)
+      return
+    }
+
+    if (value !== null && q === committedLabel) {
       setResults([])
       setError(null)
       return
@@ -103,7 +121,7 @@ export function CitySearchCombobox({
     }, 300)
 
     return () => window.clearTimeout(handle)
-  }, [query, open])
+  }, [query, open, value, committedLabel, queryTrimmed])
 
   useEffect(() => {
     if (!canNavigate || activeIndex < 0) {
@@ -141,9 +159,10 @@ export function CitySearchCombobox({
       return
     }
 
-    if (event.key === 'Enter' && activeIndex >= 0) {
+    if (event.key === 'Enter') {
       event.preventDefault()
-      const city = results[activeIndex]
+      const city =
+        activeIndex >= 0 ? results[activeIndex] : results[0]
       if (city) {
         selectCity(city)
       }
@@ -152,6 +171,17 @@ export function CitySearchCombobox({
 
   const activeOptionId =
     activeIndex >= 0 ? `${id}-option-${activeIndex}` : undefined
+
+  const activeItemValue =
+    activeIndex >= 0
+      ? (results[activeIndex]?.displayName ?? CMDK_NO_SELECTION)
+      : CMDK_NO_SELECTION
+
+  const enableInput = (input: HTMLInputElement) => {
+    if (input.readOnly) {
+      input.readOnly = false
+    }
+  }
 
   return (
     <div ref={rootRef} className={cn('relative w-full', className)}>
@@ -180,10 +210,14 @@ export function CitySearchCombobox({
           disabled={disabled}
           placeholder={placeholder}
           value={inputValue}
+          onPointerDown={(event) => enableInput(event.currentTarget)}
           onFocus={(event) => {
-            event.currentTarget.readOnly = false
+            enableInput(event.currentTarget)
             setOpen(true)
             setQuery(value?.displayName ?? query)
+          }}
+          onBlur={(event) => {
+            event.currentTarget.readOnly = true
           }}
         onKeyDown={handleInputKeyDown}
         onChange={(event) => {
@@ -204,7 +238,16 @@ export function CitySearchCombobox({
           ref={listRef}
           className="absolute top-full right-0 left-0 z-50 mt-1 overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10"
         >
-          <Command shouldFilter={false}>
+          <Command
+            shouldFilter={false}
+            value={activeItemValue}
+            onValueChange={(selected) => {
+              const index = results.findIndex((city) => city.displayName === selected)
+              if (index >= 0) {
+                setActiveIndex(index)
+              }
+            }}
+          >
             <CommandList>
               {loading ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">Searching…</p>
@@ -223,14 +266,14 @@ export function CitySearchCombobox({
                     id={`${id}-option-${index}`}
                     data-option-index={index}
                     aria-selected={activeIndex === index}
-                    className={cn(activeIndex === index && 'bg-accent text-accent-foreground')}
+                    onMouseDown={(event) => event.preventDefault()}
                     onSelect={() => selectCity(city)}
                     onMouseEnter={() => setActiveIndex(index)}
                   >
                     <CheckIcon
                       className={cn(
-                        'size-4',
-                        value?.displayName === city.displayName ? 'opacity-100' : 'opacity-0',
+                        'size-4 shrink-0',
+                        value && isSameCity(value, city) ? 'opacity-100' : 'opacity-0',
                       )}
                     />
                     {city.displayName}
