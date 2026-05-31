@@ -50,7 +50,7 @@ IMD_JWT_TOKEN=paste_jwt_from_generate_sample_jwt_button
 
 | Variable | What it is | Where it goes in HTTP |
 |----------|------------|------------------------|
-| `IMD_API_KEY` | Prod key (`PROD \| klimate-kundli-1 \| 168.144.83.192 \| Active \| b6b0…`) | Separate header (`api-key` or `X-API-KEY`) — **not** `Authorization` |
+| `IMD_API_KEY` | Prod key (`PROD \| klimate-kundli-1 \| 168.144.83.192 \| Active \| b6b0…`) | Header **`X-API-KEY`** (confirmed on droplet) — **not** `Authorization` |
 | `IMD_JWT_TOKEN` | Session JWT (`eyJ…` three parts) | `Authorization: Bearer <jwt>` |
 
 In the portal: **Generate Sample JWT From Session** → copy into `IMD_JWT_TOKEN`. JWT **expires**; regenerate when diagnose says expired.
@@ -140,7 +140,7 @@ KEY=$(grep '^IMD_API_KEY=' .env | cut -d= -f2- | tr -d '"'"'"'')
 JWT=$(grep '^IMD_JWT_TOKEN=' .env | cut -d= -f2- | tr -d '"'"'"'')
 curl -sS -w "\nHTTP %{http_code}\n" \
   -H "Authorization: Bearer $JWT" \
-  -H "api-key: $KEY" \
+  -H "X-API-KEY: $KEY" \
   "https://api.imd.gov.in/api/v1/cityforecast_mapping" | head -c 400
 ```
 

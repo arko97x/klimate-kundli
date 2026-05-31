@@ -38,17 +38,15 @@ export function imdAuthAttempts(creds: ImdCredentials): Array<{ mode: ImdAuthMod
   const attempts: Array<{ mode: ImdAuthMode; headers: Record<string, string> }> = [];
 
   if (creds.jwt && creds.apiKey) {
-    // Portal test console fills both fields — try combined headers first.
-    attempts.push(
-      {
-        mode: "jwt-bearer+api-key",
-        headers: { Authorization: `Bearer ${creds.jwt}`, "api-key": creds.apiKey },
-      },
-      {
-        mode: "jwt-bearer+x-api-key",
-        headers: { Authorization: `Bearer ${creds.jwt}`, "X-API-KEY": creds.apiKey },
-      },
-    );
+    // Droplet spike: jwt-bearer+x-api-key works; lowercase api-key does not.
+    attempts.push({
+      mode: "jwt-bearer+x-api-key",
+      headers: { Authorization: `Bearer ${creds.jwt}`, "X-API-KEY": creds.apiKey },
+    });
+    attempts.push({
+      mode: "jwt-bearer+api-key",
+      headers: { Authorization: `Bearer ${creds.jwt}`, "api-key": creds.apiKey },
+    });
   }
   if (creds.jwt) {
     attempts.push({

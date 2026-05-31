@@ -43,7 +43,7 @@ function parseEnvValue(cwd: string, name: string): { value: string; lineHint: st
 function printJwtHints(jwt: string): void {
   const parts = jwt.split(".").length;
   if (parts !== 3) {
-    console.log("WARN: IMD_JWT_TOKEN should be three dot-separated parts (eyJ...)");
+    console.log("Note: JWT is not classic 3-part — OK if jwt-bearer+x-api-key returns 200");
   }
   const exp = jwtExpiresAtSec(jwt);
   if (exp) {

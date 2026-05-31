@@ -64,20 +64,34 @@ export async function fetchStationCatalog(
   const seen = new Set<string>();
 
   const cityMapping = await imdFetchJson("/api/v1/cityforecast_mapping", creds);
-  if (cityMapping.ok && Array.isArray(cityMapping.body)) {
-    for (const row of cityMapping.body as Record<string, unknown>[]) {
+  if (cityMapping.ok) {
+    for (const row of imdDataRows(cityMapping.body)) {
       pushStation(stations, seen, row, "Station_Code", "Station_Name", "Latitude", "Longitude");
     }
   }
 
   const awsMapping = await imdFetchJson("/api/v1/aws_data_mapping", creds);
-  if (awsMapping.ok && Array.isArray(awsMapping.body)) {
-    for (const row of awsMapping.body as Record<string, unknown>[]) {
+  if (awsMapping.ok) {
+    for (const row of imdDataRows(awsMapping.body)) {
       pushStation(stations, seen, row, "ID", "STATION", "Latitude", "Longitude", "CALL_SIGN");
     }
   }
 
   return stations;
+}
+
+/** IMD wraps lists in `{ status, data: [...] }`. */
+function imdDataRows(body: unknown): Record<string, unknown>[] {
+  if (Array.isArray(body)) {
+    return body as Record<string, unknown>[];
+  }
+  if (body && typeof body === "object") {
+    const data = (body as { data?: unknown }).data;
+    if (Array.isArray(data)) {
+      return data as Record<string, unknown>[];
+    }
+  }
+  return [];
 }
 
 function pushStation(
