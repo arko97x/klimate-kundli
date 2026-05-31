@@ -441,6 +441,14 @@ function DetailLine({
 }
 
 function BladeDetailContent({ blade }: { blade: FanBladeGeom }) {
+  const peakSource = blade.peakSource ?? 'era5_grid'
+  const peakNote =
+    peakSource === 'imd_station' && blade.imdStationName
+      ? ` · IMD ${blade.imdStationName}`
+      : blade.isIndiaHome
+        ? ' · ERA5 grid (not station)'
+        : ''
+
   return (
     <>
       <span className="font-medium">{blade.year}</span>
@@ -449,6 +457,7 @@ function BladeDetailContent({ blade }: { blade: FanBladeGeom }) {
         · {blade.cityName} · {blade.peakTempC.toFixed(1)}°C
         {blade.peakDate ? ` · ${formatPeakDate(blade.peakDate)}` : ''} · #{blade.rankAmongLived}/
         {blade.livedCount}
+        {peakNote}
       </span>
     </>
   )

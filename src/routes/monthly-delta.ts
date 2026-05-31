@@ -3,6 +3,7 @@ import { z } from "zod";
 import { Budget } from "../lib/budget.js";
 import { gridKey } from "../lib/grid.js";
 import type { HistoricalWeatherResult, WeatherDaily } from "../resolvers/historical.js";
+import type { ImdService } from "../resolvers/imd/resolver.js";
 import type { StaticData } from "../resolvers/statics.js";
 import type { City } from "../types.js";
 
@@ -13,6 +14,7 @@ interface MonthlyDeltaRouteDeps {
     resolve(city: City, startDate: string, endDate: string, budget?: Budget): Promise<HistoricalWeatherResult | null>;
   };
   statics: StaticData;
+  imd?: ImdService;
   today?: Date;
 }
 
@@ -100,7 +102,13 @@ export function createMonthlyDeltaRoute(deps: MonthlyDeltaRouteDeps): Hono {
       const birthStats = monthlyStats(birthWeather.daily, birthStart, birthEnd);
       const recentStats = monthlyStats(birthWeather.daily, recentStart, recentEnd);
       const largest = largestDeltaMonth(birthStats.monthly, recentStats.monthly);
-      const hottestYears = buildHottestYearsInsight(stints, weatherByKey, birthYear, latestCompleteYear);
+      const hottestYears = buildHottestYearsInsight(
+        stints,
+        weatherByKey,
+        birthYear,
+        latestCompleteYear,
+        deps.imd,
+      );
       const indiaEmissions = buildIndiaEmissionsRings(deps.statics, birthYear, latestCompleteYear);
       const parentsBirthYear = birthYear - PARENTS_GENERATION_OFFSET;
       const parentsIndiaEmissions =
@@ -302,11 +310,25 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+type HottestYearBladeRow = {
+  year: number;
+  cityName: string;
+  displayName: string;
+  peakTempC: number;
+  peakDate: string;
+  rankInCity: number;
+  peakSource: "imd_station" | "era5_grid";
+  isIndiaHome: boolean;
+  imdStationName?: string;
+  imdDistanceKm?: number;
+};
+
 function buildHottestYearsInsight(
   stints: Stint[],
   weatherByKey: Map<string, HistoricalWeatherResult>,
   birthYear: number,
   latestCompleteYear: number,
+  imd?: ImdService,
 ) {
   const topHotByCityKey = new Map<string, Set<number>>();
   const annualByCityKey = new Map<string, Map<number, number>>();
@@ -320,17 +342,7 @@ function buildHottestYearsInsight(
   }
 
   const matchingYears = new Set<number>();
-  const bladeByYear = new Map<
-    number,
-    {
-      year: number;
-      cityName: string;
-      displayName: string;
-      peakTempC: number;
-      peakDate: string;
-      rankInCity: number;
-    }
-  >();
+  const bladeByYear = new Map<number, HottestYearBladeRow>();
   const byCity: {
     cityName: string;
     displayName: string;
@@ -366,14 +378,18 @@ function buildHottestYearsInsight(
         const peak = annualPeak.get(year);
         const rankInCity = hotYearRank(annual, year);
         if (peak != null && rankInCity != null) {
-          bladeByYear.set(year, {
+          const blade: HottestYearBladeRow = {
             year,
             cityName: stint.city.name,
             displayName: stint.city.displayName,
             peakTempC: roundTemp(peak.peakTempC),
             peakDate: peak.peakDate,
             rankInCity,
-          });
+            peakSource: "era5_grid",
+            isIndiaHome: stint.city.country === "IN",
+          };
+          applyImdPeak(blade, stint.city, imd);
+          bladeByYear.set(year, blade);
         }
       }
     }
@@ -507,6 +523,28 @@ function hotYearRank(annual: Map<number, number>, year: number): number | null {
   const ranked = [...annual.entries()].sort((a, b) => b[1] - a[1]);
   const index = ranked.findIndex(([y]) => y === year);
   return index >= 0 ? index + 1 : null;
+}
+
+function applyImdPeak(blade: HottestYearBladeRow, city: City, imd?: ImdService): void {
+  if (!imd?.enabled || city.country !== "IN") {
+    return;
+  }
+
+  const binding = imd.bindStation(city);
+  if (!binding) {
+    return;
+  }
+
+  const peak = imd.getAnnualPeak(binding.station.id, blade.year);
+  if (!peak) {
+    return;
+  }
+
+  blade.peakTempC = roundTemp(peak.peakTempC);
+  blade.peakDate = peak.peakDate;
+  blade.peakSource = "imd_station";
+  blade.imdStationName = binding.station.name;
+  blade.imdDistanceKm = Math.round(binding.distanceKm);
 }
 
 function roundTemp(value: number): number {

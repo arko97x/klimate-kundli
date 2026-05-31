@@ -211,6 +211,40 @@ export function MonthlyDeltaChart({ data, onReset }: MonthlyDeltaChartProps) {
   )
 }
 
+function PeakSourceFootnote({ blades }: { blades: NonNullable<MonthlyDeltaResponse['hottestYears']>['blades'] }) {
+  const imdCount = blades.filter((b) => b.peakSource === 'imd_station').length
+  const indiaEra5 = blades.some((b) => b.isIndiaHome && b.peakSource === 'era5_grid')
+
+  if (imdCount === 0 && !indiaEra5) {
+    return null
+  }
+
+  return (
+    <p className="max-w-xl text-xs text-muted-foreground">
+      {imdCount > 0 ? (
+        <>
+          Peak °C for {imdCount} {imdCount === 1 ? 'year' : 'years'} from nearest IMD station.{' '}
+        </>
+      ) : null}
+      {indiaEra5 ? (
+        <>
+          Other India peaks use ERA5 grid cells (~25 km) until station history is loaded.{' '}
+        </>
+      ) : null}
+      {imdCount > 0 ? (
+        <a
+          href="https://mausam.imd.gov.in/"
+          className="underline underline-offset-2 hover:text-foreground"
+          target="_blank"
+          rel="noreferrer"
+        >
+          IMD
+        </a>
+      ) : null}
+    </p>
+  )
+}
+
 function HottestYearsSection({
   insight,
 }: {
@@ -228,6 +262,7 @@ function HottestYearsSection({
           Top {insight.topK} at each home since {insight.recordStartYear} · taller shading = hotter
           peak
         </p>
+        <PeakSourceFootnote blades={insight.blades ?? []} />
       </div>
 
       {(insight.blades ?? []).length > 0 ? (

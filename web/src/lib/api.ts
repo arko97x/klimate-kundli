@@ -49,6 +49,8 @@ export interface HottestYearsByCity {
   matchingYears: number[]
 }
 
+export type PeakSource = 'imd_station' | 'era5_grid'
+
 export interface HottestYearBlade {
   year: number
   cityName: string
@@ -58,6 +60,10 @@ export interface HottestYearBlade {
   /** Date (YYYY-MM-DD) when peakTempC occurred. */
   peakDate: string
   rankInCity: number
+  peakSource: PeakSource
+  isIndiaHome: boolean
+  imdStationName?: string
+  imdDistanceKm?: number
 }
 
 export interface HottestYearsInsight {

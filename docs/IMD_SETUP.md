@@ -2,6 +2,8 @@
 
 Klimate Kundli can use your **approved IMD API** for Indian cities (hotter peaks on the fan, rainfall for tree-rings). This guide is only the steps **you** do; the repo has scripts for the rest.
 
+**Code layout:** see [IMD_IMPLEMENTATION.md](./IMD_IMPLEMENTATION.md) for how station map, peak cache, and fan overrides connect.
+
 ---
 
 ## 1. Create an API key (one time)
@@ -39,11 +41,19 @@ cd /path/to/klimate-kundli   # your deploy folder
 nano .env                      # or however you manage env
 ```
 
-Add:
+Add **both** (portal API Test Console uses two fields):
 
 ```env
-IMD_API_KEY=paste_your_prod_key_here
+IMD_API_KEY=paste_your_64_char_prod_key_here
+IMD_JWT_TOKEN=paste_jwt_from_generate_sample_jwt_button
 ```
+
+| Variable | What it is | Where it goes in HTTP |
+|----------|------------|------------------------|
+| `IMD_API_KEY` | Prod key (`PROD \| klimate-kundli-1 \| 168.144.83.192 \| Active \| b6b0…`) | Separate header (`api-key` or `X-API-KEY`) — **not** `Authorization` |
+| `IMD_JWT_TOKEN` | Session JWT (`eyJ…` three parts) | `Authorization: Bearer <jwt>` |
+
+In the portal: **Generate Sample JWT From Session** → copy into `IMD_JWT_TOKEN`. JWT **expires**; regenerate when diagnose says expired.
 
 Save, restart the API process if it’s already running.
 
@@ -116,10 +126,10 @@ grep IMD_API_KEY .env
 
 The IP from `ifconfig.me` must be exactly what you entered when you generated the **Prod** key. If you edited `.env` in `~/klimate-kundli` but the key was created for a different IP, regenerate the key.
 
-**Quick manual test** (IMD wants the key in `Authorization` **without** `Bearer`):
+**Quick manual test** (same as portal test console — JWT Bearer + API key):
 
 ```bash
-cd ~/klimate-kundli   # folder that contains .env
+cd ~/klimate-kundli
 npm run imd:diagnose
 ```
 
@@ -127,10 +137,14 @@ Or manually:
 
 ```bash
 KEY=$(grep '^IMD_API_KEY=' .env | cut -d= -f2- | tr -d '"'"'"'')
-echo "Key length: ${#KEY}"    # must be > 0 — if 0, fix .env format (see below)
-curl -sS -H "Authorization: $KEY" \
-  "https://api.imd.gov.in/api/v1/cityforecast?id=42182" | head -c 300
+JWT=$(grep '^IMD_JWT_TOKEN=' .env | cut -d= -f2- | tr -d '"'"'"'')
+curl -sS -w "\nHTTP %{http_code}\n" \
+  -H "Authorization: Bearer $JWT" \
+  -H "api-key: $KEY" \
+  "https://api.imd.gov.in/api/v1/cityforecast_mapping" | head -c 400
 ```
+
+API key **alone** in `Authorization` → `API key missing` (that was our mistake).
 
 **`.env` must look exactly like this** (no spaces around `=`, no `export`):
 
@@ -154,7 +168,7 @@ Still failing → email **sankar.nath@imd.gov.in** (template below).
 |-------|-------------|
 | `IMD_API_KEY` in `.env` | OK (64 characters) |
 | Public IP | `168.144.83.192` — must match **Prod** key on portal |
-| `Authorization: <key>` (no Bearer) | Still `API key missing` on all probes |
+| API key only in `Authorization` | `API key missing` — need **JWT Bearer** + key header (see above) |
 
 So the problem is **not** missing `.env` or Bearer format alone. Next: portal key validity, IP on key record, or IMD’s exact header rules (see PDF on portal after login).
 

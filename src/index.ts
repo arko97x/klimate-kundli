@@ -7,6 +7,7 @@ import { createCache, type Cache } from "./cache/store.js";
 import { Telemetry } from "./lib/telemetry.js";
 import { createGeocoder, type Geocoder } from "./resolvers/geocoding.js";
 import { createHistoricalResolver } from "./resolvers/historical.js";
+import { createImdService } from "./resolvers/imd/resolver.js";
 import { createProjectionResolver } from "./resolvers/projection.js";
 import { loadStaticData, type StaticData } from "./resolvers/statics.js";
 import { createGeocodeRoute } from "./routes/geocode.js";
@@ -29,6 +30,7 @@ export function createApp(options: AppOptions = {}): Hono {
   const telemetry = options.telemetry ?? new Telemetry();
   const statics = options.statics ?? loadStaticData();
   const historical = createHistoricalResolver({ cache });
+  const imd = createImdService({ cache });
   const projection = createProjectionResolver({ cache });
 
   app.use(
@@ -39,7 +41,7 @@ export function createApp(options: AppOptions = {}): Hono {
   );
 
   app.route("/kundli", createKundliRoute({ cache, statics, telemetry, historical, projection }));
-  app.route("/monthly-delta", createMonthlyDeltaRoute({ historical, statics }));
+  app.route("/monthly-delta", createMonthlyDeltaRoute({ historical, statics, imd }));
   app.route("/geocode", createGeocodeRoute(geocoder));
   app.route("/stats", createStatsRoute(cache, telemetry));
   app.route("/health", createHealthRoute(true));

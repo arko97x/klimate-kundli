@@ -12,6 +12,7 @@
     "prewarm": "tsx src/scripts/prewarm.ts",
     "imd:spike": "tsx src/scripts/imd-spike.ts",
     "imd:diagnose": "tsx src/scripts/imd-diagnose.ts",
+    "imd:build-station-map": "tsx src/scripts/imd-build-station-map.ts",
     "capture:docs": "node scripts/capture/capture.mjs"
   },
   "dependencies": {

@@ -8,7 +8,12 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { loadEnvFile } from "../lib/load-env-file.js";
-import { imdFetchJson, imdProbeAuthModes, type ImdFetchResult } from "../resolvers/imd/client.js";
+import {
+  imdFetchJson,
+  imdProbeAuthModes,
+  loadImdCredentials,
+  type ImdFetchResult,
+} from "../resolvers/imd/client.js";
 
 const DELHI_CITY_FORECAST_ID = "42182";
 const DELHI_AWS_CALL_SIGN = "NDL";
@@ -62,20 +67,26 @@ function analyze(name: string, path: string, result: ImdFetchResult): SpikeEntry
 async function main(): Promise<void> {
   loadEnvFile();
 
-  const apiKey = process.env.IMD_API_KEY?.trim();
-  if (!apiKey) {
+  const creds = loadImdCredentials();
+  if (!creds.apiKey && !creds.jwt) {
     console.error(
       [
-        "IMD_API_KEY is not set.",
+        "Set IMD_API_KEY and/or IMD_JWT_TOKEN in .env.",
         "",
-        "On your droplet .env add:  IMD_API_KEY=your_prod_key",
-        "See docs/IMD_SETUP.md for how to create the key and whitelist the server IP.",
+        "Portal test console needs JWT Bearer — see docs/IMD_SETUP.md",
       ].join("\n"),
     );
     process.exit(1);
   }
 
-  console.log(`IMD_API_KEY loaded (${apiKey.length} characters)`);
+  if (creds.apiKey) {
+    console.log(`IMD_API_KEY loaded (${creds.apiKey.length} characters)`);
+  }
+  if (creds.jwt) {
+    console.log(`IMD_JWT_TOKEN loaded (${creds.jwt.length} characters)`);
+  } else {
+    console.log("WARN: no IMD_JWT_TOKEN — API key-only calls usually return 401");
+  }
   try {
     const ipRes = await fetch("https://api.ipify.org?format=json");
     const ipBody = (await ipRes.json()) as { ip?: string };
@@ -87,7 +98,7 @@ async function main(): Promise<void> {
   }
 
   console.log("\nAuth probe on cityforecast_mapping (each header style):");
-  const authProbe = await imdProbeAuthModes("/api/v1/cityforecast_mapping", apiKey);
+  const authProbe = await imdProbeAuthModes("/api/v1/cityforecast_mapping", creds);
   for (const row of authProbe) {
     console.log(`  ${row.mode}: HTTP ${row.status} — ${row.error ?? "ok"}`);
   }
@@ -109,7 +120,7 @@ async function main(): Promise<void> {
   let workingAuth: string | null = null;
 
   for (const probe of probes) {
-    const result = await imdFetchJson(probe.path, apiKey);
+    const result = await imdFetchJson(probe.path, creds);
     if (result.ok && !workingAuth) {
       workingAuth = result.authMode;
     }
