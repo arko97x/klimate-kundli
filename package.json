@@ -10,6 +10,7 @@
     "test": "vitest run tests",
     "fetch:static": "tsx src/scripts/fetch_static_data.ts",
     "prewarm": "tsx src/scripts/prewarm.ts",
+    "imd:spike": "tsx src/scripts/imd-spike.ts",
     "capture:docs": "node scripts/capture/capture.mjs"
   },
   "dependencies": {

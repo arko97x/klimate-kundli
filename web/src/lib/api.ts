@@ -48,6 +48,17 @@ export interface HottestYearsByCity {
   matchingYears: number[]
 }
 
+export interface HottestYearBlade {
+  year: number
+  cityName: string
+  displayName: string
+  /** Highest daily maximum (tmax) that year at this city's grid. */
+  peakTempC: number
+  /** Date (YYYY-MM-DD) when peakTempC occurred. */
+  peakDate: string
+  rankInCity: number
+}
+
 export interface HottestYearsInsight {
   count: number
   topK: number
@@ -55,6 +66,7 @@ export interface HottestYearsInsight {
   latestCompleteYear: number
   years: number[]
   byCity: HottestYearsByCity[]
+  blades: HottestYearBlade[]
 }
 
 export interface IndiaEmissionsYear {

@@ -4,6 +4,7 @@ import { EmissionsRingsChart } from '@/components/EmissionsRingsChart'
 import { InsightsSection } from '@/components/InsightsSection'
 import { RemediesSection } from '@/components/RemediesSection'
 import { Button } from '@/components/ui/button'
+import { HandFanChart } from '@/components/HandFanChart'
 import type { MonthlyDeltaResponse } from '@/lib/api'
 
 const MONTH_NAMES = [
@@ -178,7 +179,7 @@ export function MonthlyDeltaChart({ data, onReset }: MonthlyDeltaChartProps) {
       {data.hottestYears ? (
         <>
           <hr className="border-border" />
-          <HottestYearsSection birthYear={data.birthYear} insight={data.hottestYears} />
+          <HottestYearsSection insight={data.hottestYears} />
         </>
       ) : null}
 
@@ -211,57 +212,50 @@ export function MonthlyDeltaChart({ data, onReset }: MonthlyDeltaChartProps) {
 }
 
 function HottestYearsSection({
-  birthYear,
   insight,
 }: {
-  birthYear: number
   insight: NonNullable<MonthlyDeltaResponse['hottestYears']>
 }) {
-  const recordSpan = insight.latestCompleteYear - insight.recordStartYear + 1
-
   return (
-    <section className="space-y-6 pb-4">
-      <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">Years you lived through that were record-hot at home</p>
+    <section className="space-y-5 pb-4">
+      <div className="space-y-2">
         <p className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
           You&apos;ve lived through{' '}
-          <span className="text-[#d3674a]">{insight.count}</span>{' '}
-          {insight.count === 1 ? 'year' : 'years'} that ranked among the{' '}
-          {insight.topK} hottest on record.
+          <span className="text-[#d3674a]">{insight.count}</span> record-hot{' '}
+          {insight.count === 1 ? 'year' : 'years'}.
         </p>
-        <p className="max-w-2xl text-pretty text-muted-foreground">
-          Counted across every city you&apos;ve called home since {birthYear}. A year counts if it
-          ranks in that city&apos;s top {insight.topK} since {insight.recordStartYear}.
+        <p className="max-w-xl text-sm text-muted-foreground">
+          Top {insight.topK} at each home since {insight.recordStartYear} · taller shading = hotter
+          peak
         </p>
       </div>
 
+      {(insight.blades ?? []).length > 0 ? (
+        <div className="mt-2">
+          <HandFanChart insight={{ ...insight, blades: insight.blades ?? [] }} />
+        </div>
+      ) : null}
+
       {insight.byCity.length > 0 ? (
-        <ul className="space-y-4">
+        <ul className="grid gap-2 sm:grid-cols-2">
           {insight.byCity.map((city) => (
             <li
               key={city.cityName}
-              className="rounded-lg border border-border bg-muted/30 px-4 py-3"
+              className="rounded-lg border border-border bg-muted/20 px-3 py-2 text-sm"
             >
-              <p className="font-medium">{city.cityName}</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {city.hotYearsLived} of {city.yearsLived} years you spent there were among its{' '}
-                {insight.topK} hottest since {insight.recordStartYear}.
-              </p>
-              {city.matchingYears.length > 0 ? (
-                <p className="mt-2 text-xs tabular-nums text-muted-foreground">
-                  {city.matchingYears.join(', ')}
-                </p>
-              ) : null}
+              <span className="font-medium">{city.cityName}</span>
+              <span className="text-muted-foreground">
+                {' '}
+                — {city.hotYearsLived}/{city.yearsLived} in top {insight.topK}
+              </span>
             </li>
           ))}
         </ul>
       ) : null}
 
-      {insight.years.length > 0 ? (
+      {insight.years.length > 0 && !(insight.blades?.length > 0) ? (
         <p className="text-xs text-muted-foreground">
-          {insight.years.length} unique calendar{' '}
-          {insight.years.length === 1 ? 'year' : 'years'} across all homes · each city ranked
-          against {recordSpan} years of records ({insight.recordStartYear}–{insight.latestCompleteYear})
+          {insight.years.length} {insight.years.length === 1 ? 'year' : 'years'} across all homes
         </p>
       ) : null}
     </section>

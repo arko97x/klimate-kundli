@@ -6,5 +6,6 @@ coverage/
 !.env.example
 data/cache.sqlite
 data/cache.sqlite-*
+data/imd-spike-report.json
 *.log
 .DS_Store

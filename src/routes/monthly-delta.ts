@@ -309,13 +309,28 @@ function buildHottestYearsInsight(
   latestCompleteYear: number,
 ) {
   const topHotByCityKey = new Map<string, Set<number>>();
+  const annualByCityKey = new Map<string, Map<number, number>>();
+  const annualPeakByCityKey = new Map<string, Map<number, { peakTempC: number; peakDate: string }>>();
 
   for (const [key, weather] of weatherByKey) {
     const annual = annualMeanTemps(weather.daily);
+    annualByCityKey.set(key, annual);
+    annualPeakByCityKey.set(key, annualPeakTmax(weather.daily));
     topHotByCityKey.set(key, topHotYears(annual, HOTTEST_TOP_K));
   }
 
   const matchingYears = new Set<number>();
+  const bladeByYear = new Map<
+    number,
+    {
+      year: number;
+      cityName: string;
+      displayName: string;
+      peakTempC: number;
+      peakDate: string;
+      rankInCity: number;
+    }
+  >();
   const byCity: {
     cityName: string;
     displayName: string;
@@ -327,7 +342,9 @@ function buildHottestYearsInsight(
   for (const stint of stints) {
     const key = gridKey(stint.city.lat, stint.city.lon);
     const topHot = topHotByCityKey.get(key);
-    if (!topHot) {
+    const annual = annualByCityKey.get(key);
+    const annualPeak = annualPeakByCityKey.get(key);
+    if (!topHot || !annual || !annualPeak) {
       continue;
     }
 
@@ -344,6 +361,21 @@ function buildHottestYearsInsight(
       }
       stintMatches.push(year);
       matchingYears.add(year);
+
+      if (!bladeByYear.has(year)) {
+        const peak = annualPeak.get(year);
+        const rankInCity = hotYearRank(annual, year);
+        if (peak != null && rankInCity != null) {
+          bladeByYear.set(year, {
+            year,
+            cityName: stint.city.name,
+            displayName: stint.city.displayName,
+            peakTempC: roundTemp(peak.peakTempC),
+            peakDate: peak.peakDate,
+            rankInCity,
+          });
+        }
+      }
     }
 
     if (yearsLived > 0) {
@@ -359,6 +391,7 @@ function buildHottestYearsInsight(
 
   // Merge rows for the same city (multiple stints).
   const mergedByCity = mergeCityBreakdown(byCity);
+  const blades = [...bladeByYear.values()].sort((a, b) => a.year - b.year);
 
   return {
     count: matchingYears.size,
@@ -367,6 +400,7 @@ function buildHottestYearsInsight(
     latestCompleteYear,
     years: [...matchingYears].sort((a, b) => a - b),
     byCity: mergedByCity,
+    blades,
   };
 }
 
@@ -421,6 +455,23 @@ function mergeCityBreakdown(
     .sort((a, b) => b.hotYearsLived - a.hotYearsLived);
 }
 
+function annualPeakTmax(daily: WeatherDaily[]): Map<number, { peakTempC: number; peakDate: string }> {
+  const out = new Map<number, { peakTempC: number; peakDate: string }>();
+
+  for (const day of daily) {
+    if (day.tmax == null) {
+      continue;
+    }
+    const year = Number(day.date.slice(0, 4));
+    const existing = out.get(year);
+    if (!existing || day.tmax > existing.peakTempC) {
+      out.set(year, { peakTempC: day.tmax, peakDate: day.date });
+    }
+  }
+
+  return out;
+}
+
 function annualMeanTemps(daily: WeatherDaily[]): Map<number, number> {
   const sums = new Map<number, { sum: number; count: number }>();
 
@@ -450,6 +501,16 @@ function topHotYears(annual: Map<number, number>, k: number): Set<number> {
     .slice(0, k)
     .map(([year]) => year);
   return new Set(ranked);
+}
+
+function hotYearRank(annual: Map<number, number>, year: number): number | null {
+  const ranked = [...annual.entries()].sort((a, b) => b[1] - a[1]);
+  const index = ranked.findIndex(([y]) => y === year);
+  return index >= 0 ? index + 1 : null;
+}
+
+function roundTemp(value: number): number {
+  return Math.round(value * 10) / 10;
 }
 
 interface MonthlyStats {
