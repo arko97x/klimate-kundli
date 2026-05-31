@@ -44,6 +44,16 @@ async function main(): Promise<void> {
   }
   console.log(`Found ${parsed.lineHint}`);
 
+  if (parsed.key.startsWith("Bearer ")) {
+    console.log("WARN: key starts with 'Bearer ' — .env should be IMD_API_KEY=<key only>");
+  }
+  if (/\s/.test(parsed.key)) {
+    console.log("WARN: key contains whitespace — re-copy from portal");
+  }
+  if (parsed.key.split(".").length === 3) {
+    console.log("Note: key looks like JWT (three dot-separated parts) — portal may want Authorization: Bearer <key>");
+  }
+
   if (parsed.key.length === 0) {
     console.log("\nKey length is 0 — fix .env (exactly: IMD_API_KEY=your_key_with_no_spaces_around_equals)");
     process.exit(1);

@@ -1,6 +1,7 @@
 import type { City, KundliInput, LivedCity } from '@/types'
 
-const API_BASE = import.meta.env.VITE_API_URL ?? ''
+/** Tunnel root only — no trailing slash, no `/geocode` suffix. */
+const API_BASE = String(import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '')
 
 export async function geocodeCities(query: string): Promise<City[]> {
   const q = query.trim()

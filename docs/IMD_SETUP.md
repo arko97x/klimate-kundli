@@ -142,9 +142,59 @@ Wrong: `IMD_API_KEY = xxx` or `export IMD_API_KEY=xxx` — `grep '^IMD_API_KEY='
 
 `Authorization: Bearer …` also returns `API key missing` — use raw `Authorization: $KEY` only.
 
-Still failing → email **sankar.nath@imd.gov.in** with your project name, the curl command, and the error JSON. Ask: “Which `Authorization` format should we use with the generated API key?”
+Still failing → email **sankar.nath@imd.gov.in** (template below).
 
 | Empty data | Tell the agent — we may need a different endpoint or a one-time historical dump from IMD |
+
+---
+
+## Current debug status (your droplet)
+
+| Check | Your result |
+|-------|-------------|
+| `IMD_API_KEY` in `.env` | OK (64 characters) |
+| Public IP | `168.144.83.192` — must match **Prod** key on portal |
+| `Authorization: <key>` (no Bearer) | Still `API key missing` on all probes |
+
+So the problem is **not** missing `.env` or Bearer format alone. Next: portal key validity, IP on key record, or IMD’s exact header rules (see PDF on portal after login).
+
+### Portal checklist
+
+1. **Your API Keys** table — key **Active**, Environment **Prod**, Server IP = `168.144.83.192`.
+2. If unsure — **delete and regenerate** Prod key; paste fresh into `.env` (one line, no quotes).
+3. After login, open **API Documentation (PDF)** on [mausam IMD APIs](https://mausam.imd.gov.in/responsive/apis.php) — find the exact auth header example.
+4. Optional: **Issue ticket** on IMD API portal with template below.
+
+### Email template (copy/edit)
+
+```
+To: sankar.nath@imd.gov.in
+Subject: VizChitra 2026 — API key returns "API key missing"
+
+Project: VizChitra 2026 (approved, All Public APIs, non-commercial).
+Prod API key (64 chars) + server IP 168.144.83.192.
+
+Request from droplet:
+  curl -H "Authorization: <our_api_key>" \
+    "https://api.imd.gov.in/api/v1/cityforecast?id=42182"
+Response: {"error":"API key missing"}
+
+Please confirm:
+1. Exact HTTP header name/format for the generated API key
+2. Whether Prod keys require IP 168.144.83.192 on file (confirmed?)
+3. Any activation step after key generation
+
+Thank you.
+```
+
+### After IMD auth works
+
+```bash
+npm run imd:spike    # what history the public APIs expose
+npm run imd:diagnose # quick re-check
+```
+
+Then we wire peaks + rainfall into the fan / tree-ring (code ready on our side).
 
 ---
 
