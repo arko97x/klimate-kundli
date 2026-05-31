@@ -49,6 +49,14 @@ Save, restart the API process if it’s already running.
 
 **Do not** paste the key in Slack/email to the agent — only on the machine that will call IMD.
 
+**Important:** the `.env` file must live in the **same folder** where you run `npm run imd:spike` (usually the repo root). If you use systemd, that is often `/opt/klimate-kundli/.env` — not a different path unless you run the command from there.
+
+Check the key is visible (shows your key length, not the secret):
+
+```bash
+grep IMD_API_KEY .env
+```
+
 ---
 
 ## 4. Run the “spike” (checks what history we can get)
@@ -56,8 +64,14 @@ Save, restart the API process if it’s already running.
 On the **droplet** (so IP matches the Prod key):
 
 ```bash
-cd /path/to/klimate-kundli
+cd /path/to/klimate-kundli   # must contain .env from step 3
 npm run imd:spike
+```
+
+The spike script reads `.env` from that folder. If it still says “not set”, run once with:
+
+```bash
+export $(grep -v '^#' .env | xargs) && npm run imd:spike
 ```
 
 This writes `data/imd-spike-report.json` and prints a short summary.
@@ -89,8 +103,47 @@ When we show IMD-based numbers in the UI, we will include:
 
 | Message | What to do |
 |--------|------------|
-| `API key missing` | `IMD_API_KEY` not set in `.env` on the machine running the script |
-| `401` / `invalid` | Wrong key, or request not from the **whitelisted IP** |
+| `API key missing` | `IMD_API_KEY` not set, or script not run from the folder that contains `.env` |
+| `Authorization header missing or invalid` | Key **is** in `.env` but IMD rejected it. Usually: **(1)** Prod key not registered with **this** server’s public IP, **(2)** Dev key used on droplet (or the reverse), **(3)** wrong header — check the PDF under “API Documentation” on the IMD portal after login |
+| `401` / `invalid` | Same as above |
+
+**IP check on droplet:**
+
+```bash
+curl -4 ifconfig.me
+grep IMD_API_KEY .env
+```
+
+The IP from `ifconfig.me` must be exactly what you entered when you generated the **Prod** key. If you edited `.env` in `~/klimate-kundli` but the key was created for a different IP, regenerate the key.
+
+**Quick manual test** (IMD wants the key in `Authorization` **without** `Bearer`):
+
+```bash
+cd ~/klimate-kundli   # folder that contains .env
+npm run imd:diagnose
+```
+
+Or manually:
+
+```bash
+KEY=$(grep '^IMD_API_KEY=' .env | cut -d= -f2- | tr -d '"'"'"'')
+echo "Key length: ${#KEY}"    # must be > 0 — if 0, fix .env format (see below)
+curl -sS -H "Authorization: $KEY" \
+  "https://api.imd.gov.in/api/v1/cityforecast?id=42182" | head -c 300
+```
+
+**`.env` must look exactly like this** (no spaces around `=`, no `export`):
+
+```env
+IMD_API_KEY=paste_your_key_here
+```
+
+Wrong: `IMD_API_KEY = xxx` or `export IMD_API_KEY=xxx` — `grep '^IMD_API_KEY='` then leaves `KEY` empty → `API key missing`.
+
+`Authorization: Bearer …` also returns `API key missing` — use raw `Authorization: $KEY` only.
+
+Still failing → email **sankar.nath@imd.gov.in** with your project name, the curl command, and the error JSON. Ask: “Which `Authorization` format should we use with the generated API key?”
+
 | Empty data | Tell the agent — we may need a different endpoint or a one-time historical dump from IMD |
 
 ---

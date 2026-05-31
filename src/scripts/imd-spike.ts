@@ -7,7 +7,8 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { imdFetchJson, type ImdFetchResult } from "../resolvers/imd/client.js";
+import { loadEnvFile } from "../lib/load-env-file.js";
+import { imdFetchJson, imdProbeAuthModes, type ImdFetchResult } from "../resolvers/imd/client.js";
 
 const DELHI_CITY_FORECAST_ID = "42182";
 const DELHI_AWS_CALL_SIGN = "NDL";
@@ -59,6 +60,8 @@ function analyze(name: string, path: string, result: ImdFetchResult): SpikeEntry
 }
 
 async function main(): Promise<void> {
+  loadEnvFile();
+
   const apiKey = process.env.IMD_API_KEY?.trim();
   if (!apiKey) {
     console.error(
@@ -71,6 +74,24 @@ async function main(): Promise<void> {
     );
     process.exit(1);
   }
+
+  console.log(`IMD_API_KEY loaded (${apiKey.length} characters)`);
+  try {
+    const ipRes = await fetch("https://api.ipify.org?format=json");
+    const ipBody = (await ipRes.json()) as { ip?: string };
+    if (ipBody.ip) {
+      console.log(`This machine's public IP: ${ipBody.ip}  (must match Prod key on IMD portal)`);
+    }
+  } catch {
+    console.log("(Could not detect public IP — run: curl -4 ifconfig.me)");
+  }
+
+  console.log("\nAuth probe on cityforecast_mapping (each header style):");
+  const authProbe = await imdProbeAuthModes("/api/v1/cityforecast_mapping", apiKey);
+  for (const row of authProbe) {
+    console.log(`  ${row.mode}: HTTP ${row.status} — ${row.error ?? "ok"}`);
+  }
+  console.log("");
 
   const probes: { name: string; path: string }[] = [
     { name: "cityforecast_mapping", path: "/api/v1/cityforecast_mapping" },
