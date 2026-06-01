@@ -1,6 +1,7 @@
 import { ChevronRightIcon } from 'lucide-react'
 
 import { BirthYearPicker } from '@/components/BirthYearPicker'
+import { DisabledTooltip } from '@/components/DisabledTooltip'
 import { cn } from '@/lib/utils'
 import { CitySearchCombobox } from '@/components/CitySearchCombobox'
 import { Button } from '@/components/ui/button'
@@ -50,16 +51,21 @@ export function BirthStep({
       </div>
 
       <div className="flex justify-end pt-2">
-        <Button
-          type="button"
-          size="icon"
-          className="size-11 rounded-md"
+        <DisabledTooltip
           disabled={!canContinue}
-          onClick={onNext}
-          aria-label="Continue"
+          content="Select your birth city"
         >
-          <ChevronRightIcon className="size-5" />
-        </Button>
+          <Button
+            type="button"
+            size="icon"
+            className="size-11 rounded-md"
+            disabled={!canContinue}
+            onClick={onNext}
+            aria-label="Continue"
+          >
+            <ChevronRightIcon className="size-5" />
+          </Button>
+        </DisabledTooltip>
       </div>
     </div>
   )

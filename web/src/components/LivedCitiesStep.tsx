@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import type { SliderRoot } from '@base-ui/react/slider'
-import { ChevronLeftIcon, PlusIcon } from 'lucide-react'
+import { ChevronLeftIcon, PlusIcon, XIcon } from 'lucide-react'
 
 import { CitySearchCombobox } from '@/components/CitySearchCombobox'
+import { DisabledTooltip } from '@/components/DisabledTooltip'
 import { TimelineYearAxis } from '@/components/TimelineYearAxis'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
-import { canAddResidenceRow, updateRowRange } from '@/lib/lived-cities'
+import { addResidenceRowDisabledReason, canAddResidenceRow, updateRowRange } from '@/lib/lived-cities'
 import { latestCompleteYearUtc, yearToTimelinePercent } from '@/lib/years'
 import type { ResidenceRow } from '@/types'
 
@@ -30,6 +31,11 @@ type LivedCitiesStepProps = {
   error?: string | null
 }
 
+const LIVED_CITIES_GRID =
+  'grid grid-cols-[11rem_minmax(0,1fr)_2.25rem] gap-x-4'
+
+const LIVED_CITIES_CONTENT = 'mx-auto w-full max-w-2xl'
+
 export function LivedCitiesStep({
   birthYear,
   rows,
@@ -39,6 +45,7 @@ export function LivedCitiesStep({
 }: LivedCitiesStepProps) {
   const [dragPreview, setDragPreview] = useState<DragPreview | null>(null)
   const canAdd = canAddResidenceRow(rows, latestCompleteYear)
+  const addDisabledReason = addResidenceRowDisabledReason(rows, latestCompleteYear)
 
   const normalizeRange = (value: number | readonly number[]): [number, number] | null => {
     const arr = Array.isArray(value) ? [...value] : [value]
@@ -96,90 +103,135 @@ export function LivedCitiesStep({
     ])
   }
 
+  const handleDeleteRow = (index: number) => {
+    if (index === 0) {
+      return
+    }
+    onRowsChange(rows.filter((_, i) => i !== index))
+  }
+
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
-      <div className="space-y-2 text-center sm:text-left">
-        <Label>Where all have you lived / travelled to?</Label>
-        <p className="text-sm text-muted-foreground">
-          Years are approximate. If you moved during a year, both places can include that year.
-        </p>
-      </div>
+    <div className="flex min-h-0 w-full flex-1 flex-col">
+      <div className="shrink-0 bg-background px-6 pb-4 sm:px-10 lg:px-14">
+        <div className={LIVED_CITIES_CONTENT}>
+          <div className="space-y-2 pb-8 text-center sm:text-left">
+            <Label>Where all have you lived / travelled to?</Label>
+            <p className="text-sm text-muted-foreground">
+              Years are approximate. If you moved during a year, both places can include that year.
+            </p>
+          </div>
 
-      <div className="grid grid-cols-[minmax(0,11rem)_minmax(0,1fr)] items-center gap-x-4 gap-y-8">
-        <TimelineYearAxis
-          birthYear={birthYear}
-          latestCompleteYear={latestCompleteYear}
-          dragPreview={
-            dragPreview
-              ? { year: dragPreview.year, percent: dragPreview.percent }
-              : null
-          }
-        />
-
-        {rows.map((row, index) => {
-          const isBirthRow = index === 0
-          const [yearStart, yearEnd] = row.range
-
-          return (
-            <div key={row.id} className="contents">
-              <div className="col-start-1 flex min-w-0 flex-col justify-center gap-0.5 self-center">
-                {isBirthRow ? (
-                  <p className="truncate text-sm font-medium" title={row.city?.displayName}>
-                    {row.city?.displayName ?? '—'}
-                  </p>
-                ) : (
-                  <CitySearchCombobox
-                    value={row.city}
-                    onValueChange={(city) => {
-                      onRowsChange(
-                        rows.map((r) => (r.id === row.id ? { ...r, city } : r)),
-                      )
-                    }}
-                    placeholder="Search city"
-                  />
-                )}
-                <p className="text-xs text-muted-foreground tabular-nums">
-                  ({yearStart}–{yearEnd})
-                </p>
-              </div>
-
-              <Slider
-                min={birthYear}
-                max={latestCompleteYear}
-                step={1}
-                minStepsBetweenValues={0}
-                value={row.range}
-                onValueChange={(value, details) =>
-                  handleSliderChange(index, value, details)
-                }
-                onValueCommitted={(value) => handleSliderCommit(index, value)}
-                className="col-start-2 w-full py-2"
-                aria-label={`Years in ${row.city?.displayName ?? (isBirthRow ? 'birth city' : 'city')}, ${yearStart} to ${yearEnd}`}
-              />
-            </div>
-          )
-        })}
-
-        <div className="col-start-1 self-start">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="size-9 rounded-md"
-            disabled={!canAdd}
-            onClick={handleAddRow}
-            aria-label="Add another city"
-          >
-            <PlusIcon className="size-4" />
-          </Button>
+          <div className={LIVED_CITIES_GRID}>
+            <div aria-hidden />
+            <TimelineYearAxis
+              birthYear={birthYear}
+              latestCompleteYear={latestCompleteYear}
+              dragPreview={
+                dragPreview
+                  ? { year: dragPreview.year, percent: dragPreview.percent }
+                  : null
+              }
+            />
+            <div className="size-9 shrink-0" aria-hidden />
+          </div>
         </div>
       </div>
 
-      {error ? (
-        <p className="text-center text-sm text-destructive sm:text-left" role="alert">
-          {error}
-        </p>
-      ) : null}
+      <div className="min-h-0 w-full flex-1 overflow-y-auto px-6 sm:px-10 lg:px-14">
+        <div className={LIVED_CITIES_CONTENT}>
+          <div className="flex flex-col gap-8 pt-8">
+            {rows.map((row, index) => {
+              const isBirthRow = index === 0
+              const [yearStart, yearEnd] = row.range
+
+              return (
+                <div
+                  key={row.id}
+                  className={`${LIVED_CITIES_GRID} grid-rows-[auto_auto] items-center gap-y-0.5`}
+                >
+                  <div className="col-start-1 row-start-1 min-w-0 self-center">
+                    {isBirthRow ? (
+                      <p className="truncate text-sm font-medium" title={row.city?.displayName}>
+                        {row.city?.displayName ?? '—'}
+                      </p>
+                    ) : (
+                      <CitySearchCombobox
+                        value={row.city}
+                        onValueChange={(city) => {
+                          onRowsChange(
+                            rows.map((r) => (r.id === row.id ? { ...r, city } : r)),
+                          )
+                        }}
+                        placeholder="Search city"
+                      />
+                    )}
+                  </div>
+
+                  <Slider
+                    min={birthYear}
+                    max={latestCompleteYear}
+                    step={1}
+                    minStepsBetweenValues={0}
+                    value={row.range}
+                    onValueChange={(value, details) =>
+                      handleSliderChange(index, value, details)
+                    }
+                    onValueCommitted={(value) => handleSliderCommit(index, value)}
+                    className="col-start-2 row-start-1 w-full self-center py-2"
+                    aria-label={`Years in ${row.city?.displayName ?? (isBirthRow ? 'birth city' : 'city')}, ${yearStart} to ${yearEnd}`}
+                  />
+
+                  {isBirthRow ? (
+                    <div
+                      className="col-start-3 row-start-1 size-9 shrink-0 self-center"
+                      aria-hidden
+                    />
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="col-start-3 row-start-1 size-9 shrink-0 self-center rounded-md"
+                      onClick={() => handleDeleteRow(index)}
+                      aria-label="Remove city"
+                    >
+                      <XIcon className="size-4" />
+                    </Button>
+                  )}
+
+                  <p className="col-start-1 row-start-2 text-xs text-muted-foreground tabular-nums">
+                    ({yearStart}–{yearEnd})
+                  </p>
+                </div>
+              )
+            })}
+
+            <div className={LIVED_CITIES_GRID}>
+              <div className="col-start-1 self-center">
+                <DisabledTooltip disabled={!canAdd} content={addDisabledReason}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="size-9 rounded-md"
+                    disabled={!canAdd}
+                    onClick={handleAddRow}
+                    aria-label="Add another city"
+                  >
+                    <PlusIcon className="size-4" />
+                  </Button>
+                </DisabledTooltip>
+              </div>
+            </div>
+          </div>
+
+          {error ? (
+            <p className="mt-8 text-center text-sm text-destructive sm:text-left" role="alert">
+              {error}
+            </p>
+          ) : null}
+        </div>
+      </div>
     </div>
   )
 }
@@ -189,12 +241,18 @@ export function LivedCitiesStepFooter({
   onGenerate,
   generating = false,
   canGenerate = false,
+  generateDisabledReason = null,
 }: {
   onBack: () => void
   onGenerate: () => void
   generating?: boolean
   canGenerate?: boolean
+  generateDisabledReason?: string | null
 }) {
+  const generateDisabled = !canGenerate || generating
+  const generateTooltip =
+    generating ? 'Generating…' : generateDisabledReason
+
   return (
     <>
       <Button
@@ -207,14 +265,16 @@ export function LivedCitiesStepFooter({
       >
         <ChevronLeftIcon className="size-5" />
       </Button>
-      <Button
-        type="button"
-        className="min-w-44 rounded-md px-8"
-        disabled={!canGenerate || generating}
-        onClick={onGenerate}
-      >
-        {generating ? 'Generating…' : 'Generate Kundli'}
-      </Button>
+      <DisabledTooltip disabled={generateDisabled} content={generateTooltip}>
+        <Button
+          type="button"
+          className="min-w-44 rounded-md px-8"
+          disabled={generateDisabled}
+          onClick={onGenerate}
+        >
+          {generating ? 'Generating…' : 'Generate Kundli'}
+        </Button>
+      </DisabledTooltip>
     </>
   )
 }

@@ -9,7 +9,7 @@ import { MonthlyDeltaChart } from '@/components/MonthlyDeltaChart'
 import { WizardLayout } from '@/components/WizardLayout'
 import { defaultBirthYear } from '@/components/BirthYearPicker'
 import { fetchMonthlyDelta, type MonthlyDeltaResponse } from '@/lib/api'
-import { createInitialRows, isLivedFormValid, rowsToLivedCities } from '@/lib/lived-cities'
+import { createInitialRows, generateKundliDisabledReason, isLivedFormValid, rowsToLivedCities } from '@/lib/lived-cities'
 import { latestCompleteYearUtc, MIN_BIRTH_YEAR } from '@/lib/years'
 import type { City, ResidenceRow } from '@/types'
 
@@ -99,6 +99,7 @@ export default function KundliApp() {
             onGenerate={handleGenerate}
             generating={generating}
             canGenerate={isLivedFormValid(rows, latestCompleteYear)}
+            generateDisabledReason={generateKundliDisabledReason(rows, latestCompleteYear)}
           />
         ) : null
       }

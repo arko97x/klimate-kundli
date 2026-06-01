@@ -13,6 +13,8 @@ export function WizardLayout({
   footer,
   scrollContent = false,
 }: WizardLayoutProps) {
+  const contentScrolls = scrollContent || footer != null
+
   return (
     <div className="grid min-h-dvh lg:h-dvh lg:max-h-dvh lg:grid-cols-3 lg:overflow-hidden">
       <aside className="flex shrink-0 items-center justify-center bg-muted px-8 py-12 lg:col-span-1 lg:h-full lg:overflow-hidden lg:px-12">
@@ -26,17 +28,29 @@ export function WizardLayout({
         </div>
       </aside>
 
-      <div className="flex min-h-dvh flex-col overflow-hidden bg-background lg:col-span-2 lg:h-full lg:min-h-0">
+      <div
+        className={cn(
+          "flex flex-col overflow-hidden bg-background lg:col-span-2 lg:h-full lg:min-h-0",
+          footer ? "h-dvh max-h-dvh min-h-0" : "min-h-dvh",
+        )}
+      >
         <div
           className={cn(
-            "flex min-h-0 flex-1 flex-col px-6 py-10 sm:px-10 lg:px-14",
-            scrollContent ? "justify-start overflow-y-auto" : "justify-center",
+            "flex min-h-0 flex-1 flex-col",
+            footer
+              ? "overflow-hidden pt-8 pb-0"
+              : "px-6 pt-8 pb-0 sm:px-10 lg:px-14",
+            !footer && contentScrolls
+              ? "justify-start overflow-y-auto"
+              : !footer
+                ? "justify-center"
+                : undefined,
           )}
         >
           {children}
         </div>
         {footer ? (
-          <footer className="flex items-center justify-between gap-4 border-t border-border px-6 py-5 sm:px-10 lg:px-14">
+          <footer className="shrink-0 flex items-center justify-between gap-4 border-t border-border bg-background px-6 py-5 sm:px-10 lg:px-14">
             {footer}
           </footer>
         ) : null}

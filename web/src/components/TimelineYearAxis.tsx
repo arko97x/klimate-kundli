@@ -23,7 +23,7 @@ export function TimelineYearAxis({
   const ticks = timelineTickYears(birthYear, latestCompleteYear)
 
   return (
-    <div className="relative col-start-2 h-8">
+    <div className="relative col-start-2 h-9">
       {ticks.map((year, index) => {
         if (
           dragPreview &&
@@ -45,7 +45,7 @@ export function TimelineYearAxis({
         return (
           <span
             key={year}
-            className="absolute bottom-0 text-xs tabular-nums text-muted-foreground transition-opacity duration-75"
+            className="absolute bottom-1.5 text-xs tabular-nums text-muted-foreground transition-opacity duration-75"
             style={{
               left: `${pct}%`,
               transform: isFirst
@@ -63,7 +63,7 @@ export function TimelineYearAxis({
       {dragPreview ? (
         <>
           <span
-            className="absolute bottom-0 z-20 -translate-x-1/2 text-xs font-medium tabular-nums text-foreground"
+            className="absolute bottom-1.5 z-20 -translate-x-1/2 text-xs font-medium tabular-nums text-foreground"
             style={{ left: `${dragPreview.percent}%` }}
           >
             {dragPreview.year}

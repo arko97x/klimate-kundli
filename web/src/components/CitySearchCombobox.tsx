@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/command'
 import { Input } from '@/components/ui/input'
 
-/** cmdk auto-highlights first item when value is ""; use a non-matching sentinel instead. */
+/** Non-matching cmdk value while list is loading or empty (avoids stray highlight). */
 const CMDK_NO_SELECTION = '__city_combobox_no_selection__'
 
 type CitySearchComboboxProps = {
@@ -74,8 +74,8 @@ export function CitySearchCombobox({
   }
 
   useEffect(() => {
-    setActiveIndex(-1)
-  }, [query, results, loading, error])
+    setActiveIndex(canNavigate ? 0 : -1)
+  }, [query, results, loading, error, canNavigate])
 
   useEffect(() => {
     if (!open) {

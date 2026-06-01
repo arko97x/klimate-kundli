@@ -53,6 +53,36 @@ export function canAddResidenceRow(
   return last ? last.range[1] < latestComplete : false
 }
 
+export function addResidenceRowDisabledReason(
+  rows: ResidenceRow[],
+  latestComplete = latestCompleteYearUtc(),
+): string | null {
+  if (canAddResidenceRow(rows, latestComplete)) {
+    return null
+  }
+  return 'Shorten the last entry to add another city'
+}
+
+export function generateKundliDisabledReason(
+  rows: ResidenceRow[],
+  latestComplete = latestCompleteYearUtc(),
+): string | null {
+  if (isLivedFormValid(rows, latestComplete)) {
+    return null
+  }
+
+  if (rows.some((row) => row.city === null)) {
+    return 'Pick a city for each row'
+  }
+
+  const last = rows[rows.length - 1]
+  if (last && last.range[1] < latestComplete) {
+    return `Extend the last entry to ${latestComplete}`
+  }
+
+  return null
+}
+
 export function createInitialRows(
   birthCity: City,
   birthYear: number,
