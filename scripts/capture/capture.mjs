@@ -276,6 +276,68 @@ async function runV033Scenario(page, scenario, latestYear) {
   await sleep(400)
 }
 
+async function scrollToRecordHotSection(page) {
+  await page.evaluate(() => {
+    const heading = [...document.querySelectorAll('p')].find((p) =>
+      /record-hot/i.test(p.textContent ?? ''),
+    )
+    heading?.scrollIntoView({ block: 'start', behavior: 'instant' })
+    window.scrollBy(0, -16)
+  })
+  await sleep(400)
+}
+
+async function captureV034(browser) {
+  console.log('\nv0.3.4 — fan, IMD peaks, typography, lived-cities polish')
+  const latestYear = new Date().getUTCFullYear() - 1
+
+  // Wizard steps (current UI)
+  {
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1280, height: 800, deviceScaleFactor: 2 })
+    await page.goto(WEB_URL, { waitUntil: 'networkidle0', timeout: 30_000 })
+    await page.waitForSelector('h1', { timeout: 10_000 })
+    await screenshot(page, path.join(OUT, 'v0-3-4/birth-step.png'))
+
+    await selectDelhi(page)
+    await page.click('button[aria-label="Continue"]')
+    await sleep(500)
+    await expandScrollContainers(page)
+    await screenshot(page, path.join(OUT, 'v0-3-4/lived-cities-step.png'), { fullPage: true })
+    await page.close()
+  }
+
+  // Full result + fan close-up (Delhi 1988 → Mumbai 2014)
+  const scenario = V033_SCENARIOS[0]
+  const page = await browser.newPage()
+  await page.setViewport({ width: 1280, height: 900, deviceScaleFactor: 2 })
+  try {
+    console.log(`  scenario ${scenario.slug}`)
+    await runV033Scenario(page, scenario, latestYear)
+    await screenshot(page, path.join(OUT, `v0-3-4/${scenario.slug}-result.png`), {
+      fullPage: true,
+    })
+
+    await scrollToRecordHotSection(page)
+    const fan = await page.$('svg[aria-label*="record-hot years"]')
+    const box = fan ? await fan.boundingBox() : null
+    if (box) {
+      const pad = 12
+      await screenshot(page, path.join(OUT, 'v0-3-4/hand-fan-delhi-1988.png'), {
+        clip: {
+          x: Math.max(0, box.x - pad),
+          y: Math.max(0, box.y - pad),
+          width: box.width + pad * 2,
+          height: box.height + pad * 2,
+        },
+      })
+    }
+  } catch (err) {
+    console.log(`  failed v0.3.4 result — ${err.message}`)
+  }
+  await page.close()
+}
+
 async function captureV033(browser) {
   console.log('\nv0.3.3 — generational emissions rings')
   const latestYear = new Date().getUTCFullYear() - 1
@@ -499,6 +561,7 @@ async function main() {
   })
 
   try {
+    if (!only || only === 'v0-3-4') await captureV034(browser)
     if (!only || only === 'v0-3-3') await captureV033(browser)
     if (!only || only === 'v0-3-2') await captureV032(browser)
     if (!only || only === 'v0-3-1') await captureV031(browser)

@@ -2,7 +2,7 @@
 
 Regenerates screenshots and screen recordings for `/documentation`.
 
-## v0.3.3 (current)
+## v0.3.4 (current)
 
 ```bash
 # terminal 1 — API
@@ -11,7 +11,15 @@ npm run dev
 # terminal 2 — web
 cd web && npm run dev
 
-# terminal 3 — capture (three result screenshots, distinct birth years + cities)
+# terminal 3 — capture (wizard steps + Delhi 1988 result + fan crop)
+npm run capture:docs -- --only v0-3-4
+```
+
+Outputs: `web/public/documentation/v0-3-4/` — `birth-step.png`, `lived-cities-step.png`, `delhi-1988-mumbai-result.png`, `hand-fan-delhi-1988.png`
+
+## v0.3.3
+
+```bash
 npm run capture:docs -- --only v0-3-3
 ```
 

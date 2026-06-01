@@ -12,22 +12,23 @@ export const meta = {
 </p>
 
 <p className="doc-meta">
-  Internal working document. Not linked from the public UI. Last updated May 2026.
+  Internal working document. Not linked from the public UI. Last updated June 2026.
 </p>
 
 ---
 
 ## How to read this
 
-Four shipped iterations plus v0.3.3 in progress — three retired or superseded. Each section covers what we built, why we built it, how the data moved, and why we moved on. Screenshots and recordings live under `/documentation/` in `web/public/`.
+Five shipped v0.3 iterations on `main` — three retired or superseded. Each section covers what we built, why we built it, how the data moved, and why we moved on. Screenshots and recordings live under `/documentation/` in `web/public/`.
 
 | Version | Status | Branch / location |
 | --- | --- | --- |
 | 0.1 | Retired | `retired-0.1-0.2` → `v0.1/` |
 | 0.2 | Retired | `retired-0.1-0.2` → `v0.2/` |
 | 0.3.1 | Superseded | `main` through 13 May 2026 |
-| 0.3.2 | Superseded | `main` (committed 24 May 2026) |
-| 0.3.3 | Current | `main` (emissions rings comparison, 24 May 2026) |
+| 0.3.2 | Superseded | `main` (wizard + monthly delta, 24 May 2026) |
+| 0.3.3 | Superseded | `main` (generational emissions rings, 24 May 2026) |
+| 0.3.4 | Current | `main` (fan, IMD, deploy, exhibit polish, Jun 2026) |
 
 Archive rationale: `docs/RETIREMENT-v0.1-v0.2.md` on the `retired-0.1-0.2` branch.
 
@@ -317,7 +318,7 @@ Implementation in `src/routes/monthly-delta.ts` — sequential weather fetches p
 
 ## v0.3.3 — generational emissions rings + tooltips
 
-**24 May 2026** · Current work
+**24 May 2026** · Superseded by v0.3.4
 
 ### Product addition
 
@@ -369,12 +370,101 @@ Captures use three distinct birth years and multi-city timelines so rings, insig
   wide
 />
 
+### What's still open (at v0.3.3)
+
+- Hand-fan section for record-hot years not yet built
+- No production deploy path beyond localhost
+- Inter typography; lived-cities step still rough around add/remove and slider affordances
+
+---
+
+## v0.3.4 — exhibit deploy, hand fan, IMD peaks, visual polish
+
+**May–June 2026** · Current work on `main`
+
+### What changed in thinking
+
+v0.3.3 made the result page feel complete for temperature + emissions. v0.3.4 is **venue-ready engineering**: ship the stack to a droplet + Vercel, add a second climate story (years you lived through that rank in each city's top-10 hottest since 1940), and tighten the wizard and typography so the kiosk reads as an almanac, not a dev tool.
+
+### Production architecture
+
+```
+Visitor → klimate-kundli.vercel.app (Vite static UI)
+              │
+              └── VITE_API_URL → Cloudflare quick tunnel → trycloudflare.com
+                        │
+                        └── DigitalOcean droplet :8787 (systemd: klimate-kundli)
+                                  ├── Hono API + SQLite cache (data/cache.sqlite)
+                                  ├── optional IMD_API_KEY + IMD_JWT_TOKEN (Indian peak °C on fan)
+                                  └── Caddy optional for sslip.io / custom domain on :443
+```
+
+**Deploy artifacts:** `deploy/setup-droplet.sh`, `deploy/klimate-kundli.service`, `deploy/setup-cloudflare-tunnel.sh`, `deploy/cloudflared-quick.service`, `deploy/show-tunnel-url.sh`. Frontend env and tunnel drift troubleshooting: `docs/VERCEL_API.md`.
+
+**Operational notes:**
+
+- Tunnel hostname **changes** when `cloudflared-quick` restarts — update `VITE_API_URL` on Vercel and redeploy.
+- `npm run build` emits `dist/index.js` for systemd; deploy skips Puppeteer on the server.
+- Droplet public IP is whitelisted on the IMD portal for `IMD_API_KEY`; JWT from the portal test console goes in `IMD_JWT_TOKEN` (expires — regenerate via `npm run imd:diagnose`).
+
+### Product addition — record-hot years hand fan
+
+After the monthly temperature chart and before emissions rings, the result view adds **"You've lived through N record-hot years"**:
+
+- For each city stint, ERA5 annual means pick the **top 10 hottest years since 1940** at that grid point.
+- Any calendar year you lived there that appears in that city's top 10 becomes a **fan blade** (one slat per year).
+- Blade **height** encodes peak daily max that year; **color** encodes city; hover shows year, °C, date, rank, and source.
+- **India:** when IMD station binding + cached peak exist, blade peak °C and tooltip use **IMD station** (`peakSource: imd_station`); qualification for "hot year" still uses ERA5 annual mean. Non-India and IMD misses stay on ERA5 with an explicit footnote.
+
+**Backend:** `POST /monthly-delta` adds `hottestYears` — `buildHottestYearsInsight()` in `src/routes/monthly-delta.ts`, with `applyImdPeak()` via `ImdService`.
+
+**Web:** `HandFanChart` (SVG fan, fixed blade capacity, global height scale), `HottestYearsSection` in `MonthlyDeltaChart`, copy in `RemediesSection` and `InsightsSection`.
+
+### IMD layer (optional, droplet)
+
+We revived a **thin IMD path** without v0.2's Postgres ingest:
+
+| Piece | Location |
+| --- | --- |
+| Station map (~4511 stations) | `src/data/imd_station_map.json` via `npm run imd:build-station-map` |
+| Nearest-station binding | `src/resolvers/imd/` |
+| Peak cache | SQLite keys `imd:peak:v1:{stationId}:{year}` |
+| Ops docs | `docs/IMD_SETUP.md`, `docs/IMD_IMPLEMENTATION.md` |
+| Auth probe | `npm run imd:diagnose`, `npm run imd:spike` |
+
+**Blocker for full historical fan:** many IMD HTTP endpoints are recent-only; long backfills may need one-time archive ingest into `data/imd/peaks/` (sketched in `IMD_IMPLEMENTATION.md`).
+
+### Visual + wizard polish
+
+- **Typography:** Cormorant Garamond headings (`font-heading`), self-hosted **General Sans** body — dropped Inter.
+- **Lived cities step:** grid layout (`11rem` city column + timeline), `DisabledTooltip` on add-row when timeline full, slider drag preview on the year axis, shared helpers in `web/src/lib/lived-cities.ts`.
+- **City search:** combobox interaction fixes for exhibit typing pace.
+
+<Figure
+  src="/documentation/v0-3-4/birth-step.png"
+  caption="Step 1 — birth city + year wheel with Cormorant/General Sans and updated wizard chrome."
+/>
+
+<Figure
+  src="/documentation/v0-3-4/lived-cities-step.png"
+  caption="Step 2 — polished lived-cities grid, timeline sliders, disabled tooltips when the axis is full."
+  wide
+/>
+
+<Figure
+  src="/documentation/v0-3-4/delhi-1988-mumbai-result.png"
+  caption="Full result — monthly chart, record-hot fan, generational emissions rings, insights, remedies (Delhi 1988 → Mumbai 2014)."
+  wide
+/>
+
 ### What's still open
 
 - `/kundli` twelve-card endpoint exists but the UI no longer calls it
-- Prewarm city list still at ~35; needs expansion before exhibit
-- No print / kiosk / offline mode
-- Tooltip copy not yet localized for exhibit kiosk language
+- Prewarm city list still at ~35; expand before exhibit
+- Named Cloudflare tunnel (fixed hostname) instead of quick-tunnel URL churn
+- IMD historical peak backfill for pre-2000 fan blades where API is thin
+- No print / kiosk offline bundle
+- Exhibit kiosk language not localized
 
 ---
 
@@ -383,27 +473,32 @@ Captures use three distinct birth years and multi-city timelines so rings, insig
 ```
 v0.1   Browser ──► Hono+SQLite ──► Open-Meteo (live + cache)
 v0.2   Browser ──► Hono ──► Supabase ◄── Python ingest ◄── CDS/IMD/R2
-v0.3   Browser ──► Hono+SQLite ──► Open-Meteo (live + cache, paid tier)
-                      │
+v0.3   Browser ──► Hono+SQLite ──► Open-Meteo (live + cache)
+                      │              └── optional IMD station peaks (IN fan blades)
                       └── POST /monthly-delta (primary UI path)
+
+v0.3.4 Vercel UI ──tunnel──► droplet Hono (same as above)
 ```
 
-The through-line: **Open-Meteo keeps winning for city-scale exhibit queries.** v0.2's IMD gridded accuracy was real for Indian monsoon rainfall, but the ops cost wasn't proportional to a two-day show. If we revisit IMD, the v0.3 prompt already sketches a static parquet tier — offline preprocessing, runtime JS lookup, no Python at exhibit time.
+The through-line: **Open-Meteo keeps winning for city-scale exhibit queries.** v0.2's full Postgres ingest stayed retired; v0.3.4 adds a **minimal IMD sidecar** (station map JSON + peak cache + API on the droplet) for hotter, more credible Indian peak temperatures on the fan without reviving Python ingest at exhibit time.
 
 ---
 
-## Repository map (current `main`)
+## Repository map (current _main_)
 
 ```
 klimate-kundli/
 ├── src/                    # v0.3 Hono backend
 │   ├── routes/             # kundli, monthly-delta, geocode, stats, health
-│   ├── resolvers/          # geocoding, historical, projection, statics
+│   ├── resolvers/          # geocoding, historical, projection, statics, imd/
 │   ├── aggregations/       # 12-card compute (legacy contract)
-│   └── scripts/            # prewarm, fetch_static_data
-├── web/                    # v0.3 React frontend
+│   └── scripts/            # prewarm, fetch_static_data, imd:*
+├── deploy/                 # droplet systemd, Caddy, Cloudflare tunnel
+├── docs/                   # IMD_SETUP, IMD_IMPLEMENTATION, VERCEL_API
+├── web/                    # v0.3 React frontend (Vercel)
 │   ├── src/documentation/  # this page (MDX)
 │   └── public/documentation/  # screenshots + recordings
+├── scripts/capture/        # Puppeteer + ffmpeg capture pipeline
 ├── klimate-kundli-pipeline-prompt.md
 └── README.md
 ```
@@ -418,10 +513,11 @@ Screenshots and screen recordings regenerate via `scripts/capture/`. Static PNGs
 
 ```bash
 # from repo root — requires dev servers or archived branch worktrees running
-npm run capture:docs
+npm run capture:docs -- --only v0-3-4   # current
+npm run capture:docs -- --only v0-3-3   # three attendee profiles (emissions focus)
 ```
 
-Outputs land in `web/public/documentation/{version}/` (v0.3.3 adds three full-result PNGs under `v0-3-3/`).
+See `scripts/capture/README.md`. Outputs land in `web/public/documentation/{version}/`.
 
 ---
 
