@@ -26,8 +26,9 @@ const VIEW_HEIGHT = MAX_SLAT_R + VIEW_PAD_TOP + VIEW_PAD_BOTTOM
 const FAN_ARC_DEG = 150
 const FAN_ARC_SPAN = (FAN_ARC_DEG * Math.PI) / 180
 const FAN_ARC_CENTER = -Math.PI / 2
-const FAN_ARC_START = FAN_ARC_CENTER - FAN_ARC_SPAN / 2
-/** Gap between slats as a fraction of slat width (keeps separation, still fills 180°). */
+/** Fixed blade count the arc is sized for — actual blades use this width, centered. */
+const FAN_BLADE_CAPACITY = 18
+/** Gap between slats as a fraction of slat width. */
 const SLAT_GAP_RATIO = 0.14
 /** Neighbor slats tuck under prior by this fraction of pitch (constant radial edges). */
 const SLAT_STEP_OVERLAP_RATIO = 0.22
@@ -265,14 +266,14 @@ function HandFanSvg({ fanBlades, count }: HandFanSvgProps) {
   )
 }
 
-function slatLayout(n: number): { slatWidth: number; gap: number } {
-  if (n <= 0) {
+function slatLayout(capacity: number): { slatWidth: number; gap: number } {
+  if (capacity <= 0) {
     return { slatWidth: 0, gap: 0 }
   }
-  if (n === 1) {
+  if (capacity === 1) {
     return { slatWidth: FAN_ARC_SPAN, gap: 0 }
   }
-  const slatWidth = FAN_ARC_SPAN / (n + (n - 1) * SLAT_GAP_RATIO)
+  const slatWidth = FAN_ARC_SPAN / (capacity + (capacity - 1) * SLAT_GAP_RATIO)
   const gap = slatWidth * SLAT_GAP_RATIO
   return { slatWidth, gap }
 }
@@ -283,22 +284,21 @@ function buildFanBlades(
 ): FanBladeGeom[] {
   if (blades.length === 0) return []
 
-  const perCityRange = new Map<string, { min: number; max: number }>()
+  let globalMin = blades[0].peakTempC
+  let globalMax = blades[0].peakTempC
   for (const blade of blades) {
-    const entry = perCityRange.get(blade.cityName) ?? { min: blade.peakTempC, max: blade.peakTempC }
-    entry.min = Math.min(entry.min, blade.peakTempC)
-    entry.max = Math.max(entry.max, blade.peakTempC)
-    perCityRange.set(blade.cityName, entry)
+    globalMin = Math.min(globalMin, blade.peakTempC)
+    globalMax = Math.max(globalMax, blade.peakTempC)
   }
+  const globalTempSpan = globalMax - globalMin
 
   const n = blades.length
-  const { slatWidth, gap } = slatLayout(n)
+  const { slatWidth, gap } = slatLayout(FAN_BLADE_CAPACITY)
   const pitch = slatWidth + gap
   const stepOverlap = pitch * SLAT_STEP_OVERLAP_RATIO
   const step = pitch - stepOverlap
-  /** Inset both ends equally when overlap shortens span (keeps fan centered on −π/2). */
-  const tuckShortfall = (n - 1) * stepOverlap
-  const arcStart = FAN_ARC_START + tuckShortfall / 2
+  const groupSpan = n === 1 ? slatWidth : (n - 1) * step + slatWidth
+  const arcStart = FAN_ARC_CENTER - groupSpan / 2
   const livedCount = blades.length
   const peakRankByYear = rankLivedYearsByPeak(blades)
 
@@ -310,9 +310,7 @@ function buildFanBlades(
     const a1Hit = a1 + hitPad
     const midAngle = (a0 + a1) / 2
 
-    const range = perCityRange.get(blade.cityName)!
-    const tempSpan = range.max - range.min
-    const heat = tempSpan > 0 ? (blade.peakTempC - range.min) / tempSpan : 1
+    const heat = globalTempSpan > 0 ? (blade.peakTempC - globalMin) / globalTempSpan : 1
     const outerR = MAX_SLAT_R
     const heatFillR = Math.max(
       BLADE_INNER_R + 10,
