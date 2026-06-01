@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createCache, type Cache } from "./cache/store.js";
+import { loadEnvFile } from "./lib/load-env-file.js";
 import { Telemetry } from "./lib/telemetry.js";
 import { createGeocoder, type Geocoder } from "./resolvers/geocoding.js";
 import { createHistoricalResolver } from "./resolvers/historical.js";
@@ -13,14 +14,17 @@ import { loadStaticData, type StaticData } from "./resolvers/statics.js";
 import { createGeocodeRoute } from "./routes/geocode.js";
 import { createHealthRoute } from "./routes/health.js";
 import { createKundliRoute } from "./routes/kundli.js";
+import { createKundlisRoute } from "./routes/kundlis.js";
 import { createMonthlyDeltaRoute } from "./routes/monthly-delta.js";
 import { createStatsRoute } from "./routes/stats.js";
+import { createKundliStore, type KundliStore } from "./storage/index.js";
 
 interface AppOptions {
   cache?: Cache;
   geocoder?: Geocoder;
   statics?: StaticData;
   telemetry?: Telemetry;
+  kundliStore?: KundliStore;
 }
 
 export function createApp(options: AppOptions = {}): Hono {
@@ -32,6 +36,7 @@ export function createApp(options: AppOptions = {}): Hono {
   const historical = createHistoricalResolver({ cache });
   const imd = createImdService({ cache });
   const projection = createProjectionResolver({ cache });
+  const kundliStore = options.kundliStore ?? createKundliStore();
 
   app.use(
     "*",
@@ -41,6 +46,7 @@ export function createApp(options: AppOptions = {}): Hono {
   );
 
   app.route("/kundli", createKundliRoute({ cache, statics, telemetry, historical, projection }));
+  app.route("/kundlis", createKundlisRoute(kundliStore));
   app.route("/monthly-delta", createMonthlyDeltaRoute({ historical, statics, imd }));
   app.route("/geocode", createGeocodeRoute(geocoder));
   app.route("/stats", createStatsRoute(cache, telemetry));
@@ -48,6 +54,8 @@ export function createApp(options: AppOptions = {}): Hono {
 
   return app;
 }
+
+loadEnvFile();
 
 const app = createApp();
 

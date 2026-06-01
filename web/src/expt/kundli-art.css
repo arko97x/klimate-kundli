@@ -1,0 +1,19 @@
+/* Matches outer fill in left-column-bg.svg */
+.kk-kundli-panel {
+  --kk-panel-bg: #115a3f;
+  background-color: var(--kk-panel-bg);
+  position: relative;
+  isolation: isolate;
+}
+
+.kk-kundli-art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: var(--kk-panel-bg);
+  background-image: url('/left-column-bg.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}

@@ -1,0 +1,126 @@
+import { useLayoutEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { MenuIcon } from 'lucide-react'
+
+import { DisabledTooltip } from '@/components/DisabledTooltip'
+import { buttonVariants } from '@/components/ui/button'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { buildWavyRectPath, WAVE_BORDER_PAD, wavyBorderViewBox } from '@/expt/wavy-border'
+
+type FrameSize = { width: number; height: number }
+
+const COMING_SOON_ITEMS = ['About', 'Privacy Policy', 'Disclaimer'] as const
+
+function HeaderMenu() {
+  return (
+    <Popover>
+      <PopoverTrigger
+        className={buttonVariants({ variant: 'outline', size: 'icon' })}
+        aria-label="Open menu"
+      >
+        <MenuIcon className="size-5" />
+      </PopoverTrigger>
+      <PopoverContent align="end" sideOffset={8} className="w-52 gap-0 p-1">
+        <ul className="flex flex-col">
+          {COMING_SOON_ITEMS.map((label) => (
+            <li key={label}>
+              <DisabledTooltip disabled content="Coming soon">
+                <button
+                  type="button"
+                  disabled
+                  className="flex w-full rounded-sm px-3 py-2 text-left text-sm text-foreground opacity-60"
+                >
+                  {label}
+                </button>
+              </DisabledTooltip>
+            </li>
+          ))}
+        </ul>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+export function Header() {
+  const headerRef = useRef<HTMLElement>(null)
+  const [frameSize, setFrameSize] = useState<FrameSize>(() => ({
+    width: 0,
+    height: 80,
+  }))
+
+  useLayoutEffect(() => {
+    const header = headerRef.current
+    if (!header) return
+
+    const update = () => {
+      const { width, height } = header.getBoundingClientRect()
+      setFrameSize({ width, height })
+    }
+
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(header)
+    return () => observer.disconnect()
+  }, [])
+
+  const viewBox = wavyBorderViewBox(frameSize.width, frameSize.height)
+  const pad = WAVE_BORDER_PAD
+
+  return (
+    <header
+      ref={headerRef}
+      className="relative z-10 w-full shrink-0 overflow-visible bg-background"
+    >
+      <div className="relative z-10 flex items-center px-4 py-4 sm:px-6 sm:py-6">
+        <Link to="/" className="shrink-0" aria-label="Klimate Kundli home">
+          <img
+            src="/kk-icon-beta.svg"
+            alt="Klimate Kundli (Beta)"
+            width={35}
+            height={22}
+            className="h-12 w-auto"
+          />
+        </Link>
+        <nav className="ml-auto flex items-center gap-2 sm:gap-3">
+          <Link
+            to="/gallery"
+            className="text-sm font-medium text-foreground transition-colors hover:text-foreground/70"
+          >
+            Explore
+          </Link>
+          <Link to="/" className={buttonVariants()}>
+            New Kundli
+          </Link>
+          <HeaderMenu />
+        </nav>
+      </div>
+      {frameSize.width > 0 ? (
+        <svg
+          aria-hidden
+          viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
+          className="pointer-events-none absolute text-[#0A9396]"
+          style={{
+            top: -pad,
+            left: -pad,
+            width: frameSize.width + pad * 2,
+            height: frameSize.height + pad * 2,
+          }}
+        >
+          <path
+            d={buildWavyRectPath(frameSize.width, frameSize.height)}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      ) : null}
+    </header>
+  )
+}

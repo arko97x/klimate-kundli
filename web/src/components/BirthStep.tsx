@@ -14,7 +14,8 @@ type BirthStepProps = {
   birthYear: number
   onBirthYearChange: (year: number) => void
   latestCompleteYear: number
-  onNext: () => void
+  onNext?: () => void
+  showContinue?: boolean
 }
 
 export function BirthStep({
@@ -24,12 +25,13 @@ export function BirthStep({
   onBirthYearChange,
   latestCompleteYear,
   onNext,
+  showContinue = true,
 }: BirthStepProps) {
   const canContinue = birthCity !== null
   const controlWidth = 'w-full max-w-sm'
 
   return (
-    <div className="mx-auto w-full max-w-md space-y-10">
+    <div className="w-full max-w-md space-y-10 px-1.5">
       <div className={cn('space-y-3', controlWidth)}>
         <Label htmlFor="birth-city">Where were you born…</Label>
         <CitySearchCombobox
@@ -50,23 +52,24 @@ export function BirthStep({
         />
       </div>
 
-      <div className="flex justify-end pt-2">
-        <DisabledTooltip
-          disabled={!canContinue}
-          content="Select your birth city"
-        >
-          <Button
-            type="button"
-            size="icon"
-            className="size-11 rounded-md"
+      {showContinue ? (
+        <div className="flex justify-end pt-2">
+          <DisabledTooltip
             disabled={!canContinue}
-            onClick={onNext}
-            aria-label="Continue"
+            content="Select your birth city"
           >
-            <ChevronRightIcon className="size-5" />
-          </Button>
-        </DisabledTooltip>
-      </div>
+            <Button
+              type="button"
+              size="icon"
+              disabled={!canContinue}
+              onClick={onNext}
+              aria-label="Continue"
+            >
+              <ChevronRightIcon className="size-5" />
+            </Button>
+          </DisabledTooltip>
+        </div>
+      ) : null}
     </div>
   )
 }

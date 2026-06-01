@@ -187,7 +187,7 @@ export function CitySearchCombobox({
     <div ref={rootRef} className={cn('relative w-full', className)}>
       <form
         autoComplete="off"
-        className="relative"
+        className="relative -m-1 p-1"
         onSubmit={(event) => event.preventDefault()}
       >
         <Input

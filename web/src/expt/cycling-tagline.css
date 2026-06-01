@@ -1,0 +1,81 @@
+@keyframes kk-tagline-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.45rem, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes kk-tagline-leave {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, -0.35rem, 0);
+  }
+}
+
+.kk-tagline-stage {
+  position: relative;
+  width: 100%;
+}
+
+.kk-tagline-sizer {
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+.kk-tagline-sizer-line {
+  display: block;
+}
+
+.kk-tagline-copy {
+  line-height: 1.15;
+  margin: 0;
+}
+
+.kk-tagline-line {
+  display: inline;
+}
+
+.kk-tagline-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  will-change: opacity, transform;
+}
+
+.kk-tagline-layer--enter .kk-tagline-line {
+  opacity: 0;
+  animation: kk-tagline-enter var(--kk-enter-ms, 900ms)
+    cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(
+    var(--kk-crossfade-overlap, 200ms) + var(--line-index) * var(--kk-stagger-ms, 130ms)
+  );
+}
+
+.kk-tagline-layer--leave {
+  animation: kk-tagline-leave var(--kk-leave-ms, 800ms)
+    cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kk-tagline-layer--enter .kk-tagline-line,
+  .kk-tagline-layer--leave {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

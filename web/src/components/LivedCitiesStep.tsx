@@ -29,6 +29,7 @@ type LivedCitiesStepProps = {
   onRowsChange: (rows: ResidenceRow[]) => void
   latestCompleteYear?: number
   error?: string | null
+  embedded?: boolean
 }
 
 const LIVED_CITIES_GRID =
@@ -42,7 +43,9 @@ export function LivedCitiesStep({
   onRowsChange,
   latestCompleteYear = latestCompleteYearUtc(),
   error = null,
+  embedded = false,
 }: LivedCitiesStepProps) {
+  const sectionPadding = embedded ? 'px-1.5' : 'px-6 sm:px-10 lg:px-14'
   const [dragPreview, setDragPreview] = useState<DragPreview | null>(null)
   const canAdd = canAddResidenceRow(rows, latestCompleteYear)
   const addDisabledReason = addResidenceRowDisabledReason(rows, latestCompleteYear)
@@ -112,9 +115,9 @@ export function LivedCitiesStep({
 
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col">
-      <div className="shrink-0 bg-background px-6 pb-4 sm:px-10 lg:px-14">
+      <div className={`shrink-0 bg-background pb-4 ${sectionPadding}`}>
         <div className={LIVED_CITIES_CONTENT}>
-          <div className="space-y-2 pb-8 text-center sm:text-left">
+          <div className="space-y-2 pb-3 text-center sm:text-left">
             <Label>Where all have you lived / travelled to?</Label>
             <p className="text-sm text-muted-foreground">
               Years are approximate. If you moved during a year, both places can include that year.
@@ -137,7 +140,7 @@ export function LivedCitiesStep({
         </div>
       </div>
 
-      <div className="min-h-0 w-full flex-1 overflow-y-auto px-6 sm:px-10 lg:px-14">
+      <div className={`min-h-0 w-full flex-1 overflow-y-auto overscroll-contain ${sectionPadding}`}>
         <div className={LIVED_CITIES_CONTENT}>
           <div className="flex flex-col gap-8 pt-8">
             {rows.map((row, index) => {
@@ -259,7 +262,6 @@ export function LivedCitiesStepFooter({
         type="button"
         variant="outline"
         size="icon"
-        className="size-11 rounded-md"
         onClick={onBack}
         aria-label="Back"
       >

@@ -135,3 +135,69 @@ export async function fetchMonthlyDelta(
 
   return res.json() as Promise<MonthlyDeltaResponse>
 }
+
+export interface SavedKundliSummary {
+  slug: string
+  birthCityDisplay: string
+  birthYear: number
+  createdAt: string
+}
+
+export interface SavedKundliRecord extends SavedKundliSummary {
+  birthCity: City
+  livedCities: LivedCity[]
+  result: MonthlyDeltaResponse
+}
+
+export interface SaveKundliInput {
+  birthCity: City
+  birthYear: number
+  livedCities: LivedCity[]
+  result: MonthlyDeltaResponse
+}
+
+export async function saveKundli(input: SaveKundliInput): Promise<SavedKundliSummary> {
+  const res = await fetch(`${API_BASE}/kundlis`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  })
+
+  if (!res.ok) {
+    throw new Error(`Could not save kundli (${res.status})`)
+  }
+
+  return res.json() as Promise<SavedKundliSummary>
+}
+
+export async function fetchKundliBySlug(slug: string): Promise<SavedKundliRecord> {
+  const res = await fetch(`${API_BASE}/kundlis/${encodeURIComponent(slug)}`)
+
+  if (res.status === 404) {
+    throw new Error('Kundli not found')
+  }
+
+  if (!res.ok) {
+    throw new Error(`Could not load kundli (${res.status})`)
+  }
+
+  return res.json() as Promise<SavedKundliRecord>
+}
+
+export async function fetchKundliList(
+  limit = 50,
+  offset = 0,
+): Promise<SavedKundliSummary[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  })
+  const res = await fetch(`${API_BASE}/kundlis?${params}`)
+
+  if (!res.ok) {
+    throw new Error(`Could not load kundli list (${res.status})`)
+  }
+
+  const body = (await res.json()) as { items: SavedKundliSummary[] }
+  return body.items ?? []
+}

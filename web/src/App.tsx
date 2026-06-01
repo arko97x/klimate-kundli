@@ -2,6 +2,8 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import KundliApp from '@/KundliApp'
 import { DocumentationPage } from '@/documentation/DocumentationPage'
+import { GalleryPage } from '@/pages/GalleryPage'
+import { KundliViewPage } from '@/pages/KundliViewPage'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
 function App() {
@@ -10,6 +12,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<KundliApp />} />
+          <Route path="/k/:slug" element={<KundliViewPage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/documentation" element={<DocumentationPage />} />
         </Routes>
       </BrowserRouter>
