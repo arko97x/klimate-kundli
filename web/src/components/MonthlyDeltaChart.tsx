@@ -5,6 +5,8 @@ import { InsightsSection } from '@/components/InsightsSection'
 import { RemediesSection } from '@/components/RemediesSection'
 import { Button } from '@/components/ui/button'
 import { HandFanChart } from '@/components/HandFanChart'
+import { MonthlyRainSection } from '@/components/MonthlyRainSection'
+import { RainRingsChart } from '@/components/RainRingsChart'
 import type { MonthlyDeltaResponse } from '@/lib/api'
 
 const MONTH_NAMES = [
@@ -175,6 +177,25 @@ export function MonthlyDeltaChart({ data, onReset }: MonthlyDeltaChartProps) {
           </span>
         </dl>
       </footer>
+
+      {data.rainfall ? (
+        <>
+          <hr className="border-border" />
+          <MonthlyRainSection
+            cityName={data.city.name}
+            rainfall={data.rainfall}
+            source={data.source}
+            confidence={data.confidence}
+          />
+        </>
+      ) : null}
+
+      {data.rainRings && data.rainRings.byCity.length > 0 ? (
+        <>
+          <hr className="border-border" />
+          <RainRingsChart insight={data.rainRings} source={data.source} />
+        </>
+      ) : null}
 
       {data.hottestYears ? (
         <>

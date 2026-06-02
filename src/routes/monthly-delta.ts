@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { Budget } from "../lib/budget.js";
 import { gridKey } from "../lib/grid.js";
+import { buildRainRingsInsight } from "../lib/rain-rings.js";
+import { buildRainfallInsight } from "../lib/rain-stats.js";
 import type { HistoricalWeatherResult, WeatherDaily } from "../resolvers/historical.js";
 import type { ImdService } from "../resolvers/imd/resolver.js";
 import type { StaticData } from "../resolvers/statics.js";
@@ -117,6 +119,14 @@ export function createMonthlyDeltaRoute(deps: MonthlyDeltaRouteDeps): Hono {
           : null;
       const parentsBirthWindow = buildParentsBirthWindow(birthWeather.daily, birthYear, latestCompleteYear);
       const globalContext = buildGlobalContext(deps.statics, birthYear, latestCompleteYear);
+      const rainfall = buildRainfallInsight(
+        birthWeather.daily,
+        birthStart,
+        birthEnd,
+        recentStart,
+        recentEnd,
+      );
+      const rainRings = buildRainRingsInsight(stints, weatherByKey, birthYear, latestCompleteYear);
 
       return c.json({
         city: parsed.data.birthCity,
@@ -141,6 +151,8 @@ export function createMonthlyDeltaRoute(deps: MonthlyDeltaRouteDeps): Hono {
         parentsIndiaEmissions,
         parentsBirthWindow,
         globalContext,
+        rainfall,
+        rainRings,
         source: birthWeather.source,
         confidence: birthWeather.confidence,
       });

@@ -97,6 +97,39 @@ export interface GlobalContext {
   co2PpmNow: number | null
 }
 
+export interface RainRingYear {
+  year: number
+  precipMm: number
+}
+
+export interface RainRingsCity {
+  cityName: string
+  displayName: string
+  startYear: number
+  endYear: number
+  years: RainRingYear[]
+  wettestYear: number | null
+  driestYear: number | null
+  wetYearsAboveMedian: number
+}
+
+export interface RainRingsInsight {
+  birthYear: number
+  latestCompleteYear: number
+  byCity: RainRingsCity[]
+}
+
+export interface RainfallInsight {
+  heavyRainThresholdMm: number
+  thenDaysPerYear: number
+  nowDaysPerYear: number
+  deltaDaysPerYear: number
+  birthWindow: MonthlyDeltaWindow
+  recentWindow: MonthlyDeltaWindow
+  largestDelta: { month: number; delta: number } | null
+  monsoonPctChange: number | null
+}
+
 export interface MonthlyDeltaResponse {
   city: City
   birthYear: number
@@ -108,6 +141,8 @@ export interface MonthlyDeltaResponse {
   parentsIndiaEmissions: IndiaEmissionsRings | null
   parentsBirthWindow: MonthlyDeltaWindow | null
   globalContext: GlobalContext | null
+  rainfall: RainfallInsight | null
+  rainRings: RainRingsInsight | null
   source: string
   confidence: string
 }

@@ -22,6 +22,8 @@ const sampleResult = {
   parentsIndiaEmissions: null,
   parentsBirthWindow: null,
   globalContext: null,
+  rainfall: null,
+  rainRings: null,
   source: "era5",
   confidence: "high",
 };
