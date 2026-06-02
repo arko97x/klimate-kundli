@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.build.json",
+    "redeploy": "bash deploy/redeploy-api.sh",
     "start": "node dist/index.js",
     "test": "vitest run tests",
     "fetch:static": "tsx src/scripts/fetch_static_data.ts",
