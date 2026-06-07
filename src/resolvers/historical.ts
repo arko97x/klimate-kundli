@@ -15,7 +15,7 @@ export interface WeatherDaily {
 
 export interface HistoricalWeatherResult {
   daily: WeatherDaily[];
-  source: Extract<Source, "era5" | "nasa_power" | "nearest_city">;
+  source: Extract<Source, "era5" | "era5_seamless" | "nasa_power" | "nearest_city">;
   confidence: Confidence;
   reason?: string;
   nearestCity?: string;
@@ -64,23 +64,31 @@ export function createHistoricalResolver(options: HistoricalOptions) {
   return {
     async resolve(city: City, startDate: string, endDate: string, budget = new Budget(8000)) {
       const range = fullYearRange(startDate, endDate);
-      const key = historicalCacheKey(city, range.startYear, range.endYear);
-      const cached = options.cache.get<HistoricalWeatherResult>(key);
+      const cached = readHistoricalCache(options.cache, city, range.startYear, range.endYear);
 
       if (cached) {
         return cached;
       }
 
-      const era5 = await fetchOpenMeteo(city, range.start, range.end, fetchImpl, budget, openMeteoTimeoutMs, options.onError);
-      if (era5) {
-        options.cache.set(key, era5);
-        return era5;
+      const writeKey = historicalCacheKeyV2(city, range.startYear, range.endYear);
+      const seamless = await fetchOpenMeteo(
+        city,
+        range.start,
+        range.end,
+        fetchImpl,
+        budget,
+        openMeteoTimeoutMs,
+        options.onError,
+      );
+      if (seamless) {
+        options.cache.set(writeKey, seamless);
+        return seamless;
       }
 
       if (range.start >= NASA_START) {
         const nasa = await fetchNasaPower(city, range.start, range.end, fetchImpl, budget, nasaTimeoutMs, options.onError);
         if (nasa) {
-          options.cache.set(key, nasa);
+          options.cache.set(writeKey, nasa);
           return nasa;
         }
       } else {
@@ -97,8 +105,43 @@ export function createHistoricalResolver(options: HistoricalOptions) {
   };
 }
 
+/** Legacy prewarm entries (default Open-Meteo blend). Kept readable; do not invalidate. */
 export function historicalCacheKey(city: Pick<City, "lat" | "lon">, startYear: number, endYear: number): string {
+  return historicalCacheKeyV1(city, startYear, endYear);
+}
+
+export function historicalCacheKeyV1(city: Pick<City, "lat" | "lon">, startYear: number, endYear: number): string {
   return `hist:raw:v1:${gridKey(city.lat, city.lon)}:${startYear}:${endYear}`;
+}
+
+/** ERA5 / ERA5-Land via Open-Meteo `models=era5_seamless`. */
+export function historicalCacheKeyV2(city: Pick<City, "lat" | "lon">, startYear: number, endYear: number): string {
+  return `hist:raw:v2:${gridKey(city.lat, city.lon)}:${startYear}:${endYear}`;
+}
+
+export function isHistoricalCacheWarm(
+  cache: Cache,
+  city: Pick<City, "lat" | "lon">,
+  startYear: number,
+  endYear: number,
+): boolean {
+  return (
+    cache.has(historicalCacheKeyV2(city, startYear, endYear)) ||
+    cache.has(historicalCacheKeyV1(city, startYear, endYear))
+  );
+}
+
+function readHistoricalCache(
+  cache: Cache,
+  city: Pick<City, "lat" | "lon">,
+  startYear: number,
+  endYear: number,
+): HistoricalWeatherResult | null {
+  return (
+    cache.get<HistoricalWeatherResult>(historicalCacheKeyV2(city, startYear, endYear)) ??
+    cache.get<HistoricalWeatherResult>(historicalCacheKeyV1(city, startYear, endYear)) ??
+    null
+  );
 }
 
 async function fetchOpenMeteo(
@@ -117,6 +160,7 @@ async function fetchOpenMeteo(
   url.searchParams.set("end_date", endDate);
   url.searchParams.set("daily", "temperature_2m_max,temperature_2m_min,precipitation_sum");
   url.searchParams.set("timezone", "auto");
+  url.searchParams.set("models", "era5_seamless");
 
   try {
     const body = await fetchJsonWithRetry<OpenMeteoArchiveResponse>(url, fetchImpl, budget.signal(timeoutMs));
@@ -127,7 +171,7 @@ async function fetchOpenMeteo(
       body.daily?.precipitation_sum ?? [],
     );
 
-    return daily.length > 0 ? { daily, source: "era5", confidence: "high" } : null;
+    return daily.length > 0 ? { daily, source: "era5_seamless", confidence: "high" } : null;
   } catch (error) {
     onError?.({ city, tier: "open-meteo", error: error instanceof Error ? error.message : String(error) });
     return null;
@@ -189,7 +233,7 @@ function nearestPrewarmed(
     return null;
   }
 
-  const cached = cache.get<HistoricalWeatherResult>(historicalCacheKey(nearest.candidate, startYear, endYear));
+  const cached = readHistoricalCache(cache, nearest.candidate, startYear, endYear);
   if (!cached) {
     return null;
   }

@@ -7,6 +7,8 @@ import { Budget } from "../src/lib/budget.js";
 import {
   createHistoricalResolver,
   historicalCacheKey,
+  historicalCacheKeyV1,
+  historicalCacheKeyV2,
   type HistoricalWeatherResult,
 } from "../src/resolvers/historical.js";
 import type { City } from "../src/types.js";
@@ -42,12 +44,14 @@ function tempCache(): SqliteCache {
 }
 
 describe("historical resolver", () => {
-  it("fetches Open-Meteo ERA5 with full-year cache ranges", async () => {
+  it("fetches Open-Meteo era5_seamless with full-year cache ranges", async () => {
     const cache = tempCache();
     let requestedStart = "";
+    let requestedModels = "";
     const fetchImpl: typeof fetch = async (input) => {
       const url = new URL(String(input));
       requestedStart = url.searchParams.get("start_date") ?? "";
+      requestedModels = url.searchParams.get("models") ?? "";
       return new Response(
         JSON.stringify({
           daily: {
@@ -64,12 +68,38 @@ describe("historical resolver", () => {
     const result = await resolver.resolve(delhi, "1993-12-10", "1993-12-10", new Budget(8000));
 
     expect(requestedStart).toBe("1993-01-01");
+    expect(requestedModels).toBe("era5_seamless");
     expect(result).toMatchObject({
-      source: "era5",
+      source: "era5_seamless",
       confidence: "high",
       daily: [{ date: "1993-06-11", tmax: 47.9, tmin: 31.2, precip: 0 }],
     });
-    expect(cache.has(historicalCacheKey(delhi, 1993, 1993))).toBe(true);
+    expect(cache.has(historicalCacheKeyV2(delhi, 1993, 1993))).toBe(true);
+    expect(cache.has(historicalCacheKeyV1(delhi, 1993, 1993))).toBe(false);
+
+    cache.close();
+  });
+
+  it("serves legacy v1 prewarm cache without refetching Open-Meteo", async () => {
+    const cache = tempCache();
+    const legacy: HistoricalWeatherResult = {
+      source: "era5",
+      confidence: "high",
+      daily: [{ date: "2000-07-01", tmax: 38, tmin: 28, precip: 12 }],
+    };
+    cache.set(historicalCacheKeyV1(delhi, 2000, 2000), legacy);
+
+    const fetchImpl: typeof fetch = async () => {
+      throw new Error("should not fetch");
+    };
+
+    const resolver = createHistoricalResolver({ cache, fetchImpl, prewarmCities: [] });
+    const result = await resolver.resolve(delhi, "2000-06-01", "2000-08-01", new Budget(8000));
+
+    expect(result).toMatchObject({
+      source: "era5",
+      daily: [{ date: "2000-07-01", tmax: 38 }],
+    });
 
     cache.close();
   });
@@ -107,7 +137,7 @@ describe("historical resolver", () => {
       confidence: "high",
       daily: [{ date: "1970-01-01", tmax: 31, tmin: 20, precip: 0 }],
     };
-    cache.set(historicalCacheKey(mumbai, 1970, 1970), cachedMumbai);
+    cache.set(historicalCacheKeyV1(mumbai, 1970, 1970), cachedMumbai);
 
     const calls: string[] = [];
     const fetchImpl: typeof fetch = async (input) => {

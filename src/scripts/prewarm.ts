@@ -3,7 +3,11 @@ import { join } from "node:path";
 import { createCache } from "../cache/store.js";
 import { Budget } from "../lib/budget.js";
 import { gridKey } from "../lib/grid.js";
-import { createHistoricalResolver, historicalCacheKey, type WeatherDaily } from "../resolvers/historical.js";
+import {
+  createHistoricalResolver,
+  isHistoricalCacheWarm,
+  type WeatherDaily,
+} from "../resolvers/historical.js";
 import type { City } from "../types.js";
 
 const START_YEAR = 1940;
@@ -70,9 +74,7 @@ async function main(): Promise<void> {
       break;
     }
 
-    const key = historicalCacheKey(city, START_YEAR, END_YEAR);
-
-    if (cache.has(key)) {
+    if (isHistoricalCacheWarm(cache, city, START_YEAR, END_YEAR)) {
       skipped += 1;
       log({ msg: "prewarm_skip", city: city.displayName });
       continue;

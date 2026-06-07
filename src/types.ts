@@ -2,6 +2,7 @@ export type Confidence = "exact" | "high" | "medium" | "low" | "unavailable";
 
 export type Source =
   | "era5"
+  | "era5_seamless"
   | "nasa_power"
   | "imd"
   | "nearest_city"
