@@ -9,8 +9,14 @@ import { join } from "node:path";
 
 import { loadEnvFile } from "../lib/load-env-file.js";
 import {
+  hasImdAuthConfigured,
+  hasImdOAuthEnv,
+  resolveImdCredentials,
+} from "../resolvers/imd/auth.js";
+import {
   imdFetchJson,
   imdProbeAuthModes,
+  jwtExpiresAtSec,
   loadImdCredentials,
   type ImdFetchResult,
 } from "../resolvers/imd/client.js";
@@ -67,25 +73,32 @@ function analyze(name: string, path: string, result: ImdFetchResult): SpikeEntry
 async function main(): Promise<void> {
   loadEnvFile();
 
-  const creds = loadImdCredentials();
-  if (!creds.apiKey && !creds.jwt) {
+  if (!hasImdAuthConfigured()) {
     console.error(
       [
-        "Set IMD_API_KEY and/or IMD_JWT_TOKEN in .env.",
+        "Set IMD_API_KEY plus either IMD_EMAIL/IMD_PASSWORD (oauth) or IMD_JWT_TOKEN in .env.",
         "",
-        "Portal test console needs JWT Bearer — see docs/IMD_SETUP.md",
+        "See docs/IMD_SETUP.md",
       ].join("\n"),
     );
     process.exit(1);
   }
 
+  const creds = await resolveImdCredentials();
   if (creds.apiKey) {
     console.log(`IMD_API_KEY loaded (${creds.apiKey.length} characters)`);
   }
+  if (hasImdOAuthEnv()) {
+    console.log("IMD_EMAIL + IMD_PASSWORD set — JWT via oauth/token.php");
+  }
   if (creds.jwt) {
-    console.log(`IMD_JWT_TOKEN loaded (${creds.jwt.length} characters)`);
+    console.log(`JWT resolved (${creds.jwt.length} characters)`);
+    const exp = jwtExpiresAtSec(creds.jwt);
+    if (exp) {
+      console.log(`JWT exp: ${new Date(exp * 1000).toISOString()}`);
+    }
   } else {
-    console.log("WARN: no IMD_JWT_TOKEN — API key-only calls usually return 401");
+    console.log("WARN: no JWT — API key-only calls usually return 401");
   }
   try {
     const ipRes = await fetch("https://api.ipify.org?format=json");

@@ -32,7 +32,7 @@ Use that IPv4 in the IMD key form.
 
 ---
 
-## 3. Put the key on the server (not in chat)
+## 3. Put credentials on the server (not in chat)
 
 SSH into the droplet, edit the app env file (same place as `CACHE_PATH` / Open-Meteo settings):
 
@@ -41,23 +41,27 @@ cd /path/to/klimate-kundli   # your deploy folder
 nano .env                      # or however you manage env
 ```
 
-Add **both** (portal API Test Console uses two fields):
+Add **Prod API key** plus **portal login** (recommended — auto-refreshes JWT every hour):
 
 ```env
 IMD_API_KEY=paste_your_64_char_prod_key_here
-IMD_JWT_TOKEN=paste_jwt_from_generate_sample_jwt_button
+IMD_EMAIL=your_portal_login_email
+IMD_PASSWORD=your_portal_password
 ```
 
 | Variable | What it is | Where it goes in HTTP |
 |----------|------------|------------------------|
-| `IMD_API_KEY` | Prod key (`PROD \| klimate-kundli-1 \| 168.144.83.192 \| Active \| b6b0…`) | Header **`X-API-KEY`** (confirmed on droplet) — **not** `Authorization` |
-| `IMD_JWT_TOKEN` | Session JWT (`eyJ…` three parts) | `Authorization: Bearer <jwt>` |
+| `IMD_API_KEY` | Prod key from portal | Header **`X-API-KEY`** (bound to server IP) |
+| `IMD_EMAIL` / `IMD_PASSWORD` | Same login as https://api.imd.gov.in | Used to `POST /api/oauth/token.php` → `Authorization: Bearer <JWT>` |
+| `IMD_JWT_TOKEN` | Optional fallback only | Static JWT if you cannot store password on server |
 
-In the portal: **Generate Sample JWT From Session** → copy into `IMD_JWT_TOKEN`. JWT **expires**; regenerate when diagnose says expired.
+OAuth response TTL is **3600s**; the app refreshes ~5 minutes before expiry. No manual “Generate Sample JWT” step.
 
 Save, restart the API process if it’s already running.
 
-**Do not** paste the key in Slack/email to the agent — only on the machine that will call IMD.
+**Do not** paste keys or passwords in Slack/email to the agent — only on the machine that will call IMD.
+
+**Historical data:** IMD REST APIs are forecast/realtime only. Multi-decade station temps and rainfall require **NDC Pune** (see project docs / IMD ticket reply).
 
 **Important:** the `.env` file must live in the **same folder** where you run `npm run imd:spike` (usually the repo root). If you use systemd, that is often `/opt/klimate-kundli/.env` — not a different path unless you run the command from there.
 

@@ -395,7 +395,7 @@ Visitor → klimate-kundli.vercel.app (Vite static UI)
                         │
                         └── DigitalOcean droplet :8787 (systemd: klimate-kundli)
                                   ├── Hono API + SQLite cache (data/cache.sqlite)
-                                  ├── optional IMD_API_KEY + IMD_JWT_TOKEN (Indian peak °C on fan)
+                                  ├── optional IMD_API_KEY + IMD_EMAIL/PASSWORD (Indian peak °C on fan; JWT auto-refresh)
                                   └── Caddy optional for sslip.io / custom domain on :443
 ```
 
@@ -405,7 +405,7 @@ Visitor → klimate-kundli.vercel.app (Vite static UI)
 
 - Tunnel hostname **changes** when `cloudflared-quick` restarts — update `VITE_API_URL` on Vercel and redeploy.
 - `npm run build` emits `dist/index.js` for systemd; deploy skips Puppeteer on the server.
-- Droplet public IP is whitelisted on the IMD portal for `IMD_API_KEY`; JWT from the portal test console goes in `IMD_JWT_TOKEN` (expires — regenerate via `npm run imd:diagnose`).
+- Droplet public IP is whitelisted on the IMD portal for `IMD_API_KEY`; JWT from `POST /api/oauth/token.php` using portal login (`IMD_EMAIL` / `IMD_PASSWORD`), refreshed hourly — verify with `npm run imd:diagnose`.
 
 ### Product addition — record-hot years hand fan
 

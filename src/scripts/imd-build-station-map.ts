@@ -1,24 +1,23 @@
 /**
  * Refresh src/data/imd_station_map.json from IMD mapping APIs.
- * Requires working IMD_API_KEY on this machine.
+ * Requires working IMD auth on this machine.
  */
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { loadEnvFile } from "../lib/load-env-file.js";
-import { loadImdCredentials } from "../resolvers/imd/client.js";
+import { hasImdAuthConfigured } from "../resolvers/imd/auth.js";
 import { fetchStationCatalog } from "../resolvers/imd/resolver.js";
 import type { ImdStationMapFile } from "../resolvers/imd/types.js";
 
 async function main(): Promise<void> {
   loadEnvFile();
-  const creds = loadImdCredentials();
-  if (!creds.jwt && !creds.apiKey) {
-    console.error("Set IMD_JWT_TOKEN (and IMD_API_KEY) in .env. See docs/IMD_SETUP.md");
+  if (!hasImdAuthConfigured()) {
+    console.error("Set IMD_API_KEY + IMD_EMAIL/IMD_PASSWORD (or IMD_JWT_TOKEN). See docs/IMD_SETUP.md");
     process.exit(1);
   }
 
-  const stations = await fetchStationCatalog(creds);
+  const stations = await fetchStationCatalog();
   if (stations.length === 0) {
     console.error("No stations returned — fix auth first (npm run imd:diagnose).");
     process.exit(1);

@@ -1,18 +1,19 @@
 /**
  * Safe IMD .env + auth check (never prints secrets).
  * Run on droplet: npm run imd:diagnose
- *
- * Portal test console uses JWT Bearer + API key — not raw key in Authorization.
  */
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 import { loadEnvFile } from "../lib/load-env-file.js";
 import {
+  hasImdAuthConfigured,
+  hasImdOAuthEnv,
+  resolveImdCredentials,
+} from "../resolvers/imd/auth.js";
+import {
   imdProbeAuthModes,
   jwtExpiresAtSec,
-  loadImdCredentials,
-  type ImdCredentials,
 } from "../resolvers/imd/client.js";
 
 function parseEnvValue(cwd: string, name: string): { value: string; lineHint: string } | null {
@@ -49,7 +50,7 @@ function printJwtHints(jwt: string): void {
   if (exp) {
     const expDate = new Date(exp * 1000);
     const ok = expDate.getTime() > Date.now();
-    console.log(`JWT exp: ${expDate.toISOString()} ${ok ? "(valid)" : "(EXPIRED — regenerate in portal)"}`);
+    console.log(`JWT exp: ${expDate.toISOString()} ${ok ? "(valid)" : "(EXPIRED)"}`);
   }
 }
 
@@ -59,44 +60,62 @@ async function main(): Promise<void> {
 
   const apiParsed = parseEnvValue(cwd, "IMD_API_KEY");
   const jwtParsed = parseEnvValue(cwd, "IMD_JWT_TOKEN");
+  const emailParsed = parseEnvValue(cwd, "IMD_EMAIL");
+  const passwordParsed = parseEnvValue(cwd, "IMD_PASSWORD");
 
-  if (!apiParsed && !jwtParsed) {
-    console.log("No IMD_API_KEY= or IMD_JWT_TOKEN= in .env");
+  if (!apiParsed) {
+    console.log("MISSING IMD_API_KEY= in .env (required)");
     process.exit(1);
   }
 
-  if (apiParsed) {
-    console.log(`Found ${apiParsed.lineHint}`);
-    if (apiParsed.value.length === 0) {
-      console.log("IMD_API_KEY length is 0 — fix .env");
-      process.exit(1);
-    }
-    if (apiParsed.value.split(".").length === 3) {
-      console.log("WARN: IMD_API_KEY looks like a JWT — put JWT in IMD_JWT_TOKEN, keep hex key in IMD_API_KEY");
-    }
-  } else {
-    console.log("No IMD_API_KEY= line (optional if JWT works alone)");
+  console.log(`Found ${apiParsed.lineHint}`);
+  if (apiParsed.value.length === 0) {
+    console.log("IMD_API_KEY length is 0 — fix .env");
+    process.exit(1);
+  }
+  if (apiParsed.value.split(".").length === 3) {
+    console.log("WARN: IMD_API_KEY looks like a JWT — keep hex key in IMD_API_KEY only");
   }
 
-  if (jwtParsed) {
+  if (hasImdOAuthEnv()) {
+    console.log(`Found ${emailParsed?.lineHint ?? "IMD_EMAIL=…"}`);
+    console.log(`Found ${passwordParsed?.lineHint ?? "IMD_PASSWORD=…"}`);
+    console.log("Auth mode: oauth/token.php (auto-refresh, 1h TTL)");
+  } else if (jwtParsed) {
     console.log(`Found ${jwtParsed.lineHint}`);
     if (jwtParsed.value.length === 0) {
       console.log("IMD_JWT_TOKEN length is 0 — fix .env");
       process.exit(1);
     }
     printJwtHints(jwtParsed.value);
+    console.log("Auth mode: static IMD_JWT_TOKEN (manual refresh when expired)");
   } else {
-    console.log("\nMISSING IMD_JWT_TOKEN — portal API Test Console needs JWT Bearer.");
-    console.log("  1. Log in at https://api.imd.gov.in");
-    console.log("  2. Open API Test Console → Generate Sample JWT From Session");
-    console.log("  3. Add to .env: IMD_JWT_TOKEN=eyJ...  (one line, no quotes)");
+    console.log("\nMISSING JWT source — set IMD_EMAIL + IMD_PASSWORD (recommended) or IMD_JWT_TOKEN.");
+    console.log("  OAuth: POST https://api.imd.gov.in/api/oauth/token.php");
+    process.exit(1);
+  }
+
+  if (!hasImdAuthConfigured()) {
+    console.log("\nIncomplete IMD auth config.");
+    process.exit(1);
   }
 
   loadEnvFile();
-  const creds = loadImdCredentials();
+
+  let creds;
+  try {
+    creds = await resolveImdCredentials();
+  } catch (err) {
+    console.error(`\nJWT resolve failed: ${err instanceof Error ? err.message : err}`);
+    process.exit(1);
+  }
+
   console.log(
-    `\nprocess.env: apiKey=${creds.apiKey?.length ?? 0} chars, jwt=${creds.jwt?.length ?? 0} chars`,
+    `\nResolved: apiKey=${creds.apiKey?.length ?? 0} chars, jwt=${creds.jwt?.length ?? 0} chars`,
   );
+  if (creds.jwt) {
+    printJwtHints(creds.jwt);
+  }
 
   try {
     const ipRes = await fetch("https://api.ipify.org?format=json");
@@ -120,15 +139,10 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (!creds.jwt) {
-    console.log("\nAPI key alone failed (expected). Add IMD_JWT_TOKEN from portal test console.");
-    return;
-  }
-
-  console.log("\nJWT set but still failing:");
-  console.log("  • Regenerate JWT in portal (session button) — tokens expire");
-  console.log("  • Keep IMD_API_KEY= prod key; Prod IP must match Public IP above");
-  console.log("  • Ask IMD for server-side JWT issuance if session tokens cannot run on droplet");
+  console.log("\nAuth failed:");
+  console.log("  • Check IMD_EMAIL/PASSWORD (portal login) or refresh IMD_JWT_TOKEN");
+  console.log("  • Prod IMD_API_KEY IP must match Public IP above");
+  console.log("  • Headers: X-API-KEY + Authorization: Bearer <JWT>");
 }
 
 main().catch((err) => {

@@ -13,7 +13,7 @@ export type ImdAuthMode =
 
 export interface ImdCredentials {
   apiKey?: string;
-  /** Session JWT from portal “Generate Sample JWT From Session” — goes in Authorization: Bearer */
+  /** JWT for Authorization: Bearer — oauth/token.php or static IMD_JWT_TOKEN */
   jwt?: string;
 }
 

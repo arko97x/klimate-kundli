@@ -1,7 +1,8 @@
 import type { Cache } from "../../cache/store.js";
 import { loadEnvFile } from "../../lib/load-env-file.js";
 import type { City } from "../../types.js";
-import { imdFetchJson, loadImdCredentials } from "./client.js";
+import { hasImdAuthConfigured, resolveImdCredentials } from "./auth.js";
+import { imdFetchJson } from "./client.js";
 import { bindNearestStation, loadStationMap } from "./stations.js";
 import type { ImdAnnualPeak, ImdStationBinding, ImdStationMapFile } from "./types.js";
 
@@ -19,14 +20,11 @@ type CreateImdServiceOptions = {
 
 export function createImdService(options: CreateImdServiceOptions = {}): ImdService {
   loadEnvFile();
-  const creds = loadImdCredentials();
-  const apiKey = options.apiKey ?? creds.apiKey ?? "";
-  const jwt = creds.jwt;
   const map = options.stationMap ?? loadStationMap();
   const cache = options.cache;
 
   return {
-    enabled: (apiKey.length > 0 || (jwt?.length ?? 0) > 0) && map.stations.length > 0,
+    enabled: hasImdAuthConfigured() && map.stations.length > 0,
     bindStation(city) {
       return bindNearestStation(city, map);
     },
@@ -58,19 +56,20 @@ export function cacheAnnualPeak(
 
 /** Fetch cityforecast_mapping + aws_data_mapping when API key works. */
 export async function fetchStationCatalog(
-  creds: Parameters<typeof imdFetchJson>[1],
+  creds?: Parameters<typeof imdFetchJson>[1],
 ): Promise<ImdStationMapFile["stations"]> {
+  const auth = creds ?? (await resolveImdCredentials());
   const stations: ImdStationMapFile["stations"] = [];
   const seen = new Set<string>();
 
-  const cityMapping = await imdFetchJson("/api/v1/cityforecast_mapping", creds);
+  const cityMapping = await imdFetchJson("/api/v1/cityforecast_mapping", auth);
   if (cityMapping.ok) {
     for (const row of imdDataRows(cityMapping.body)) {
       pushStation(stations, seen, row, "Station_Code", "Station_Name", "Latitude", "Longitude");
     }
   }
 
-  const awsMapping = await imdFetchJson("/api/v1/aws_data_mapping", creds);
+  const awsMapping = await imdFetchJson("/api/v1/aws_data_mapping", auth);
   if (awsMapping.ok) {
     for (const row of imdDataRows(awsMapping.body)) {
       pushStation(stations, seen, row, "ID", "STATION", "Latitude", "Longitude", "CALL_SIGN");
