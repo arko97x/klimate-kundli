@@ -58,6 +58,8 @@ async function main(): Promise<void> {
   const cwd = process.cwd();
   console.log(`Working directory: ${cwd}\n`);
 
+  loadEnvFile();
+
   const apiParsed = parseEnvValue(cwd, "IMD_API_KEY");
   const jwtParsed = parseEnvValue(cwd, "IMD_JWT_TOKEN");
   const emailParsed = parseEnvValue(cwd, "IMD_EMAIL");
@@ -99,8 +101,6 @@ async function main(): Promise<void> {
     console.log("\nIncomplete IMD auth config.");
     process.exit(1);
   }
-
-  loadEnvFile();
 
   let creds;
   try {
