@@ -78,6 +78,12 @@ async function main(): Promise<void> {
   if (apiParsed.value.split(".").length === 3) {
     console.log("WARN: IMD_API_KEY looks like a JWT — keep hex key in IMD_API_KEY only");
   }
+  if (apiParsed.value.length > 72) {
+    console.log(
+      `WARN: IMD_API_KEY is ${apiParsed.value.length} chars — Prod keys are ~64. ` +
+        "Long keys can break IMD ApiLogger (Data too long for column 'api_key'). Regenerate in portal.",
+    );
+  }
 
   if (hasImdOAuthEnv()) {
     console.log(`Found ${emailParsed?.lineHint ?? "IMD_EMAIL=…"}`);

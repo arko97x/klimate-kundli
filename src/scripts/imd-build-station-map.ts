@@ -18,10 +18,6 @@ async function main(): Promise<void> {
   }
 
   const stations = await fetchStationCatalog();
-  if (stations.length === 0) {
-    console.error("No stations returned — fix auth first (npm run imd:diagnose).");
-    process.exit(1);
-  }
 
   const map: ImdStationMapFile = {
     updatedAt: new Date().toISOString(),

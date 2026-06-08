@@ -100,17 +100,12 @@ export async function imdFetchJson(
   for (const { mode, headers } of attempts) {
     const res = await fetch(url, { headers });
     const text = await res.text();
-    let body: unknown = text;
-    try {
-      body = JSON.parse(text) as unknown;
-    } catch {
-      // keep text
-    }
+    const parsed = parseImdBody(text);
+    const errMsg = parsed.error;
+    const ok = res.ok && parsed.ok;
+    last = { ok, status: res.status, authMode: mode, url, body: parsed.body, error: errMsg };
 
-    const errMsg = errorMessage(body);
-    last = { ok: res.ok, status: res.status, authMode: mode, url, body, error: errMsg };
-
-    if (res.ok) {
+    if (ok) {
       return last;
     }
 
@@ -122,6 +117,43 @@ export async function imdFetchJson(
   }
 
   return last;
+}
+
+function parseImdBody(text: string): { ok: boolean; body: unknown; error?: string } {
+  let body: unknown = text;
+  try {
+    body = JSON.parse(text) as unknown;
+  } catch {
+    // keep text
+  }
+
+  const htmlErr = imdHtmlError(body);
+  if (htmlErr) {
+    return { ok: false, body, error: htmlErr };
+  }
+
+  if (typeof body === "string" && body.trimStart().startsWith("<")) {
+    return { ok: false, body, error: "IMD returned HTML instead of JSON" };
+  }
+
+  const jsonErr = errorMessage(body);
+  if (jsonErr) {
+    return { ok: false, body, error: jsonErr };
+  }
+
+  return { ok: true, body };
+}
+
+/** IMD sometimes returns HTTP 200 with PHP fatal error HTML (e.g. api_key too long for logger). */
+function imdHtmlError(body: unknown): string | undefined {
+  if (typeof body !== "string") {
+    return undefined;
+  }
+  if (!body.includes("Fatal error") && !body.includes("mysqli_")) {
+    return undefined;
+  }
+  const match = body.match(/mysqli_sql_exception:\s*([^<\n]+)/);
+  return match?.[1]?.trim() ?? "IMD server error (PHP fatal in response)";
 }
 
 /** Spike / diagnose: try every auth style (no secrets logged). */
@@ -136,13 +168,12 @@ export async function imdProbeAuthModes(
   for (const { mode, headers } of imdAuthAttempts(auth)) {
     const res = await fetch(url, { headers });
     const text = await res.text();
-    let body: unknown = text;
-    try {
-      body = JSON.parse(text) as unknown;
-    } catch {
-      // keep text
-    }
-    out.push({ mode, status: res.status, error: errorMessage(body) });
+    const parsed = parseImdBody(text);
+    out.push({
+      mode,
+      status: res.status,
+      error: parsed.error ?? (parsed.ok ? undefined : "invalid response body"),
+    });
   }
 
   return out;

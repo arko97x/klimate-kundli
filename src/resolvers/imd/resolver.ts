@@ -63,49 +63,95 @@ export async function fetchStationCatalog(
   const seen = new Set<string>();
 
   const cityMapping = await imdFetchJson("/api/v1/cityforecast_mapping", auth);
-  if (cityMapping.ok) {
-    for (const row of imdDataRows(cityMapping.body)) {
-      pushStation(stations, seen, row, "Station_Code", "Station_Name", "Latitude", "Longitude");
-    }
+  const cityRows = cityMapping.ok ? imdDataRows(cityMapping.body) : [];
+  for (const row of cityRows) {
+    pushCityStation(stations, seen, row);
   }
 
   const awsMapping = await imdFetchJson("/api/v1/aws_data_mapping", auth);
-  if (awsMapping.ok) {
-    for (const row of imdDataRows(awsMapping.body)) {
-      pushStation(stations, seen, row, "ID", "STATION", "Latitude", "Longitude", "CALL_SIGN");
-    }
+  const awsRows = awsMapping.ok ? imdDataRows(awsMapping.body) : [];
+  for (const row of awsRows) {
+    pushAwsStation(stations, seen, row);
+  }
+
+  if (stations.length === 0) {
+    throw new Error(formatCatalogFailure(cityMapping, awsMapping, cityRows, awsRows));
   }
 
   return stations;
 }
 
-/** IMD wraps lists in `{ status, data: [...] }`. */
-function imdDataRows(body: unknown): Record<string, unknown>[] {
+/** IMD wraps lists in `{ status, data: [...] }` (casing varies). */
+export function imdDataRows(body: unknown): Record<string, unknown>[] {
   if (Array.isArray(body)) {
     return body as Record<string, unknown>[];
   }
   if (body && typeof body === "object") {
-    const data = (body as { data?: unknown }).data;
-    if (Array.isArray(data)) {
-      return data as Record<string, unknown>[];
+    const obj = body as Record<string, unknown>;
+    for (const key of ["data", "Data", "DATA", "records", "Records"]) {
+      const nested = obj[key];
+      if (Array.isArray(nested)) {
+        return nested as Record<string, unknown>[];
+      }
+      if (typeof nested === "string") {
+        try {
+          const parsed = JSON.parse(nested) as unknown;
+          if (Array.isArray(parsed)) {
+            return parsed as Record<string, unknown>[];
+          }
+        } catch {
+          // ignore non-JSON string
+        }
+      }
     }
   }
   return [];
+}
+
+function pushCityStation(
+  out: ImdStationMapFile["stations"],
+  seen: Set<string>,
+  row: Record<string, unknown>,
+): void {
+  pushStation(out, seen, row, {
+    idKeys: ["Station_Code", "station_code", "STATION_CODE", "id", "ID"],
+    nameKeys: ["Station_Name", "station_name", "STATION_NAME", "name", "Name"],
+    latKeys: ["Latitude", "latitude", "Lat", "lat", "LAT"],
+    lonKeys: ["Longitude", "longitude", "Lon", "lon", "LON"],
+  });
+}
+
+function pushAwsStation(
+  out: ImdStationMapFile["stations"],
+  seen: Set<string>,
+  row: Record<string, unknown>,
+): void {
+  pushStation(out, seen, row, {
+    idKeys: ["ID", "id", "Station_Code", "station_code"],
+    nameKeys: ["STATION", "Station", "station", "Station_Name", "station_name"],
+    latKeys: ["Latitude", "latitude", "Lat", "lat", "LAT"],
+    lonKeys: ["Longitude", "longitude", "Lon", "lon", "LON"],
+    callSignKeys: ["CALL_SIGN", "call_sign", "Call_Sign"],
+    stateKeys: ["STATE", "State", "state"],
+  });
 }
 
 function pushStation(
   out: ImdStationMapFile["stations"],
   seen: Set<string>,
   row: Record<string, unknown>,
-  idKey: string,
-  nameKey: string,
-  latKey: string,
-  lonKey: string,
-  callSignKey?: string,
+  keys: {
+    idKeys: string[];
+    nameKeys: string[];
+    latKeys: string[];
+    lonKeys: string[];
+    callSignKeys?: string[];
+    stateKeys?: string[];
+  },
 ): void {
-  const id = stringField(row, idKey);
-  const lat = numberField(row, latKey);
-  const lon = numberField(row, lonKey);
+  const id = pickString(row, keys.idKeys);
+  const lat = pickNumber(row, keys.latKeys);
+  const lon = pickNumber(row, keys.lonKeys);
   if (!id || lat == null || lon == null) {
     return;
   }
@@ -116,28 +162,71 @@ function pushStation(
   seen.add(dedupe);
   out.push({
     id,
-    name: stringField(row, nameKey) ?? id,
+    name: pickString(row, keys.nameKeys) ?? id,
     lat,
     lon,
-    callSign: callSignKey ? stringField(row, callSignKey) ?? undefined : undefined,
-    state: stringField(row, "STATE") ?? undefined,
+    callSign: keys.callSignKeys ? pickString(row, keys.callSignKeys) ?? undefined : undefined,
+    state: keys.stateKeys ? pickString(row, keys.stateKeys) ?? undefined : undefined,
   });
 }
 
-function stringField(row: Record<string, unknown>, key: string): string | null {
-  const v = row[key];
-  if (v == null) {
-    return null;
+function pickString(row: Record<string, unknown>, keys: string[]): string | null {
+  for (const key of keys) {
+    const v = row[key];
+    if (v == null) {
+      continue;
+    }
+    const s = String(v).trim();
+    if (s.length > 0) {
+      return s;
+    }
   }
-  const s = String(v).trim();
-  return s.length > 0 ? s : null;
+  return null;
 }
 
-function numberField(row: Record<string, unknown>, key: string): number | null {
-  const v = row[key];
-  if (v == null || v === "") {
-    return null;
+function pickNumber(row: Record<string, unknown>, keys: string[]): number | null {
+  for (const key of keys) {
+    const v = row[key];
+    if (v == null || v === "") {
+      continue;
+    }
+    const n = Number(v);
+    if (Number.isFinite(n)) {
+      return n;
+    }
   }
-  const n = Number(v);
-  return Number.isFinite(n) ? n : null;
+  return null;
+}
+
+function formatCatalogFailure(
+  cityMapping: Awaited<ReturnType<typeof imdFetchJson>>,
+  awsMapping: Awaited<ReturnType<typeof imdFetchJson>>,
+  cityRows: Record<string, unknown>[],
+  awsRows: Record<string, unknown>[],
+): string {
+  return [
+    "No stations parsed from IMD mapping APIs (auth may still be OK).",
+    `cityforecast_mapping: HTTP ${cityMapping.status}, rawRows=${cityRows.length}, bodyKeys=${sampleBodyKeys(cityMapping.body).join(",") || "—"}`,
+    `  rowKeys=${sampleRowKeys(cityRows).join(",") || "—"}`,
+    `aws_data_mapping: HTTP ${awsMapping.status}, rawRows=${awsRows.length}, bodyKeys=${sampleBodyKeys(awsMapping.body).join(",") || "—"}`,
+    `  rowKeys=${sampleRowKeys(awsRows).join(",") || "—"}`,
+    cityMapping.error ? `city error: ${cityMapping.error}` : "",
+    awsMapping.error ? `aws error: ${awsMapping.error}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function sampleBodyKeys(body: unknown): string[] {
+  if (body && typeof body === "object" && !Array.isArray(body)) {
+    return Object.keys(body as object).slice(0, 12);
+  }
+  return [];
+}
+
+function sampleRowKeys(rows: Record<string, unknown>[]): string[] {
+  if (rows.length === 0) {
+    return [];
+  }
+  return Object.keys(rows[0]!).slice(0, 12);
 }
