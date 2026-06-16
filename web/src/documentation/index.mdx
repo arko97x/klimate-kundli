@@ -29,7 +29,7 @@ Five shipped v0.3 iterations on `main` — four retired or superseded. Each sect
 | 0.3.2 | Superseded | `main` (wizard + monthly delta, 24 May 2026) |
 | 0.3.3 | Superseded | `main` (generational emissions rings, 24 May 2026) |
 | 0.3.4 | Superseded | `main` (fan, IMD, deploy, exhibit polish, Jun 2026) |
-| 0.3.5 | Current | `main` (life-temperature trail, rainfall orbit, shared result pages, Jun 2026) |
+| 0.3.5 | Current | `main` (life trails, public saves, frozen snapshots, Jun 2026) |
 
 Archive rationale: `docs/RETIREMENT-v0.1-v0.2.md` on the `retired-0.1-0.2` branch.
 
@@ -469,28 +469,38 @@ We revived a **thin IMD path** without v0.2's Postgres ingest:
 
 ---
 
-## v0.3.5 — life trails, rainfall orbit, shared result pages
+## v0.3.5 — life trails, public saves, frozen snapshots
 
 **June 2026** · Current work on `main`
 
 ### What changed in thinking
 
-v0.3.4 made the kiosk deployable and added the record-hot hand fan. v0.3.5 turns the result page from a stack of climate facts into a life-shaped reading: year-by-year temperature where the visitor lived, rainfall wrapped into an orbit, and saved kundli pages that preserve lived-city context.
+v0.3.4 made the kiosk deployable and added the record-hot hand fan. v0.3.5 does two things: the result becomes more life-shaped, and every generated kundli becomes a durable public artifact. The live result can still render from JSON, but once the snapshot worker runs, shared links prefer frozen WebP chunks so later UI changes do not mutate past readings.
 
 ### Product additions
 
-- **Lifetime temperature timeline:** `POST /monthly-delta` now returns `tempTimeline`, a yearly mean-temperature series for lived-city stints from birth year through the latest complete year. It includes city order, warmest/coolest year, and lifetime temperature delta.
+- **Lifetime temperature timeline:** `POST /monthly-delta` returns `tempTimeline`, a yearly mean-temperature series for lived-city stints from birth year through the latest complete year. It includes city order, warmest/coolest year, and lifetime temperature delta.
 - **Life temperature chart:** `LifeTempChart` renders each lived year as a city-colored temperature dot with a vertical stem, hover details, source/confidence metadata, and headline copy keyed to warming/cooling delta.
 - **Life rainfall orbit:** `LifeOrbitChart` wraps annual rainfall into a radial path from birth year clockwise to the latest complete year. Radius encodes annual rainfall, color encodes lived city, and hover shows year, city, and rainfall.
-- **Shared result pages:** `KundliViewPage` now keeps the full saved kundli record, not only the computed result, so shared pages can pass `livedCities` into `MonthlyDeltaChart`.
+- **Public saved kundlis:** the home flow now generates monthly-delta data, saves the full input + result through `POST /kundlis`, stores the slug locally as "mine", then navigates to `/k/:slug`.
+- **Explore gallery:** `/gallery` lists saved kundlis newest-first. Cards show birth city, birth year, created date, and whether the slug belongs to this browser.
+- **Frozen snapshots:** `/k/:slug` shows a frozen snapshot frame when `snapshot.chunks` exists; otherwise it falls back to the live `MonthlyDeltaChart`. The capture-only route `/capture/k/:slug` renders the live result without the public page chrome so Puppeteer can freeze it.
 
 ### Data flow
 
 ```
-Saved kundli record
-  ├── result.tempTimeline ──► LifeTempChart
-  ├── result.rainRings + livedCities ──► LifeOrbitChart
-  └── result source/confidence ──► shared formatter labels
+Visitor
+  -> /monthly-delta
+  -> POST /kundlis
+  -> /k/:slug
+       -> snapshot chunks if frozen
+       -> live MonthlyDeltaChart if not frozen yet
+
+Snapshot worker
+  -> /capture/k/:slug
+  -> WebP chunks
+  -> Supabase Storage bucket
+  -> PUT /kundlis/:slug/snapshot
 ```
 
 ### Backend
@@ -499,16 +509,49 @@ Saved kundli record
 
 `src/routes/monthly-delta.ts` includes `tempTimeline` in the `/monthly-delta` response next to rainfall, rain rings, emissions, global context, and hot-year fan data.
 
+`src/routes/kundlis.ts` now supports the full saved-artifact lifecycle:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /kundlis` | Save birth city, birth year, lived cities, and generated result; optionally trigger snapshot capture |
+| `GET /kundlis` | List public saved kundlis for `/gallery` |
+| `GET /kundlis/:slug` | Fetch saved input, result, and optional snapshot manifest |
+| `PUT /kundlis/:slug/snapshot` | Store the frozen snapshot manifest, guarded by `KUNDLI_SNAPSHOT_TOKEN` in production |
+
+`supabase/migrations/002_kundli_snapshots.sql` adds a nullable `snapshot` JSONB column to `kundlis` and creates the public `kundli-snapshots` storage bucket for WebP chunks.
+
+Snapshot capture can be triggered by either:
+
+- a generic webhook (`KUNDLI_SNAPSHOT_WEBHOOK_URL`, plus optional secret/auth header)
+- GitHub `repository_dispatch` (`KUNDLI_SNAPSHOT_GITHUB_REPO` + `KUNDLI_SNAPSHOT_GITHUB_TOKEN`)
+
 ### Web
 
 | Component | Change |
 | --- | --- |
+| `KundliApp` | Generates, saves, marks local slug, then redirects to `/k/:slug` |
+| `KundliViewPage` | Shows frozen snapshot chunks when present, live chart while capture is pending |
+| `KundliSnapshotFrame` | Displays the immutable WebP chunk stack with city/year header |
+| `KundliCapturePage` | Minimal capture route with `data-kundli-capture-ready` marker |
+| `GalleryPage` | Public listing of saved kundlis |
 | `MonthlyDeltaChart` | Inserts life temperature chart and rainfall orbit after the monthly delta summary |
 | `LifeTempChart` | New yearly mean-temperature trail with city legend and hover |
 | `LifeOrbitChart` | New radial annual-rainfall chart using lived-city spans |
-| `KundliViewPage` | Passes saved lived-city history into result charts |
 | `EmissionsRingsChart` | Clearer title, gradient legend, dynamic hub color, stronger growth-factor label |
 | `MonthlyRainSection`, `RainRingsChart` | Shared data-source label formatting |
+
+### Snapshot worker
+
+`npm run capture:kundlis` runs `scripts/capture/kundli-snapshots.mjs`:
+
+- accepts `--slug`, comma-separated slugs, `--all`, and `--force`
+- waits for `/capture/k/:slug` to mark itself ready
+- expands scroll containers so the full result can be chunked
+- captures WebP chunks at configurable width, chunk height, viewport height, and device scale factor
+- uploads to Supabase Storage when `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` are present, otherwise writes to `web/public/kundli-snapshots/`
+- updates the saved record through `PUT /kundlis/:slug/snapshot`
+
+`.github/workflows/kundli-snapshot.yml` runs the same script on GitHub Actions for `repository_dispatch` or manual `workflow_dispatch`.
 
 ### Images
 
@@ -516,13 +559,14 @@ Saved kundli record
 
 ### Tests
 
-`tests/temp-timeline.test.ts` covers yearly mean-temperature aggregation and multi-city lived-year coverage.
+`tests/temp-timeline.test.ts` covers yearly mean-temperature aggregation and multi-city lived-year coverage. `tests/kundlis.test.ts` covers save/fetch, listing, invalid slugs, and snapshot manifest updates.
 
 ### What's still open (at v0.3.5)
 
 - Figma captures need exporting into `web/public/documentation/v0-3-5/` if this doc needs embedded screenshots later.
 - Rainfall orbit depends on `rainRings` data; if rain rings are unavailable, the orbit intentionally does not render.
-- Shared result pages now carry lived cities through, but older saved records without that shape may need verification.
+- Snapshot capture depends on API + web app reachability from the runner (`KUNDLI_SNAPSHOT_WEB_URL`, `KUNDLI_SNAPSHOT_API_URL`) and Supabase service-role storage writes.
+- Frozen snapshots are immutable by convention, not by bucket policy; `--force` intentionally overwrites a saved manifest for recapture.
 
 ---
 
@@ -536,9 +580,12 @@ v0.3   Browser ──► Hono+SQLite ──► Open-Meteo (live + cache)
                       └── POST /monthly-delta (primary UI path)
 
 v0.3.4 Vercel UI ──tunnel──► droplet Hono (same as above)
+v0.3.5 Vercel UI ──► droplet Hono ──► Supabase Postgres (saved kundlis)
+                                      └── Supabase Storage (frozen WebP chunks)
+                         GitHub Actions/Puppeteer ──► /capture/k/:slug ──► PUT snapshot manifest
 ```
 
-The through-line: **Open-Meteo keeps winning for city-scale exhibit queries.** v0.2's full Postgres ingest stayed retired; v0.3.4 adds a **minimal IMD sidecar** (station map JSON + peak cache + API on the droplet) for hotter, more credible Indian peak temperatures on the fan without reviving Python ingest at exhibit time.
+The through-line: **Open-Meteo keeps winning for city-scale exhibit queries.** v0.2's full Postgres ingest stayed retired; v0.3.4 adds a **minimal IMD sidecar** (station map JSON + peak cache + API on the droplet) for hotter, more credible Indian peak temperatures on the fan without reviving Python ingest at exhibit time. v0.3.5 uses Supabase narrowly: durable saved kundli JSON plus frozen snapshot assets, not climate computation.
 
 ---
 
@@ -548,15 +595,17 @@ The through-line: **Open-Meteo keeps winning for city-scale exhibit queries.** v
 klimate-kundli/
 ├── src/                    # v0.3 Hono backend
 │   ├── routes/             # kundli, monthly-delta, geocode, stats, health
+│   ├── storage/            # in-memory / Supabase saved kundli stores
 │   ├── resolvers/          # geocoding, historical, projection, statics, imd/
 │   ├── aggregations/       # 12-card compute (legacy contract)
 │   └── scripts/            # prewarm, fetch_static_data, imd:*
 ├── deploy/                 # droplet systemd, Caddy, Cloudflare tunnel
 ├── docs/                   # IMD_SETUP, IMD_IMPLEMENTATION, VERCEL_API
+├── supabase/migrations/    # saved kundlis + snapshot storage schema
 ├── web/                    # v0.3 React frontend (Vercel)
 │   ├── src/documentation/  # this page (MDX)
 │   └── public/documentation/  # screenshots + recordings
-├── scripts/capture/        # Puppeteer + ffmpeg capture pipeline
+├── scripts/capture/        # docs capture + frozen kundli snapshots
 ├── klimate-kundli-pipeline-prompt.md
 └── README.md
 ```
@@ -571,11 +620,12 @@ Screenshots and screen recordings regenerate via `scripts/capture/`. Static PNGs
 
 ```bash
 # from repo root — requires dev servers or archived branch worktrees running
-npm run capture:docs -- --only v0-3-4   # current
+npm run capture:docs -- --only v0-3-4   # latest embedded docs screenshots
 npm run capture:docs -- --only v0-3-3   # three attendee profiles (emissions focus)
+npm run capture:kundlis -- --slug abc123 --force
 ```
 
-See `scripts/capture/README.md`. Outputs land in `web/public/documentation/{version}/`.
+See `scripts/capture/README.md`. Documentation outputs land in `web/public/documentation/{version}/`. Kundli snapshot outputs upload to Supabase Storage when service-role env is present; otherwise they land in `web/public/kundli-snapshots/{slug}/`.
 
 ---
 
