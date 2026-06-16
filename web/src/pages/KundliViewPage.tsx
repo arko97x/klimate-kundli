@@ -76,38 +76,13 @@ export function KundliViewPage() {
         ) : null}
 
         {!loading && record && !record.snapshot?.chunks.length ? (
-          <>
-            <SnapshotPending createdAt={record.createdAt} />
-            <MonthlyDeltaChart
-              data={record.result}
-              livedCities={record.livedCities}
-              onReset={() => navigate('/')}
-            />
-          </>
+          <MonthlyDeltaChart
+            data={record.result}
+            livedCities={record.livedCities}
+            onReset={() => navigate('/')}
+          />
         ) : null}
       </div>
     </KundliResultLayout>
   )
 }
-
-function SnapshotPending({ createdAt }: { createdAt: string }) {
-  return (
-    <div className="mb-6 rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-      <div className="flex items-center gap-3">
-        <span className="size-2.5 animate-pulse rounded-full bg-foreground/60" aria-hidden />
-        <p>
-          Snapshot freezing in background. This live preview will become a frozen kundli on refresh
-          once capture finishes. Created {formatCreatedAt(createdAt)}.
-        </p>
-      </div>
-    </div>
-  )
-}
-
-function formatCreatedAt(value: string): string {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value))
-}
-
