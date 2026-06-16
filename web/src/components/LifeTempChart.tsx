@@ -35,7 +35,7 @@ type Geometry = {
 
 export function LifeTempChart({ insight, source, confidence }: LifeTempChartProps) {
   const geometry = useMemo(() => buildGeometry(insight), [insight])
-  const headline = buildHeadline(insight, geometry)
+  const headline = buildHeadline(insight)
 
   if (geometry.points.length < 2) {
     return null
@@ -316,7 +316,7 @@ function niceStep(rough: number): number {
   return 10
 }
 
-function buildHeadline(insight: TempTimelineInsight, geometry: Geometry): { main: string; sub: string } {
+function buildHeadline(insight: TempTimelineInsight): { main: string; sub: string } {
   const startYear = insight.years[0]!.year
   const endYear = insight.years[insight.years.length - 1]!.year
   const span = insight.years.length
