@@ -46,7 +46,16 @@ export function createApp(options: AppOptions = {}): Hono {
   );
 
   app.route("/kundli", createKundliRoute({ cache, statics, telemetry, historical, projection }));
-  app.route("/kundlis", createKundlisRoute(kundliStore));
+  app.route(
+    "/kundlis",
+    createKundlisRoute(kundliStore, {
+      snapshotWebhookUrl: process.env.KUNDLI_SNAPSHOT_WEBHOOK_URL,
+      snapshotWebhookSecret: process.env.KUNDLI_SNAPSHOT_WEBHOOK_SECRET,
+      snapshotWebhookAuthorization: process.env.KUNDLI_SNAPSHOT_WEBHOOK_AUTHORIZATION,
+      snapshotGithubRepo: process.env.KUNDLI_SNAPSHOT_GITHUB_REPO,
+      snapshotGithubToken: process.env.KUNDLI_SNAPSHOT_GITHUB_TOKEN,
+    }),
+  );
   app.route("/monthly-delta", createMonthlyDeltaRoute({ historical, statics, imd }));
   app.route("/geocode", createGeocodeRoute(geocoder));
   app.route("/stats", createStatsRoute(cache, telemetry));

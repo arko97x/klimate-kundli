@@ -49,7 +49,15 @@ const listQuerySchema = z.object({
   offset: z.coerce.number().int().min(0).default(0),
 });
 
-export function createKundlisRoute(store: KundliStore): Hono {
+interface KundlisRouteOptions {
+  snapshotWebhookUrl?: string;
+  snapshotWebhookSecret?: string;
+  snapshotWebhookAuthorization?: string;
+  snapshotGithubRepo?: string;
+  snapshotGithubToken?: string;
+}
+
+export function createKundlisRoute(store: KundliStore, options: KundlisRouteOptions = {}): Hono {
   const route = new Hono();
 
   route.post("/", async (c) => {
@@ -60,6 +68,7 @@ export function createKundlisRoute(store: KundliStore): Hono {
 
     try {
       const saved = await store.save(parsed.data);
+      triggerSnapshotWebhook(saved.slug, options);
       return c.json(
         {
           slug: saved.slug,
@@ -180,6 +189,54 @@ export function createKundlisRoute(store: KundliStore): Hono {
   });
 
   return route;
+}
+
+function triggerSnapshotWebhook(slug: string, options: KundlisRouteOptions): void {
+  const githubRepo = options.snapshotGithubRepo?.trim();
+  const githubToken = options.snapshotGithubToken?.trim();
+  if (githubRepo && githubToken) {
+    void fetch(`https://api.github.com/repos/${githubRepo}/dispatches`, {
+      method: "POST",
+      headers: {
+        "Accept": "application/vnd.github+json",
+        "Authorization": `Bearer ${githubToken}`,
+        "Content-Type": "application/json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      body: JSON.stringify({
+        event_type: "kundli-snapshot",
+        client_payload: { slug },
+      }),
+    }).catch((err) => logSnapshotTriggerError(slug, err));
+    return;
+  }
+
+  const url = options.snapshotWebhookUrl?.trim();
+  if (!url) {
+    return;
+  }
+
+  void fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.snapshotWebhookAuthorization ? { "Authorization": options.snapshotWebhookAuthorization } : {}),
+      ...(options.snapshotWebhookSecret ? { "X-Kundli-Snapshot-Secret": options.snapshotWebhookSecret } : {}),
+    },
+    body: JSON.stringify({ slug }),
+  }).catch((err) => logSnapshotTriggerError(slug, err));
+}
+
+function logSnapshotTriggerError(slug: string, err: unknown): void {
+  console.error(
+    JSON.stringify({
+      t: new Date().toISOString(),
+      endpoint: "POST /kundlis",
+      msg: "snapshot_trigger_failed",
+      slug,
+      error: err instanceof Error ? err.message : String(err),
+    }),
+  );
 }
 
 function isSnapshotUpdateAuthorized(authorization: string | undefined): boolean {

@@ -1,0 +1,35 @@
+name: Kundli snapshot
+
+on:
+  repository_dispatch:
+    types: [kundli-snapshot]
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: Saved kundli slug to snapshot
+        required: true
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Capture kundli snapshot
+        env:
+          WEB_URL: ${{ secrets.KUNDLI_SNAPSHOT_WEB_URL }}
+          API_URL: ${{ secrets.KUNDLI_SNAPSHOT_API_URL }}
+          KUNDLI_SNAPSHOT_TOKEN: ${{ secrets.KUNDLI_SNAPSHOT_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SNAPSHOT_SLUG: ${{ github.event.client_payload.slug || inputs.slug }}
+        run: npm run capture:kundlis -- --slug "$SNAPSHOT_SLUG" --force
