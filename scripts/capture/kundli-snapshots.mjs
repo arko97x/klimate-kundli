@@ -210,7 +210,7 @@ async function main() {
 
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--force-device-scale-factor=2'],
+    args: ['--force-device-scale-factor=2', '--no-sandbox', '--disable-setuid-sandbox'],
   })
 
   try {
