@@ -56,6 +56,43 @@ describe("kundlis API", () => {
     expect(fetched.result.birthYear).toBe(1990);
   });
 
+  it("updates and returns snapshot manifests", async () => {
+    const store = new InMemoryKundliStore();
+    const app = createApp({ kundliStore: store });
+
+    const saveRes = await app.request("/kundlis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        birthCity: delhi,
+        birthYear: 1990,
+        livedCities: [{ ...delhi, start: "1990-01-01", end: null }],
+        result: sampleResult,
+      }),
+    });
+
+    const saved = (await saveRes.json()) as { slug: string };
+    const snapshot = {
+      version: 1,
+      createdAt: "2026-06-16T12:00:00.000Z",
+      viewportWidth: 960,
+      deviceScaleFactor: 2,
+      chunks: [{ index: 0, url: "/kundli-snapshots/demo/001.webp", width: 960, height: 1200 }],
+    };
+
+    const updateRes = await app.request(`/kundlis/${saved.slug}/snapshot`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ snapshot }),
+    });
+
+    expect(updateRes.status).toBe(200);
+
+    const getRes = await app.request(`/kundlis/${saved.slug}`);
+    const fetched = (await getRes.json()) as { snapshot: typeof snapshot };
+    expect(fetched.snapshot.chunks[0]?.url).toBe("/kundli-snapshots/demo/001.webp");
+  });
+
   it("lists saved kundlis newest first", async () => {
     const store = new InMemoryKundliStore();
     const app = createApp({ kundliStore: store });

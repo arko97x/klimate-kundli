@@ -14,7 +14,8 @@
     "imd:spike": "tsx src/scripts/imd-spike.ts",
     "imd:diagnose": "tsx src/scripts/imd-diagnose.ts",
     "imd:build-station-map": "tsx src/scripts/imd-build-station-map.ts",
-    "capture:docs": "node scripts/capture/capture.mjs"
+    "capture:docs": "node scripts/capture/capture.mjs",
+    "capture:kundlis": "node scripts/capture/kundli-snapshots.mjs"
   },
   "dependencies": {
     "@hono/node-server": "latest",

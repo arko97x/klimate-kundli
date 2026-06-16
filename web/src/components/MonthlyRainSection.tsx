@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 
 import type { RainfallInsight } from '@/lib/api'
+import { formatDataSource } from '@/lib/utils'
 
 const MONTH_NAMES = [
   'January',
@@ -169,7 +170,7 @@ export function MonthlyRainSection({ cityName, rainfall, source, confidence }: M
             mm per month (avg) · bars = wettest–driest year in each window
           </span>
           <span className="text-xs uppercase tracking-wider opacity-70">
-            {source.replace('_', ' ')} · {confidence}
+            {formatDataSource(source)} · {confidence}
           </span>
         </dl>
       </footer>

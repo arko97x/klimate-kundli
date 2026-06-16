@@ -19,6 +19,7 @@ export class InMemoryKundliStore implements KundliStore {
       birthCity: input.birthCity,
       livedCities: input.livedCities,
       result: input.result,
+      snapshot: null,
       createdAt: new Date().toISOString(),
     };
 
@@ -33,6 +34,16 @@ export class InMemoryKundliStore implements KundliStore {
 
   async list(limit: number, offset: number): Promise<KundliListItem[]> {
     return this.ordered.slice(offset, offset + limit).map(toListItem);
+  }
+
+  async updateSnapshot(slug: string, snapshot: NonNullable<SavedKundli["snapshot"]>): Promise<SavedKundli | null> {
+    const saved = this.bySlug.get(slug);
+    if (!saved || !snapshot) {
+      return null;
+    }
+
+    saved.snapshot = snapshot;
+    return saved;
   }
 }
 

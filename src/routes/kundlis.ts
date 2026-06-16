@@ -25,6 +25,25 @@ const saveSchema = z.object({
   result: z.record(z.string(), z.unknown()),
 });
 
+const snapshotSchema = z.object({
+  version: z.number().int().min(1),
+  createdAt: z.string().datetime(),
+  viewportWidth: z.number().int().min(320).max(2400),
+  deviceScaleFactor: z.number().min(1).max(4),
+  chunks: z.array(
+    z.object({
+      index: z.number().int().min(0),
+      url: z.string().min(1),
+      width: z.number().int().min(1).max(5000),
+      height: z.number().int().min(1).max(6000),
+    }),
+  ).min(1),
+});
+
+const snapshotUpdateSchema = z.object({
+  snapshot: snapshotSchema,
+});
+
 const listQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(50),
   offset: z.coerce.number().int().min(0).default(0),
@@ -106,6 +125,7 @@ export function createKundlisRoute(store: KundliStore): Hono {
         birthCity: saved.birthCity,
         livedCities: saved.livedCities,
         result: saved.result,
+        snapshot: saved.snapshot,
         createdAt: saved.createdAt,
       });
     } catch (err) {
@@ -121,5 +141,51 @@ export function createKundlisRoute(store: KundliStore): Hono {
     }
   });
 
+  route.put("/:slug/snapshot", async (c) => {
+    const slug = c.req.param("slug");
+    if (!SLUG_PATTERN.test(slug)) {
+      return c.json({ error: "not_found" }, 404);
+    }
+
+    if (!isSnapshotUpdateAuthorized(c.req.header("authorization"))) {
+      return c.json({ error: "unauthorized" }, 401);
+    }
+
+    const parsed = snapshotUpdateSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) {
+      return c.json({ issues: parsed.error.issues }, 400);
+    }
+
+    try {
+      const saved = await store.updateSnapshot(slug, parsed.data.snapshot);
+      if (!saved) {
+        return c.json({ error: "not_found" }, 404);
+      }
+
+      return c.json({
+        slug: saved.slug,
+        snapshot: saved.snapshot,
+      });
+    } catch (err) {
+      console.error(
+        JSON.stringify({
+          t: new Date().toISOString(),
+          endpoint: "PUT /kundlis/:slug/snapshot",
+          slug,
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
+      return c.json({ error: "snapshot_update_failed" }, 500);
+    }
+  });
+
   return route;
+}
+
+function isSnapshotUpdateAuthorized(authorization: string | undefined): boolean {
+  const token = process.env.KUNDLI_SNAPSHOT_TOKEN?.trim();
+  if (!token) {
+    return process.env.NODE_ENV !== "production";
+  }
+  return authorization === `Bearer ${token}`;
 }

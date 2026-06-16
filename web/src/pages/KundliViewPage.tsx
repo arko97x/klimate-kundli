@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import { KundliSnapshotFrame } from '@/components/KundliSnapshotFrame'
 import { MonthlyDeltaChart } from '@/components/MonthlyDeltaChart'
 import { Button } from '@/components/ui/button'
 import { KundliResultLayout } from '@/expt/KundliResultLayout'
-import { fetchKundliBySlug, type MonthlyDeltaResponse } from '@/lib/api'
+import { fetchKundliBySlug, type SavedKundliRecord } from '@/lib/api'
 
 export function KundliViewPage() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
-  const [data, setData] = useState<MonthlyDeltaResponse | null>(null)
+  const [record, setRecord] = useState<SavedKundliRecord | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -25,13 +26,13 @@ export function KundliViewPage() {
     fetchKundliBySlug(slug)
       .then((record) => {
         if (!cancelled) {
-          setData(record.result)
+          setRecord(record)
           setError(null)
         }
       })
       .catch((err) => {
         if (!cancelled) {
-          setData(null)
+          setRecord(null)
           setError(err instanceof Error ? err.message : 'Could not load kundli')
         }
       })
@@ -64,9 +65,19 @@ export function KundliViewPage() {
           </div>
         ) : null}
 
-        {!loading && data ? (
+        {!loading && record?.snapshot?.chunks.length ? (
+          <KundliSnapshotFrame
+            snapshot={record.snapshot}
+            createdAt={record.createdAt}
+            birthCityDisplay={record.birthCityDisplay}
+            birthYear={record.birthYear}
+          />
+        ) : null}
+
+        {!loading && record && !record.snapshot?.chunks.length ? (
           <MonthlyDeltaChart
-            data={data}
+            data={record.result}
+            livedCities={record.livedCities}
             onReset={() => navigate('/')}
           />
         ) : null}

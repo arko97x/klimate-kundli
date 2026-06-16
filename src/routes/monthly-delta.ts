@@ -4,6 +4,7 @@ import { Budget } from "../lib/budget.js";
 import { gridKey } from "../lib/grid.js";
 import { buildRainRingsInsight } from "../lib/rain-rings.js";
 import { buildRainfallInsight } from "../lib/rain-stats.js";
+import { buildTempTimelineInsight } from "../lib/temp-timeline.js";
 import type { HistoricalWeatherResult, WeatherDaily } from "../resolvers/historical.js";
 import type { ImdService } from "../resolvers/imd/resolver.js";
 import type { StaticData } from "../resolvers/statics.js";
@@ -127,6 +128,7 @@ export function createMonthlyDeltaRoute(deps: MonthlyDeltaRouteDeps): Hono {
         recentEnd,
       );
       const rainRings = buildRainRingsInsight(stints, weatherByKey, birthYear, latestCompleteYear);
+      const tempTimeline = buildTempTimelineInsight(stints, weatherByKey, birthYear, latestCompleteYear);
 
       return c.json({
         city: parsed.data.birthCity,
@@ -153,6 +155,7 @@ export function createMonthlyDeltaRoute(deps: MonthlyDeltaRouteDeps): Hono {
         globalContext,
         rainfall,
         rainRings,
+        tempTimeline,
         source: birthWeather.source,
         confidence: birthWeather.confidence,
       });

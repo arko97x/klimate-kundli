@@ -17,6 +17,26 @@ npm run capture:docs -- --only v0-3-4
 
 Outputs: `web/public/documentation/v0-3-4/` — `birth-step.png`, `lived-cities-step.png`, `delhi-1988-mumbai-result.png`, `hand-fan-delhi-1988.png`
 
+## Kundli snapshots
+
+Freezes saved kundlis as WebP chunks and updates each `/kundlis/:slug` record with a snapshot manifest.
+
+```bash
+# terminal 1 — API
+npm run dev
+
+# terminal 2 — web
+cd web && npm run dev
+
+# terminal 3 — capture all missing snapshots
+KUNDLI_SNAPSHOT_TOKEN=... npm run capture:kundlis -- --all
+
+# one record, replacing an existing snapshot
+KUNDLI_SNAPSHOT_TOKEN=... npm run capture:kundlis -- --slug abc123def4 --force
+```
+
+With `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, chunks upload to the public `kundli-snapshots` bucket from migration `002_kundli_snapshots.sql`. Without Supabase env, chunks are written under `web/public/kundli-snapshots/` for local previews.
+
 ## v0.3.3
 
 ```bash

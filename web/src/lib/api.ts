@@ -119,6 +119,28 @@ export interface RainRingsInsight {
   byCity: RainRingsCity[]
 }
 
+export interface TempTimelineYear {
+  year: number
+  meanTempC: number
+  cityName: string
+  displayName: string
+}
+
+export interface TempTimelineCity {
+  cityName: string
+  displayName: string
+}
+
+export interface TempTimelineInsight {
+  birthYear: number
+  latestCompleteYear: number
+  years: TempTimelineYear[]
+  cities: TempTimelineCity[]
+  warmestYear: number | null
+  coolestYear: number | null
+  lifeDeltaC: number | null
+}
+
 export interface RainfallInsight {
   heavyRainThresholdMm: number
   thenDaysPerYear: number
@@ -143,8 +165,24 @@ export interface MonthlyDeltaResponse {
   globalContext: GlobalContext | null
   rainfall: RainfallInsight | null
   rainRings: RainRingsInsight | null
+  tempTimeline: TempTimelineInsight | null
   source: string
   confidence: string
+}
+
+export interface KundliSnapshotChunk {
+  index: number
+  url: string
+  width: number
+  height: number
+}
+
+export interface KundliSnapshot {
+  version: number
+  createdAt: string
+  viewportWidth: number
+  deviceScaleFactor: number
+  chunks: KundliSnapshotChunk[]
 }
 
 export async function fetchMonthlyDelta(
@@ -182,6 +220,7 @@ export interface SavedKundliRecord extends SavedKundliSummary {
   birthCity: City
   livedCities: LivedCity[]
   result: MonthlyDeltaResponse
+  snapshot: KundliSnapshot | null
 }
 
 export interface SaveKundliInput {

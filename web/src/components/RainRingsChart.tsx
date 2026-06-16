@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 
 import type { RainRingsCity, RainRingsInsight } from '@/lib/api'
 import { parallelAnnulusPath, permutationForSeed } from '@/lib/organicTreeRing'
+import { formatDataSource } from '@/lib/utils'
 
 const SIZE = 400
 const CENTER = SIZE / 2
@@ -96,7 +97,7 @@ export function RainRingsChart({ insight, source }: RainRingsChartProps) {
 
       <p className="text-center text-xs text-muted-foreground">
         Organic rings (noise-shaped, like a tree cross-section) · {active.startYear}–{active.endYear} ·{' '}
-        {source.replace('_', ' ')}
+        {formatDataSource(source)}
       </p>
     </section>
   )

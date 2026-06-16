@@ -48,8 +48,10 @@ export function EmissionsRingsChart({ birthYear, data, parentsData }: EmissionsR
   return (
     <section className="space-y-6 pb-6">
       <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">India&apos;s emissions across your lifetime</p>
         <p className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
+          India&apos;s carbon emissions across your lifetime
+        </p>
+        <p className="text-sm text-muted-foreground">
           {hasComparison ? 'Your rings vs your parents\' rings.' : 'Every ring is a year you were alive.'}
         </p>
         <p className="max-w-3xl text-pretty text-muted-foreground">
@@ -96,12 +98,12 @@ export function EmissionsRingsChart({ birthYear, data, parentsData }: EmissionsR
 
       <div className="mx-auto flex max-w-2xl flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
         <span className="flex items-center gap-2">
-          <span className="inline-block h-2 w-6 rounded-sm bg-[#f5d547]" aria-hidden />
-          Lower emissions
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="inline-block h-2 w-6 rounded-sm bg-[#d45a3a]" aria-hidden />
-          Higher emissions
+          <span>Lower emissions</span>
+          <span
+            className="inline-block h-2 w-20 rounded-sm bg-linear-to-r from-[#f5d547] via-[#d45a3a] to-[#8e3a7a]"
+            aria-hidden
+          />
+          <span>Higher emissions</span>
         </span>
         <span>
           Ring thickness = that year&apos;s share of lifetime emissions
@@ -129,6 +131,8 @@ function RingChartPanel({ label, subtitle, birthYear, data, rings }: RingChartPa
   const svgRef = useRef<SVGSVGElement>(null)
   const [hoveredRing, setHoveredRing] = useState<RingGeometry | null>(null)
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
+  const hubColor = rings[0]?.color ?? '#f5d547'
+  const hubStroke = mixHex(hubColor, '#1a1028', 0.3)
 
   function handlePointerMove(event: { clientX: number; clientY: number }) {
     const svg = svgRef.current
@@ -183,8 +187,8 @@ function RingChartPanel({ label, subtitle, birthYear, data, rings }: RingChartPa
             />
           ))}
 
-          <circle cx={CENTER} cy={CENTER} r={MIN_RADIUS - 4} fill="#f5d547" pointerEvents="none" />
-          <circle cx={CENTER} cy={CENTER} r={MIN_RADIUS - 4} fill="none" stroke="#c4832a44" strokeWidth={1} pointerEvents="none" />
+          <circle cx={CENTER} cy={CENTER} r={MIN_RADIUS - 4} fill={hubColor} pointerEvents="none" />
+          <circle cx={CENTER} cy={CENTER} r={MIN_RADIUS - 4} fill="none" stroke={hubStroke} strokeWidth={1} pointerEvents="none" />
           <text
             x={CENTER}
             y={CENTER - 5}
@@ -223,7 +227,9 @@ function RingChartPanel({ label, subtitle, birthYear, data, rings }: RingChartPa
       </div>
       <p className="text-center text-xs text-muted-foreground tabular-nums">
         {data.startYear} ({formatMt(data.firstCo2Mt)} Mt) → {data.endYear} ({formatMt(data.lastCo2Mt)} Mt)
-        {data.growthFactor != null ? ` · ${data.growthFactor}×` : null}
+        {data.growthFactor != null ? (
+          <span className="text-base font-semibold text-foreground"> · {data.growthFactor}×</span>
+        ) : null}
       </p>
     </div>
   )

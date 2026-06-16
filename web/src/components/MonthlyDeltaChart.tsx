@@ -2,12 +2,17 @@ import { useMemo } from 'react'
 
 import { EmissionsRingsChart } from '@/components/EmissionsRingsChart'
 import { InsightsSection } from '@/components/InsightsSection'
+import { LifeOrbitChart } from '@/components/LifeOrbitChart'
+import { LifeTempChart } from '@/components/LifeTempChart'
 import { RemediesSection } from '@/components/RemediesSection'
 import { Button } from '@/components/ui/button'
 import { HandFanChart } from '@/components/HandFanChart'
 import { MonthlyRainSection } from '@/components/MonthlyRainSection'
 import { RainRingsChart } from '@/components/RainRingsChart'
 import type { MonthlyDeltaResponse } from '@/lib/api'
+import { formatDataSource } from '@/lib/utils'
+import { latestCompleteYearUtc } from '@/lib/years'
+import type { LivedCity } from '@/types'
 
 const MONTH_NAMES = [
   'January',
@@ -46,10 +51,11 @@ type ChartPoint = { x: number; y: number; value: number; month: number }
 
 type MonthlyDeltaChartProps = {
   data: MonthlyDeltaResponse
+  livedCities?: LivedCity[]
   onReset?: () => void
 }
 
-export function MonthlyDeltaChart({ data, onReset }: MonthlyDeltaChartProps) {
+export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaChartProps) {
   const geometry = useMemo(() => buildGeometry(data), [data])
   const headline = buildHeadline(data)
 
@@ -173,10 +179,37 @@ export function MonthlyDeltaChart({ data, onReset }: MonthlyDeltaChartProps) {
             Bars = coolest–hottest month in each 5-yr window · line = average
           </span>
           <span className="text-xs uppercase tracking-wider opacity-70">
-            {data.source.replace('_', ' ')} · {data.confidence}
+            {formatDataSource(data.source)} · {data.confidence}
           </span>
         </dl>
       </footer>
+
+      {data.tempTimeline ? (
+        <>
+          <hr className="border-border" />
+          <LifeTempChart
+            insight={data.tempTimeline}
+            source={data.source}
+            confidence={data.confidence}
+          />
+        </>
+      ) : null}
+
+      {livedCities && livedCities.length > 0 ? (
+        <>
+          <hr className="border-border" />
+          <LifeOrbitChart
+            birthYear={data.birthYear}
+            livedCities={livedCities}
+            rainRings={data.rainRings}
+            latestCompleteYear={
+              data.hottestYears?.latestCompleteYear ??
+              data.rainRings?.latestCompleteYear ??
+              latestCompleteYearUtc()
+            }
+          />
+        </>
+      ) : null}
 
       {data.rainfall ? (
         <>

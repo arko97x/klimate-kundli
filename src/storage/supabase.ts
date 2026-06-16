@@ -1,6 +1,6 @@
 import { generateSlug } from "../lib/slug.js";
 import type { City, LivedCity } from "../types.js";
-import type { KundliListItem, KundliStore, SaveKundliInput, SavedKundli } from "./types.js";
+import type { KundliListItem, KundliSnapshot, KundliStore, SaveKundliInput, SavedKundli } from "./types.js";
 
 interface DbRow {
   slug: string;
@@ -9,6 +9,7 @@ interface DbRow {
   birth_city: City;
   lived_cities: LivedCity[];
   result: Record<string, unknown>;
+  snapshot: KundliSnapshot | null;
   created_at: string;
 }
 
@@ -69,7 +70,7 @@ export function createSupabaseKundliStore(baseUrl: string, serviceRoleKey: strin
 
     async getBySlug(slug) {
       const res = await rest(
-        `kundlis?slug=eq.${encodeURIComponent(slug)}&select=slug,birth_city_display,birth_year,birth_city,lived_cities,result,created_at&limit=1`,
+        `kundlis?slug=eq.${encodeURIComponent(slug)}&select=slug,birth_city_display,birth_year,birth_city,lived_cities,result,snapshot,created_at&limit=1`,
       );
 
       if (!res.ok) {
@@ -99,6 +100,25 @@ export function createSupabaseKundliStore(baseUrl: string, serviceRoleKey: strin
         createdAt: row.created_at,
       }));
     },
+
+    async updateSnapshot(slug, snapshot) {
+      const res = await rest(
+        `kundlis?slug=eq.${encodeURIComponent(slug)}&select=slug,birth_city_display,birth_year,birth_city,lived_cities,result,snapshot,created_at`,
+        {
+          method: "PATCH",
+          headers: { Prefer: "return=representation" },
+          body: JSON.stringify({ snapshot }),
+        },
+      );
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        throw new Error(`Supabase snapshot update failed (${res.status}): ${body}`);
+      }
+
+      const rows = (await res.json()) as DbRow[];
+      return rows[0] ? fromDbRow(rows[0]) : null;
+    },
   };
 }
 
@@ -110,6 +130,7 @@ function fromDbRow(row: DbRow): SavedKundli {
     birthCity: row.birth_city,
     livedCities: row.lived_cities,
     result: row.result,
+    snapshot: row.snapshot ?? null,
     createdAt: row.created_at,
   };
 }

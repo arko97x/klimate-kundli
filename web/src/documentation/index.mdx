@@ -19,7 +19,7 @@ export const meta = {
 
 ## How to read this
 
-Five shipped v0.3 iterations on `main` — three retired or superseded. Each section covers what we built, why we built it, how the data moved, and why we moved on. Screenshots and recordings live under `/documentation/` in `web/public/`.
+Five shipped v0.3 iterations on `main` — four retired or superseded. Each section covers what we built, why we built it, how the data moved, and why we moved on. Screenshots and recordings live under `/documentation/` in `web/public/`.
 
 | Version | Status | Branch / location |
 | --- | --- | --- |
@@ -28,7 +28,8 @@ Five shipped v0.3 iterations on `main` — three retired or superseded. Each sec
 | 0.3.1 | Superseded | `main` through 13 May 2026 |
 | 0.3.2 | Superseded | `main` (wizard + monthly delta, 24 May 2026) |
 | 0.3.3 | Superseded | `main` (generational emissions rings, 24 May 2026) |
-| 0.3.4 | Current | `main` (fan, IMD, deploy, exhibit polish, Jun 2026) |
+| 0.3.4 | Superseded | `main` (fan, IMD, deploy, exhibit polish, Jun 2026) |
+| 0.3.5 | Current | `main` (life-temperature trail, rainfall orbit, shared result pages, Jun 2026) |
 
 Archive rationale: `docs/RETIREMENT-v0.1-v0.2.md` on the `retired-0.1-0.2` branch.
 
@@ -465,6 +466,63 @@ We revived a **thin IMD path** without v0.2's Postgres ingest:
 - IMD historical peak backfill for pre-2000 fan blades where API is thin
 - No print / kiosk offline bundle
 - Exhibit kiosk language not localized
+
+---
+
+## v0.3.5 — life trails, rainfall orbit, shared result pages
+
+**June 2026** · Current work on `main`
+
+### What changed in thinking
+
+v0.3.4 made the kiosk deployable and added the record-hot hand fan. v0.3.5 turns the result page from a stack of climate facts into a life-shaped reading: year-by-year temperature where the visitor lived, rainfall wrapped into an orbit, and saved kundli pages that preserve lived-city context.
+
+### Product additions
+
+- **Lifetime temperature timeline:** `POST /monthly-delta` now returns `tempTimeline`, a yearly mean-temperature series for lived-city stints from birth year through the latest complete year. It includes city order, warmest/coolest year, and lifetime temperature delta.
+- **Life temperature chart:** `LifeTempChart` renders each lived year as a city-colored temperature dot with a vertical stem, hover details, source/confidence metadata, and headline copy keyed to warming/cooling delta.
+- **Life rainfall orbit:** `LifeOrbitChart` wraps annual rainfall into a radial path from birth year clockwise to the latest complete year. Radius encodes annual rainfall, color encodes lived city, and hover shows year, city, and rainfall.
+- **Shared result pages:** `KundliViewPage` now keeps the full saved kundli record, not only the computed result, so shared pages can pass `livedCities` into `MonthlyDeltaChart`.
+
+### Data flow
+
+```
+Saved kundli record
+  ├── result.tempTimeline ──► LifeTempChart
+  ├── result.rainRings + livedCities ──► LifeOrbitChart
+  └── result source/confidence ──► shared formatter labels
+```
+
+### Backend
+
+`src/lib/temp-timeline.ts` adds `annualMeanTemps()` and `buildTempTimelineInsight()`. It groups daily `tmax`/`tmin` into annual means, clips each lived-city stint to birth year/latest complete year, and emits one chronological row per covered year.
+
+`src/routes/monthly-delta.ts` includes `tempTimeline` in the `/monthly-delta` response next to rainfall, rain rings, emissions, global context, and hot-year fan data.
+
+### Web
+
+| Component | Change |
+| --- | --- |
+| `MonthlyDeltaChart` | Inserts life temperature chart and rainfall orbit after the monthly delta summary |
+| `LifeTempChart` | New yearly mean-temperature trail with city legend and hover |
+| `LifeOrbitChart` | New radial annual-rainfall chart using lived-city spans |
+| `KundliViewPage` | Passes saved lived-city history into result charts |
+| `EmissionsRingsChart` | Clearer title, gradient legend, dynamic hub color, stronger growth-factor label |
+| `MonthlyRainSection`, `RainRingsChart` | Shared data-source label formatting |
+
+### Images
+
+`<Refer Figma>`
+
+### Tests
+
+`tests/temp-timeline.test.ts` covers yearly mean-temperature aggregation and multi-city lived-year coverage.
+
+### What's still open (at v0.3.5)
+
+- Figma captures need exporting into `web/public/documentation/v0-3-5/` if this doc needs embedded screenshots later.
+- Rainfall orbit depends on `rainRings` data; if rain rings are unavailable, the orbit intentionally does not render.
+- Shared result pages now carry lived cities through, but older saved records without that shape may need verification.
 
 ---
 
