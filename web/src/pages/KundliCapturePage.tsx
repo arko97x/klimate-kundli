@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { MonthlyDeltaChart } from '@/components/MonthlyDeltaChart'
-import { KundliResultLayout } from '@/expt/KundliResultLayout'
 import { fetchKundliBySlug, type SavedKundliRecord } from '@/lib/api'
 
 export function KundliCapturePage() {
@@ -37,9 +36,9 @@ export function KundliCapturePage() {
   }, [slug])
 
   return (
-    <KundliResultLayout>
+    <div className="min-h-dvh bg-background text-foreground">
       <main
-        className="p-6 pt-0"
+        className="mx-auto w-full max-w-4xl p-6"
         data-kundli-capture-root
         data-kundli-capture-ready={record ? 'true' : undefined}
       >
@@ -53,6 +52,6 @@ export function KundliCapturePage() {
           <MonthlyDeltaChart data={record.result} livedCities={record.livedCities} />
         ) : null}
       </main>
-    </KundliResultLayout>
+    </div>
   )
 }

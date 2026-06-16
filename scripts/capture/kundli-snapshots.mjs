@@ -123,25 +123,22 @@ async function captureSlug(browser, slug, snapshotId) {
     const root = await page.$('[data-kundli-capture-root]')
     if (!root) throw new Error('capture root not found')
 
-    const box = await root.boundingBox()
-    if (!box) throw new Error('capture root has no box')
-
     const chunks = []
-    const totalHeight = Math.ceil(box.height)
-    const width = Math.ceil(box.width)
+    const totalHeight = await page.evaluate((el) => Math.ceil(el.getBoundingClientRect().height), root)
+    const width = VIEWPORT_WIDTH
 
     for (let top = 0, index = 0; top < totalHeight; top += CHUNK_HEIGHT, index += 1) {
       const height = Math.min(CHUNK_HEIGHT, totalHeight - top)
+      await page.setViewport({
+        width: VIEWPORT_WIDTH,
+        height,
+        deviceScaleFactor: DEVICE_SCALE_FACTOR,
+      })
+      await page.evaluate((y) => window.scrollTo(0, y), top)
+      await sleep(120)
       const buffer = await page.screenshot({
         type: 'webp',
         quality: 88,
-        captureBeyondViewport: true,
-        clip: {
-          x: Math.max(0, Math.floor(box.x)),
-          y: Math.max(0, Math.floor(box.y + top)),
-          width,
-          height,
-        },
       })
       const filename = `${String(index + 1).padStart(3, '0')}.webp`
       const url = await storeChunk(slug, snapshotId, filename, buffer)
