@@ -1,0 +1,3516 @@
+[
+  {
+    "name": "Istanbul",
+    "displayName": "Istanbul, Turkey",
+    "lat": 41.0138,
+    "lon": 28.9497,
+    "country": "TR"
+  },
+  {
+    "name": "Tianjin",
+    "displayName": "Tianjin, China",
+    "lat": 39.1422,
+    "lon": 117.1767,
+    "country": "CN"
+  },
+  {
+    "name": "Wuhan",
+    "displayName": "Wuhan, China",
+    "lat": 30.5833,
+    "lon": 114.2667,
+    "country": "CN"
+  },
+  {
+    "name": "Dongguan",
+    "displayName": "Dongguan, China",
+    "lat": 23.018,
+    "lon": 113.7487,
+    "country": "CN"
+  },
+  {
+    "name": "Kinshasa",
+    "displayName": "Kinshasa, Democratic Republic of the Congo",
+    "lat": -4.3276,
+    "lon": 15.3136,
+    "country": "CD"
+  },
+  {
+    "name": "Chongqing",
+    "displayName": "Chongqing, China",
+    "lat": 29.5628,
+    "lon": 106.5528,
+    "country": "CN"
+  },
+  {
+    "name": "Chengdu",
+    "displayName": "Chengdu, China",
+    "lat": 30.6667,
+    "lon": 104.0667,
+    "country": "CN"
+  },
+  {
+    "name": "Nanjing",
+    "displayName": "Nanjing, China",
+    "lat": 32.0617,
+    "lon": 118.7778,
+    "country": "CN"
+  },
+  {
+    "name": "Nanchong",
+    "displayName": "Nanchong, China",
+    "lat": 30.7951,
+    "lon": 106.0847,
+    "country": "CN"
+  },
+  {
+    "name": "Xi’an",
+    "displayName": "Xi’an, China",
+    "lat": 34.2583,
+    "lon": 108.9286,
+    "country": "CN"
+  },
+  {
+    "name": "Shenyang",
+    "displayName": "Shenyang, China",
+    "lat": 41.7922,
+    "lon": 123.4328,
+    "country": "CN"
+  },
+  {
+    "name": "Hangzhou",
+    "displayName": "Hangzhou, China",
+    "lat": 30.2937,
+    "lon": 120.1614,
+    "country": "CN"
+  },
+  {
+    "name": "Harbin",
+    "displayName": "Harbin, China",
+    "lat": 45.75,
+    "lon": 126.65,
+    "country": "CN"
+  },
+  {
+    "name": "Tai’an",
+    "displayName": "Tai’an, China",
+    "lat": 36.1853,
+    "lon": 117.12,
+    "country": "CN"
+  },
+  {
+    "name": "Suzhou",
+    "displayName": "Suzhou, China",
+    "lat": 31.3041,
+    "lon": 120.5954,
+    "country": "CN"
+  },
+  {
+    "name": "Shantou",
+    "displayName": "Shantou, China",
+    "lat": 23.3681,
+    "lon": 116.7148,
+    "country": "CN"
+  },
+  {
+    "name": "Jinan",
+    "displayName": "Jinan, China",
+    "lat": 36.6683,
+    "lon": 116.9972,
+    "country": "CN"
+  },
+  {
+    "name": "Zhengzhou",
+    "displayName": "Zhengzhou, China",
+    "lat": 34.7578,
+    "lon": 113.6486,
+    "country": "CN"
+  },
+  {
+    "name": "Changchun",
+    "displayName": "Changchun, China",
+    "lat": 43.88,
+    "lon": 125.3228,
+    "country": "CN"
+  },
+  {
+    "name": "Dalian",
+    "displayName": "Dalian, China",
+    "lat": 38.9122,
+    "lon": 121.6022,
+    "country": "CN"
+  },
+  {
+    "name": "Kunming",
+    "displayName": "Kunming, China",
+    "lat": 25.0389,
+    "lon": 102.7183,
+    "country": "CN"
+  },
+  {
+    "name": "Qingdao",
+    "displayName": "Qingdao, China",
+    "lat": 36.0649,
+    "lon": 120.3804,
+    "country": "CN"
+  },
+  {
+    "name": "Abidjan",
+    "displayName": "Abidjan, Cote d'Ivoire",
+    "lat": 5.3544,
+    "lon": -4.0017,
+    "country": "CI"
+  },
+  {
+    "name": "Kano",
+    "displayName": "Kano, Nigeria",
+    "lat": 12.0001,
+    "lon": 8.5167,
+    "country": "NG"
+  },
+  {
+    "name": "Foshan",
+    "displayName": "Foshan, China",
+    "lat": 23.0268,
+    "lon": 113.1315,
+    "country": "CN"
+  },
+  {
+    "name": "Puyang",
+    "displayName": "Puyang, China",
+    "lat": 29.4568,
+    "lon": 119.8887,
+    "country": "CN"
+  },
+  {
+    "name": "Yokohama",
+    "displayName": "Yokohama, Japan",
+    "lat": 35.4333,
+    "lon": 139.65,
+    "country": "JP"
+  },
+  {
+    "name": "Ibadan",
+    "displayName": "Ibadan, Nigeria",
+    "lat": 7.3776,
+    "lon": 3.9059,
+    "country": "NG"
+  },
+  {
+    "name": "Wuxi",
+    "displayName": "Wuxi, China",
+    "lat": 31.5689,
+    "lon": 120.2886,
+    "country": "CN"
+  },
+  {
+    "name": "Xiamen",
+    "displayName": "Xiamen, China",
+    "lat": 24.4798,
+    "lon": 118.0819,
+    "country": "CN"
+  },
+  {
+    "name": "Ankara",
+    "displayName": "Ankara, Turkey",
+    "lat": 39.9199,
+    "lon": 32.8543,
+    "country": "TR"
+  },
+  {
+    "name": "Tianshui",
+    "displayName": "Tianshui, China",
+    "lat": 34.5795,
+    "lon": 105.7424,
+    "country": "CN"
+  },
+  {
+    "name": "Ningbo",
+    "displayName": "Ningbo, China",
+    "lat": 29.8782,
+    "lon": 121.5495,
+    "country": "CN"
+  },
+  {
+    "name": "Shiyan",
+    "displayName": "Shiyan, China",
+    "lat": 32.6475,
+    "lon": 110.7781,
+    "country": "CN"
+  },
+  {
+    "name": "Taiyuan",
+    "displayName": "Taiyuan, China",
+    "lat": 37.8694,
+    "lon": 112.5603,
+    "country": "CN"
+  },
+  {
+    "name": "Tangshan",
+    "displayName": "Tangshan, China",
+    "lat": 39.6333,
+    "lon": 118.1833,
+    "country": "CN"
+  },
+  {
+    "name": "Hefei",
+    "displayName": "Hefei, China",
+    "lat": 31.8639,
+    "lon": 117.2808,
+    "country": "CN"
+  },
+  {
+    "name": "Pyongyang",
+    "displayName": "Pyongyang, North Korea",
+    "lat": 39.0339,
+    "lon": 125.7543,
+    "country": "KP"
+  },
+  {
+    "name": "Zibo",
+    "displayName": "Zibo, China",
+    "lat": 36.7906,
+    "lon": 118.0633,
+    "country": "CN"
+  },
+  {
+    "name": "Zhongshan",
+    "displayName": "Zhongshan, China",
+    "lat": 21.3199,
+    "lon": 110.5723,
+    "country": "CN"
+  },
+  {
+    "name": "Changsha",
+    "displayName": "Changsha, China",
+    "lat": 28.1987,
+    "lon": 112.9709,
+    "country": "CN"
+  },
+  {
+    "name": "Ürümqi",
+    "displayName": "Ürümqi, China",
+    "lat": 43.801,
+    "lon": 87.6005,
+    "country": "CN"
+  },
+  {
+    "name": "Shijiazhuang",
+    "displayName": "Shijiazhuang, China",
+    "lat": 38.0414,
+    "lon": 114.4786,
+    "country": "CN"
+  },
+  {
+    "name": "Luanda",
+    "displayName": "Luanda, Angola",
+    "lat": -8.8368,
+    "lon": 13.2343,
+    "country": "AO"
+  },
+  {
+    "name": "Quezon City",
+    "displayName": "Quezon City, Philippines",
+    "lat": 14.6488,
+    "lon": 121.0509,
+    "country": "PH"
+  },
+  {
+    "name": "Salvador",
+    "displayName": "Salvador, Brazil",
+    "lat": -12.9711,
+    "lon": -38.5108,
+    "country": "BR"
+  },
+  {
+    "name": "Lanzhou",
+    "displayName": "Lanzhou, China",
+    "lat": 36.057,
+    "lon": 103.8399,
+    "country": "CN"
+  },
+  {
+    "name": "Incheon",
+    "displayName": "Incheon, South Korea",
+    "lat": 37.4565,
+    "lon": 126.7052,
+    "country": "KR"
+  },
+  {
+    "name": "Yunfu",
+    "displayName": "Yunfu, China",
+    "lat": 22.9283,
+    "lon": 112.0395,
+    "country": "CN"
+  },
+  {
+    "name": "Basrah",
+    "displayName": "Basrah, Iraq",
+    "lat": 30.5085,
+    "lon": 47.7804,
+    "country": "IQ"
+  },
+  {
+    "name": "Mogadishu",
+    "displayName": "Mogadishu, Somalia",
+    "lat": 2.0371,
+    "lon": 45.3438,
+    "country": "SO"
+  },
+  {
+    "name": "Daegu",
+    "displayName": "Daegu, South Korea",
+    "lat": 35.8703,
+    "lon": 128.5911,
+    "country": "KR"
+  },
+  {
+    "name": "Faisalabad",
+    "displayName": "Faisalabad, Pakistan",
+    "lat": 31.4155,
+    "lon": 73.0897,
+    "country": "PK"
+  },
+  {
+    "name": "İzmir",
+    "displayName": "İzmir, Turkey",
+    "lat": 38.4127,
+    "lon": 27.1384,
+    "country": "TR"
+  },
+  {
+    "name": "Dakar",
+    "displayName": "Dakar, Senegal",
+    "lat": 14.6937,
+    "lon": -17.4441,
+    "country": "SN"
+  },
+  {
+    "name": "Fortaleza",
+    "displayName": "Fortaleza, Brazil",
+    "lat": -3.7172,
+    "lon": -38.5431,
+    "country": "BR"
+  },
+  {
+    "name": "Surabaya",
+    "displayName": "Surabaya, Indonesia",
+    "lat": -7.2492,
+    "lon": 112.7508,
+    "country": "ID"
+  },
+  {
+    "name": "Belo Horizonte",
+    "displayName": "Belo Horizonte, Brazil",
+    "lat": -19.9208,
+    "lon": -43.9378,
+    "country": "BR"
+  },
+  {
+    "name": "Nanchang",
+    "displayName": "Nanchang, China",
+    "lat": 28.684,
+    "lon": 115.8531,
+    "country": "CN"
+  },
+  {
+    "name": "Mashhad",
+    "displayName": "Mashhad, Iran",
+    "lat": 36.3156,
+    "lon": 59.568,
+    "country": "IR"
+  },
+  {
+    "name": "Brooklyn",
+    "displayName": "Brooklyn, New York, United States",
+    "lat": 40.6501,
+    "lon": -73.9496,
+    "country": "US",
+    "admin1": "New York"
+  },
+  {
+    "name": "Queens",
+    "displayName": "Queens, New York, United States",
+    "lat": 40.6815,
+    "lon": -73.8365,
+    "country": "US",
+    "admin1": "New York"
+  },
+  {
+    "name": "Maracaibo",
+    "displayName": "Maracaibo, Venezuela",
+    "lat": 10.6666,
+    "lon": -71.6124,
+    "country": "VE"
+  },
+  {
+    "name": "Santo Domingo",
+    "displayName": "Santo Domingo, Dominican Republic",
+    "lat": 18.4719,
+    "lon": -69.8923,
+    "country": "DO"
+  },
+  {
+    "name": "Nagoya",
+    "displayName": "Nagoya, Japan",
+    "lat": 35.1815,
+    "lon": 136.9064,
+    "country": "JP"
+  },
+  {
+    "name": "Al Mawşil al Jadīdah",
+    "displayName": "Al Mawşil al Jadīdah, Iraq",
+    "lat": 36.3327,
+    "lon": 43.1056,
+    "country": "IQ"
+  },
+  {
+    "name": "Almaty",
+    "displayName": "Almaty, Kazakhstan",
+    "lat": 43.2567,
+    "lon": 76.9286,
+    "country": "KZ"
+  },
+  {
+    "name": "Dadonghai",
+    "displayName": "Dadonghai, China",
+    "lat": 18.2206,
+    "lon": 109.5103,
+    "country": "CN"
+  },
+  {
+    "name": "Medellín",
+    "displayName": "Medellín, Colombia",
+    "lat": 6.2518,
+    "lon": -75.5636,
+    "country": "CO"
+  },
+  {
+    "name": "Tashkent",
+    "displayName": "Tashkent, Uzbekistan",
+    "lat": 41.2647,
+    "lon": 69.2163,
+    "country": "UZ"
+  },
+  {
+    "name": "Algiers",
+    "displayName": "Algiers, Algeria",
+    "lat": 36.7323,
+    "lon": 3.0875,
+    "country": "DZ"
+  },
+  {
+    "name": "Guayaquil",
+    "displayName": "Guayaquil, Ecuador",
+    "lat": -2.1962,
+    "lon": -79.8862,
+    "country": "EC"
+  },
+  {
+    "name": "Ordos",
+    "displayName": "Ordos, China",
+    "lat": 39.6086,
+    "lon": 109.7816,
+    "country": "CN"
+  },
+  {
+    "name": "Sanaa",
+    "displayName": "Sanaa, Yemen",
+    "lat": 15.3547,
+    "lon": 44.2067,
+    "country": "YE"
+  },
+  {
+    "name": "Beirut",
+    "displayName": "Beirut, Lebanon",
+    "lat": 33.8933,
+    "lon": 35.5016,
+    "country": "LB"
+  },
+  {
+    "name": "Jilin",
+    "displayName": "Jilin, China",
+    "lat": 43.8508,
+    "lon": 126.5603,
+    "country": "CN"
+  },
+  {
+    "name": "Bucharest",
+    "displayName": "Bucharest, Romania",
+    "lat": 44.4323,
+    "lon": 26.1063,
+    "country": "RO"
+  },
+  {
+    "name": "Camayenne",
+    "displayName": "Camayenne, Guinea",
+    "lat": 9.535,
+    "lon": -13.6878,
+    "country": "GN"
+  },
+  {
+    "name": "Iztapalapa",
+    "displayName": "Iztapalapa, Mexico",
+    "lat": 19.3553,
+    "lon": -99.0622,
+    "country": "MX"
+  },
+  {
+    "name": "Bayan Nur",
+    "displayName": "Bayan Nur, China",
+    "lat": 40.7414,
+    "lon": 107.386,
+    "country": "CN"
+  },
+  {
+    "name": "Maracay",
+    "displayName": "Maracay, Venezuela",
+    "lat": 10.2354,
+    "lon": -67.5911,
+    "country": "VE"
+  },
+  {
+    "name": "Medan",
+    "displayName": "Medan, Indonesia",
+    "lat": 3.5833,
+    "lon": 98.6667,
+    "country": "ID"
+  },
+  {
+    "name": "Rawalpindi",
+    "displayName": "Rawalpindi, Pakistan",
+    "lat": 33.5973,
+    "lon": 73.0479,
+    "country": "PK"
+  },
+  {
+    "name": "Minsk",
+    "displayName": "Minsk, Belarus",
+    "lat": 53.9,
+    "lon": 27.5667,
+    "country": "BY"
+  },
+  {
+    "name": "Budapest",
+    "displayName": "Budapest, Hungary",
+    "lat": 47.4984,
+    "lon": 19.0405,
+    "country": "HU"
+  },
+  {
+    "name": "Curitiba",
+    "displayName": "Curitiba, Brazil",
+    "lat": -25.4278,
+    "lon": -49.2731,
+    "country": "BR"
+  },
+  {
+    "name": "Bandung",
+    "displayName": "Bandung, Indonesia",
+    "lat": -6.9222,
+    "lon": 107.6069,
+    "country": "ID"
+  },
+  {
+    "name": "Soweto",
+    "displayName": "Soweto, South Africa",
+    "lat": -26.2678,
+    "lon": 27.8585,
+    "country": "ZA"
+  },
+  {
+    "name": "Rabat",
+    "displayName": "Rabat, Morocco",
+    "lat": 34.0133,
+    "lon": -6.8325,
+    "country": "MA"
+  },
+  {
+    "name": "Ecatepec de Morelos",
+    "displayName": "Ecatepec de Morelos, Mexico",
+    "lat": 19.6049,
+    "lon": -99.0606,
+    "country": "MX"
+  },
+  {
+    "name": "Aleppo",
+    "displayName": "Aleppo, Syria",
+    "lat": 36.2012,
+    "lon": 37.1612,
+    "country": "SY"
+  },
+  {
+    "name": "Kunshan",
+    "displayName": "Kunshan, China",
+    "lat": 31.3776,
+    "lon": 120.9543,
+    "country": "CN"
+  },
+  {
+    "name": "Manaus",
+    "displayName": "Manaus, Brazil",
+    "lat": -3.1019,
+    "lon": -60.025,
+    "country": "BR"
+  },
+  {
+    "name": "Xinyang",
+    "displayName": "Xinyang, China",
+    "lat": 32.1228,
+    "lon": 114.0656,
+    "country": "CN"
+  },
+  {
+    "name": "Kaduna",
+    "displayName": "Kaduna, Nigeria",
+    "lat": 10.5264,
+    "lon": 7.4388,
+    "country": "NG"
+  },
+  {
+    "name": "Phnom Penh",
+    "displayName": "Phnom Penh, Cambodia",
+    "lat": 11.5625,
+    "lon": 104.916,
+    "country": "KH"
+  },
+  {
+    "name": "Damascus",
+    "displayName": "Damascus, Syria",
+    "lat": 33.5102,
+    "lon": 36.2913,
+    "country": "SY"
+  },
+  {
+    "name": "Isfahan",
+    "displayName": "Isfahan, Iran",
+    "lat": 32.6525,
+    "lon": 51.6746,
+    "country": "IR"
+  },
+  {
+    "name": "Harare",
+    "displayName": "Harare, Zimbabwe",
+    "lat": -17.8277,
+    "lon": 31.0534,
+    "country": "ZW"
+  },
+  {
+    "name": "Kobe",
+    "displayName": "Kobe, Japan",
+    "lat": 34.6913,
+    "lon": 135.183,
+    "country": "JP"
+  },
+  {
+    "name": "Bekasi",
+    "displayName": "Bekasi, Indonesia",
+    "lat": -6.2349,
+    "lon": 106.9896,
+    "country": "ID"
+  },
+  {
+    "name": "Kaohsiung",
+    "displayName": "Kaohsiung, Taiwan",
+    "lat": 22.6163,
+    "lon": 120.3133,
+    "country": "TW"
+  },
+  {
+    "name": "Manhattan",
+    "displayName": "Manhattan, New York, United States",
+    "lat": 40.7834,
+    "lon": -73.9662,
+    "country": "US",
+    "admin1": "New York"
+  },
+  {
+    "name": "Asunción",
+    "displayName": "Asunción, Paraguay",
+    "lat": -25.2865,
+    "lon": -57.647,
+    "country": "PY"
+  },
+  {
+    "name": "Recife",
+    "displayName": "Recife, Brazil",
+    "lat": -8.0539,
+    "lon": -34.8811,
+    "country": "BR"
+  },
+  {
+    "name": "Daejeon",
+    "displayName": "Daejeon, South Korea",
+    "lat": 36.3491,
+    "lon": 127.3849,
+    "country": "KR"
+  },
+  {
+    "name": "San Antonio",
+    "displayName": "San Antonio, Texas, United States",
+    "lat": 29.4241,
+    "lon": -98.4936,
+    "country": "US",
+    "admin1": "Texas"
+  },
+  {
+    "name": "Kumasi",
+    "displayName": "Kumasi, Ghana",
+    "lat": 6.6885,
+    "lon": -1.6244,
+    "country": "GH"
+  },
+  {
+    "name": "Karaj",
+    "displayName": "Karaj, Iran",
+    "lat": 35.8327,
+    "lon": 50.9915,
+    "country": "IR"
+  },
+  {
+    "name": "Palembang",
+    "displayName": "Palembang, Indonesia",
+    "lat": -2.9167,
+    "lon": 104.7458,
+    "country": "ID"
+  },
+  {
+    "name": "Multan",
+    "displayName": "Multan, Pakistan",
+    "lat": 30.1968,
+    "lon": 71.4782,
+    "country": "PK"
+  },
+  {
+    "name": "Puebla",
+    "displayName": "Puebla, Mexico",
+    "lat": 19.0379,
+    "lon": -98.2035,
+    "country": "MX"
+  },
+  {
+    "name": "Kharkiv",
+    "displayName": "Kharkiv, Ukraine",
+    "lat": 49.9808,
+    "lon": 36.2527,
+    "country": "UA"
+  },
+  {
+    "name": "Córdoba",
+    "displayName": "Córdoba, Argentina",
+    "lat": -31.4135,
+    "lon": -64.181,
+    "country": "AR"
+  },
+  {
+    "name": "Tabriz",
+    "displayName": "Tabriz, Iran",
+    "lat": 38.08,
+    "lon": 46.2919,
+    "country": "IR"
+  },
+  {
+    "name": "Novosibirsk",
+    "displayName": "Novosibirsk, Russia",
+    "lat": 55.0415,
+    "lon": 82.9346,
+    "country": "RU"
+  },
+  {
+    "name": "Gwangju",
+    "displayName": "Gwangju, South Korea",
+    "lat": 35.1547,
+    "lon": 126.9156,
+    "country": "KR"
+  },
+  {
+    "name": "Bursa",
+    "displayName": "Bursa, Turkey",
+    "lat": 40.1956,
+    "lon": 29.0601,
+    "country": "TR"
+  },
+  {
+    "name": "Belém",
+    "displayName": "Belém, Brazil",
+    "lat": -1.4558,
+    "lon": -48.5044,
+    "country": "BR"
+  },
+  {
+    "name": "Fushun",
+    "displayName": "Fushun, China",
+    "lat": 41.8867,
+    "lon": 123.9436,
+    "country": "CN"
+  },
+  {
+    "name": "Quito",
+    "displayName": "Quito, Ecuador",
+    "lat": -0.2298,
+    "lon": -78.5249,
+    "country": "EC"
+  },
+  {
+    "name": "Fukuoka",
+    "displayName": "Fukuoka, Japan",
+    "lat": 33.6,
+    "lon": 130.4167,
+    "country": "JP"
+  },
+  {
+    "name": "Antananarivo",
+    "displayName": "Antananarivo, Madagascar",
+    "lat": -18.9137,
+    "lon": 47.5361,
+    "country": "MG"
+  },
+  {
+    "name": "Luoyang",
+    "displayName": "Luoyang, China",
+    "lat": 34.6836,
+    "lon": 112.4536,
+    "country": "CN"
+  },
+  {
+    "name": "The Bronx",
+    "displayName": "The Bronx, New York, United States",
+    "lat": 40.8499,
+    "lon": -73.8664,
+    "country": "US",
+    "admin1": "New York"
+  },
+  {
+    "name": "Valencia",
+    "displayName": "Valencia, Venezuela",
+    "lat": 10.162,
+    "lon": -68.0076,
+    "country": "VE"
+  },
+  {
+    "name": "Gujranwala",
+    "displayName": "Gujranwala, Pakistan",
+    "lat": 32.1557,
+    "lon": 74.1871,
+    "country": "PK"
+  },
+  {
+    "name": "Barranquilla",
+    "displayName": "Barranquilla, Colombia",
+    "lat": 10.9685,
+    "lon": -74.7813,
+    "country": "CO"
+  },
+  {
+    "name": "Guankou",
+    "displayName": "Guankou, China",
+    "lat": 28.1586,
+    "lon": 113.6271,
+    "country": "CN"
+  },
+  {
+    "name": "Lubumbashi",
+    "displayName": "Lubumbashi, Democratic Republic of the Congo",
+    "lat": -11.6609,
+    "lon": 27.4794,
+    "country": "CD"
+  },
+  {
+    "name": "Porto Alegre",
+    "displayName": "Porto Alegre, Brazil",
+    "lat": -30.0328,
+    "lon": -51.2302,
+    "country": "BR"
+  },
+  {
+    "name": "Tangerang",
+    "displayName": "Tangerang, Indonesia",
+    "lat": -6.1781,
+    "lon": 106.63,
+    "country": "ID"
+  },
+  {
+    "name": "Najafgarh",
+    "displayName": "Najafgarh, India",
+    "lat": 28.6092,
+    "lon": 76.9798,
+    "country": "IN"
+  },
+  {
+    "name": "Santa Cruz de la Sierra",
+    "displayName": "Santa Cruz de la Sierra, Bolivia",
+    "lat": -17.7863,
+    "lon": -63.1812,
+    "country": "BO"
+  },
+  {
+    "name": "Handan",
+    "displayName": "Handan, China",
+    "lat": 36.6006,
+    "lon": 114.4678,
+    "country": "CN"
+  },
+  {
+    "name": "Yekaterinburg",
+    "displayName": "Yekaterinburg, Russia",
+    "lat": 56.8519,
+    "lon": 60.6122,
+    "country": "RU"
+  },
+  {
+    "name": "Khulna",
+    "displayName": "Khulna, Bangladesh",
+    "lat": 22.8098,
+    "lon": 89.5644,
+    "country": "BD"
+  },
+  {
+    "name": "Douala",
+    "displayName": "Douala, Cameroon",
+    "lat": 4.0483,
+    "lon": 9.7043,
+    "country": "CM"
+  },
+  {
+    "name": "Mecca",
+    "displayName": "Mecca, Saudi Arabia",
+    "lat": 21.4266,
+    "lon": 39.8256,
+    "country": "SA"
+  },
+  {
+    "name": "Makassar",
+    "displayName": "Makassar, Indonesia",
+    "lat": -5.1486,
+    "lon": 119.4319,
+    "country": "ID"
+  },
+  {
+    "name": "Juárez",
+    "displayName": "Juárez, Mexico",
+    "lat": 31.7202,
+    "lon": -106.4608,
+    "country": "MX"
+  },
+  {
+    "name": "Kawasaki",
+    "displayName": "Kawasaki, Japan",
+    "lat": 35.5206,
+    "lon": 139.7172,
+    "country": "JP"
+  },
+  {
+    "name": "Baotou",
+    "displayName": "Baotou, China",
+    "lat": 40.5834,
+    "lon": 110.0167,
+    "country": "CN"
+  },
+  {
+    "name": "Tijuana",
+    "displayName": "Tijuana, Mexico",
+    "lat": 32.5027,
+    "lon": -117.0037,
+    "country": "MX"
+  },
+  {
+    "name": "Medina",
+    "displayName": "Medina, Saudi Arabia",
+    "lat": 24.4686,
+    "lon": 39.6142,
+    "country": "SA"
+  },
+  {
+    "name": "Yaoundé",
+    "displayName": "Yaoundé, Cameroon",
+    "lat": 3.8667,
+    "lon": 11.5167,
+    "country": "CM"
+  },
+  {
+    "name": "Bamako",
+    "displayName": "Bamako, Mali",
+    "lat": 12.65,
+    "lon": -8,
+    "country": "ML"
+  },
+  {
+    "name": "Semarang",
+    "displayName": "Semarang, Indonesia",
+    "lat": -6.9931,
+    "lon": 110.4208,
+    "country": "ID"
+  },
+  {
+    "name": "Brazzaville",
+    "displayName": "Brazzaville, Republic of the Congo",
+    "lat": -4.2661,
+    "lon": 15.2832,
+    "country": "CG"
+  },
+  {
+    "name": "Pimpri",
+    "displayName": "Pimpri, India",
+    "lat": 18.6229,
+    "lon": 73.807,
+    "country": "IN"
+  },
+  {
+    "name": "Nizhniy Novgorod",
+    "displayName": "Nizhniy Novgorod, Russia",
+    "lat": 56.3287,
+    "lon": 44.002,
+    "country": "RU"
+  },
+  {
+    "name": "Budta",
+    "displayName": "Budta, Philippines",
+    "lat": 7.2042,
+    "lon": 124.4397,
+    "country": "PH"
+  },
+  {
+    "name": "Belgrade",
+    "displayName": "Belgrade, Serbia",
+    "lat": 44.804,
+    "lon": 20.4651,
+    "country": "RS"
+  },
+  {
+    "name": "Montevideo",
+    "displayName": "Montevideo, Uruguay",
+    "lat": -34.9033,
+    "lon": -56.1882,
+    "country": "UY"
+  },
+  {
+    "name": "Lusaka",
+    "displayName": "Lusaka, Zambia",
+    "lat": -15.4067,
+    "lon": 28.2871,
+    "country": "ZM"
+  },
+  {
+    "name": "Xuchang",
+    "displayName": "Xuchang, China",
+    "lat": 34.0319,
+    "lon": 113.863,
+    "country": "CN"
+  },
+  {
+    "name": "Kalyān",
+    "displayName": "Kalyān, India",
+    "lat": 19.2437,
+    "lon": 73.1355,
+    "country": "IN"
+  },
+  {
+    "name": "Shiraz",
+    "displayName": "Shiraz, Iran",
+    "lat": 29.6103,
+    "lon": 52.5311,
+    "country": "IR"
+  },
+  {
+    "name": "Adana",
+    "displayName": "Adana, Turkey",
+    "lat": 36.9862,
+    "lon": 35.3253,
+    "country": "TR"
+  },
+  {
+    "name": "Suwon",
+    "displayName": "Suwon, South Korea",
+    "lat": 37.2911,
+    "lon": 127.0089,
+    "country": "KR"
+  },
+  {
+    "name": "León de los Aldama",
+    "displayName": "León de los Aldama, Mexico",
+    "lat": 21.1291,
+    "lon": -101.6737,
+    "country": "MX"
+  },
+  {
+    "name": "Port-au-Prince",
+    "displayName": "Port-au-Prince, Haiti",
+    "lat": 18.5435,
+    "lon": -72.3388,
+    "country": "HT"
+  },
+  {
+    "name": "Nowrangapur",
+    "displayName": "Nowrangapur, India",
+    "lat": 19.2311,
+    "lon": 82.5483,
+    "country": "IN"
+  },
+  {
+    "name": "Davao",
+    "displayName": "Davao, Philippines",
+    "lat": 7.0731,
+    "lon": 125.6128,
+    "country": "PH"
+  },
+  {
+    "name": "Mandalay",
+    "displayName": "Mandalay, Myanmar",
+    "lat": 21.9747,
+    "lon": 96.0836,
+    "country": "MM"
+  },
+  {
+    "name": "Yueyang",
+    "displayName": "Yueyang, China",
+    "lat": 29.3746,
+    "lon": 113.0948,
+    "country": "CN"
+  },
+  {
+    "name": "Omdurman",
+    "displayName": "Omdurman, Sudan",
+    "lat": 15.6445,
+    "lon": 32.4777,
+    "country": "SD"
+  },
+  {
+    "name": "Anshan",
+    "displayName": "Anshan, China",
+    "lat": 41.1236,
+    "lon": 122.99,
+    "country": "CN"
+  },
+  {
+    "name": "Tongshan",
+    "displayName": "Tongshan, China",
+    "lat": 34.1805,
+    "lon": 117.1571,
+    "country": "CN"
+  },
+  {
+    "name": "Depok",
+    "displayName": "Depok, Indonesia",
+    "lat": -6.4,
+    "lon": 106.8186,
+    "country": "ID"
+  },
+  {
+    "name": "Saitama",
+    "displayName": "Saitama, Japan",
+    "lat": 35.9081,
+    "lon": 139.6566,
+    "country": "JP"
+  },
+  {
+    "name": "Maputo",
+    "displayName": "Maputo, Mozambique",
+    "lat": -25.9655,
+    "lon": 32.5832,
+    "country": "MZ"
+  },
+  {
+    "name": "Gustavo Adolfo Madero",
+    "displayName": "Gustavo Adolfo Madero, Mexico",
+    "lat": 19.4939,
+    "lon": -99.1107,
+    "country": "MX"
+  },
+  {
+    "name": "Fuzhou",
+    "displayName": "Fuzhou, China",
+    "lat": 26.0614,
+    "lon": 119.3061,
+    "country": "CN"
+  },
+  {
+    "name": "Rosario",
+    "displayName": "Rosario, Argentina",
+    "lat": -32.9468,
+    "lon": -60.6393,
+    "country": "AR"
+  },
+  {
+    "name": "Guiyang",
+    "displayName": "Guiyang, China",
+    "lat": 26.5833,
+    "lon": 106.7167,
+    "country": "CN"
+  },
+  {
+    "name": "Goiânia",
+    "displayName": "Goiânia, Brazil",
+    "lat": -16.6786,
+    "lon": -49.2539,
+    "country": "BR"
+  },
+  {
+    "name": "Guarulhos",
+    "displayName": "Guarulhos, Brazil",
+    "lat": -23.4628,
+    "lon": -46.5333,
+    "country": "BR"
+  },
+  {
+    "name": "Batam",
+    "displayName": "Batam, Indonesia",
+    "lat": 1.1494,
+    "lon": 104.0249,
+    "country": "ID"
+  },
+  {
+    "name": "Sofia",
+    "displayName": "Sofia, Bulgaria",
+    "lat": 42.6975,
+    "lon": 23.3242,
+    "country": "BG"
+  },
+  {
+    "name": "Tripoli",
+    "displayName": "Tripoli, Libya",
+    "lat": 32.8874,
+    "lon": 13.1873,
+    "country": "LY"
+  },
+  {
+    "name": "Port Harcourt",
+    "displayName": "Port Harcourt, Nigeria",
+    "lat": 4.7774,
+    "lon": 7.0134,
+    "country": "NG"
+  },
+  {
+    "name": "Hiroshima",
+    "displayName": "Hiroshima, Japan",
+    "lat": 34.4,
+    "lon": 132.45,
+    "country": "JP"
+  },
+  {
+    "name": "Zapopan",
+    "displayName": "Zapopan, Mexico",
+    "lat": 20.7236,
+    "lon": -103.3848,
+    "country": "MX"
+  },
+  {
+    "name": "Lijiang",
+    "displayName": "Lijiang, China",
+    "lat": 26.8688,
+    "lon": 100.2207,
+    "country": "CN"
+  },
+  {
+    "name": "Monterrey",
+    "displayName": "Monterrey, Mexico",
+    "lat": 25.6751,
+    "lon": -100.3185,
+    "country": "MX"
+  },
+  {
+    "name": "Samara",
+    "displayName": "Samara, Russia",
+    "lat": 53.2001,
+    "lon": 50.15,
+    "country": "RU"
+  },
+  {
+    "name": "Omsk",
+    "displayName": "Omsk, Russia",
+    "lat": 54.9924,
+    "lon": 73.3686,
+    "country": "RU"
+  },
+  {
+    "name": "Benin City",
+    "displayName": "Benin City, Nigeria",
+    "lat": 6.3382,
+    "lon": 5.6258,
+    "country": "NG"
+  },
+  {
+    "name": "Baku",
+    "displayName": "Baku, Azerbaijan",
+    "lat": 40.3777,
+    "lon": 49.892,
+    "country": "AZ"
+  },
+  {
+    "name": "Maiduguri",
+    "displayName": "Maiduguri, Nigeria",
+    "lat": 11.8469,
+    "lon": 13.1571,
+    "country": "NG"
+  },
+  {
+    "name": "Kazan",
+    "displayName": "Kazan, Russia",
+    "lat": 55.7887,
+    "lon": 49.1221,
+    "country": "RU"
+  },
+  {
+    "name": "Yerevan",
+    "displayName": "Yerevan, Armenia",
+    "lat": 40.1811,
+    "lon": 44.5136,
+    "country": "AM"
+  },
+  {
+    "name": "Ouagadougou",
+    "displayName": "Ouagadougou, Burkina Faso",
+    "lat": 12.3657,
+    "lon": -1.5339,
+    "country": "BF"
+  },
+  {
+    "name": "Rostov-na-Donu",
+    "displayName": "Rostov-na-Donu, Russia",
+    "lat": 47.2314,
+    "lon": 39.7233,
+    "country": "RU"
+  },
+  {
+    "name": "Goyang-si",
+    "displayName": "Goyang-si, South Korea",
+    "lat": 37.6564,
+    "lon": 126.835,
+    "country": "KR"
+  },
+  {
+    "name": "Gaziantep",
+    "displayName": "Gaziantep, Turkey",
+    "lat": 37.0594,
+    "lon": 37.3825,
+    "country": "TR"
+  },
+  {
+    "name": "Sendai",
+    "displayName": "Sendai, Japan",
+    "lat": 38.2667,
+    "lon": 140.8667,
+    "country": "JP"
+  },
+  {
+    "name": "Chelyabinsk",
+    "displayName": "Chelyabinsk, Russia",
+    "lat": 55.154,
+    "lon": 61.4292,
+    "country": "RU"
+  },
+  {
+    "name": "Datong",
+    "displayName": "Datong, China",
+    "lat": 40.0936,
+    "lon": 113.2914,
+    "country": "CN"
+  },
+  {
+    "name": "Tbilisi",
+    "displayName": "Tbilisi, Georgia",
+    "lat": 41.6941,
+    "lon": 44.8337,
+    "country": "GE"
+  },
+  {
+    "name": "Changshu City",
+    "displayName": "Changshu City, China",
+    "lat": 31.6462,
+    "lon": 120.7422,
+    "country": "CN"
+  },
+  {
+    "name": "Taichung",
+    "displayName": "Taichung, Taiwan",
+    "lat": 24.1469,
+    "lon": 120.6839,
+    "country": "TW"
+  },
+  {
+    "name": "Teni",
+    "displayName": "Teni, India",
+    "lat": 10.0112,
+    "lon": 77.4777,
+    "country": "IN"
+  },
+  {
+    "name": "Ufa",
+    "displayName": "Ufa, Russia",
+    "lat": 54.7431,
+    "lon": 55.9678,
+    "country": "RU"
+  },
+  {
+    "name": "Dnipro",
+    "displayName": "Dnipro, Ukraine",
+    "lat": 48.4593,
+    "lon": 35.0386,
+    "country": "UA"
+  },
+  {
+    "name": "Seongnam-si",
+    "displayName": "Seongnam-si, South Korea",
+    "lat": 37.4386,
+    "lon": 127.1378,
+    "country": "KR"
+  },
+  {
+    "name": "Campinas",
+    "displayName": "Campinas, Brazil",
+    "lat": -22.9056,
+    "lon": -47.0608,
+    "country": "BR"
+  },
+  {
+    "name": "Huainan",
+    "displayName": "Huainan, China",
+    "lat": 32.6264,
+    "lon": 116.9969,
+    "country": "CN"
+  },
+  {
+    "name": "Donetsk",
+    "displayName": "Donetsk, Ukraine",
+    "lat": 48.023,
+    "lon": 37.8022,
+    "country": "UA"
+  },
+  {
+    "name": "Volgograd",
+    "displayName": "Volgograd, Russia",
+    "lat": 48.7194,
+    "lon": 44.5018,
+    "country": "RU"
+  },
+  {
+    "name": "Nova Iguaçu",
+    "displayName": "Nova Iguaçu, Brazil",
+    "lat": -22.7592,
+    "lon": -43.4511,
+    "country": "BR"
+  },
+  {
+    "name": "Jieyang",
+    "displayName": "Jieyang, China",
+    "lat": 23.5418,
+    "lon": 116.3658,
+    "country": "CN"
+  },
+  {
+    "name": "Odessa",
+    "displayName": "Odessa, Ukraine",
+    "lat": 46.4775,
+    "lon": 30.7326,
+    "country": "UA"
+  },
+  {
+    "name": "Zhu Cheng City",
+    "displayName": "Zhu Cheng City, China",
+    "lat": 35.995,
+    "lon": 119.4026,
+    "country": "CN"
+  },
+  {
+    "name": "Kitakyushu",
+    "displayName": "Kitakyushu, Japan",
+    "lat": 33.8518,
+    "lon": 130.8503,
+    "country": "JP"
+  },
+  {
+    "name": "Baoding",
+    "displayName": "Baoding, China",
+    "lat": 38.8511,
+    "lon": 115.4903,
+    "country": "CN"
+  },
+  {
+    "name": "Guatemala City",
+    "displayName": "Guatemala City, Guatemala",
+    "lat": 14.6407,
+    "lon": -90.5133,
+    "country": "GT"
+  },
+  {
+    "name": "Benxi",
+    "displayName": "Benxi, China",
+    "lat": 41.2886,
+    "lon": 123.765,
+    "country": "CN"
+  },
+  {
+    "name": "Perm",
+    "displayName": "Perm, Russia",
+    "lat": 58.0105,
+    "lon": 56.2502,
+    "country": "RU"
+  },
+  {
+    "name": "Zaria",
+    "displayName": "Zaria, Nigeria",
+    "lat": 11.1113,
+    "lon": 7.7227,
+    "country": "NG"
+  },
+  {
+    "name": "Managua",
+    "displayName": "Managua, Nicaragua",
+    "lat": 12.1328,
+    "lon": -86.2504,
+    "country": "NI"
+  },
+  {
+    "name": "Port Elizabeth",
+    "displayName": "Port Elizabeth, South Africa",
+    "lat": -33.9611,
+    "lon": 25.6149,
+    "country": "ZA"
+  },
+  {
+    "name": "Fès",
+    "displayName": "Fès, Morocco",
+    "lat": 34.0331,
+    "lon": -5.0003,
+    "country": "MA"
+  },
+  {
+    "name": "Köln",
+    "displayName": "Köln, Germany",
+    "lat": 50.9333,
+    "lon": 6.95,
+    "country": "DE"
+  },
+  {
+    "name": "Ulsan",
+    "displayName": "Ulsan, South Korea",
+    "lat": 35.5372,
+    "lon": 129.3167,
+    "country": "KR"
+  },
+  {
+    "name": "Maceió",
+    "displayName": "Maceió, Brazil",
+    "lat": -9.6658,
+    "lon": -35.7353,
+    "country": "BR"
+  },
+  {
+    "name": "Cartagena",
+    "displayName": "Cartagena, Colombia",
+    "lat": 10.3997,
+    "lon": -75.5144,
+    "country": "CO"
+  },
+  {
+    "name": "Monrovia",
+    "displayName": "Monrovia, Liberia",
+    "lat": 6.3005,
+    "lon": -10.7969,
+    "country": "LR"
+  },
+  {
+    "name": "Erbil",
+    "displayName": "Erbil, Iraq",
+    "lat": 36.1833,
+    "lon": 44.0119,
+    "country": "IQ"
+  },
+  {
+    "name": "Krasnoyarsk",
+    "displayName": "Krasnoyarsk, Russia",
+    "lat": 56.0184,
+    "lon": 92.8672,
+    "country": "RU"
+  },
+  {
+    "name": "Nay Pyi Taw",
+    "displayName": "Nay Pyi Taw, Myanmar",
+    "lat": 19.745,
+    "lon": 96.1297,
+    "country": "MM"
+  },
+  {
+    "name": "Chiba",
+    "displayName": "Chiba, Japan",
+    "lat": 35.6,
+    "lon": 140.1167,
+    "country": "JP"
+  },
+  {
+    "name": "São Luís",
+    "displayName": "São Luís, Brazil",
+    "lat": -2.5297,
+    "lon": -44.3028,
+    "country": "BR"
+  },
+  {
+    "name": "Huaibei",
+    "displayName": "Huaibei, China",
+    "lat": 33.9744,
+    "lon": 116.7917,
+    "country": "CN"
+  },
+  {
+    "name": "Cochabamba",
+    "displayName": "Cochabamba, Bolivia",
+    "lat": -17.3895,
+    "lon": -66.1568,
+    "country": "BO"
+  },
+  {
+    "name": "Abobo",
+    "displayName": "Abobo, Cote d'Ivoire",
+    "lat": 5.4161,
+    "lon": -4.0159,
+    "country": "CI"
+  },
+  {
+    "name": "Kaifeng",
+    "displayName": "Kaifeng, China",
+    "lat": 34.7986,
+    "lon": 114.3074,
+    "country": "CN"
+  },
+  {
+    "name": "Abū Ghurayb",
+    "displayName": "Abū Ghurayb, Iraq",
+    "lat": 33.3056,
+    "lon": 44.1848,
+    "country": "IQ"
+  },
+  {
+    "name": "Qom",
+    "displayName": "Qom, Iran",
+    "lat": 34.6401,
+    "lon": 50.8764,
+    "country": "IR"
+  },
+  {
+    "name": "Bishkek",
+    "displayName": "Bishkek, Kyrgyzstan",
+    "lat": 42.87,
+    "lon": 74.59,
+    "country": "KG"
+  },
+  {
+    "name": "Aba",
+    "displayName": "Aba, Nigeria",
+    "lat": 5.1066,
+    "lon": 7.3667,
+    "country": "NG"
+  },
+  {
+    "name": "Pingdingshan",
+    "displayName": "Pingdingshan, China",
+    "lat": 33.7385,
+    "lon": 113.3012,
+    "country": "CN"
+  },
+  {
+    "name": "Qiqihar",
+    "displayName": "Qiqihar, China",
+    "lat": 47.3409,
+    "lon": 123.9605,
+    "country": "CN"
+  },
+  {
+    "name": "Klang",
+    "displayName": "Klang, Malaysia",
+    "lat": 3.0367,
+    "lon": 101.4433,
+    "country": "MY"
+  },
+  {
+    "name": "Mendoza",
+    "displayName": "Mendoza, Argentina",
+    "lat": -32.8908,
+    "lon": -68.8272,
+    "country": "AR"
+  },
+  {
+    "name": "Konya",
+    "displayName": "Konya, Turkey",
+    "lat": 37.8714,
+    "lon": 32.4846,
+    "country": "TR"
+  },
+  {
+    "name": "Mbuji-Mayi",
+    "displayName": "Mbuji-Mayi, Democratic Republic of the Congo",
+    "lat": -6.136,
+    "lon": 23.5898,
+    "country": "CD"
+  },
+  {
+    "name": "Pikine",
+    "displayName": "Pikine, Senegal",
+    "lat": 14.7646,
+    "lon": -17.3907,
+    "country": "SN"
+  },
+  {
+    "name": "Turin",
+    "displayName": "Turin, Italy",
+    "lat": 45.0705,
+    "lon": 7.6868,
+    "country": "IT"
+  },
+  {
+    "name": "Jacksonville",
+    "displayName": "Jacksonville, Florida, United States",
+    "lat": 30.3322,
+    "lon": -81.6556,
+    "country": "US",
+    "admin1": "Florida"
+  },
+  {
+    "name": "Wenzhou",
+    "displayName": "Wenzhou, China",
+    "lat": 27.9994,
+    "lon": 120.6668,
+    "country": "CN"
+  },
+  {
+    "name": "Saratov",
+    "displayName": "Saratov, Russia",
+    "lat": 51.5406,
+    "lon": 46.0086,
+    "country": "RU"
+  },
+  {
+    "name": "Rohini",
+    "displayName": "Rohini, India",
+    "lat": 28.7432,
+    "lon": 77.0678,
+    "country": "IN"
+  },
+  {
+    "name": "Tegucigalpa",
+    "displayName": "Tegucigalpa, Honduras",
+    "lat": 14.0818,
+    "lon": -87.2068,
+    "country": "HN"
+  },
+  {
+    "name": "Bucheon-si",
+    "displayName": "Bucheon-si, South Korea",
+    "lat": 37.4989,
+    "lon": 126.7831,
+    "country": "KR"
+  },
+  {
+    "name": "Columbus",
+    "displayName": "Columbus, Ohio, United States",
+    "lat": 39.9612,
+    "lon": -82.9988,
+    "country": "US",
+    "admin1": "Ohio"
+  },
+  {
+    "name": "Voronezh",
+    "displayName": "Voronezh, Russia",
+    "lat": 51.672,
+    "lon": 39.1843,
+    "country": "RU"
+  },
+  {
+    "name": "Ulan Bator",
+    "displayName": "Ulan Bator, Mongolia",
+    "lat": 47.9077,
+    "lon": 106.8832,
+    "country": "MN"
+  },
+  {
+    "name": "Takeo",
+    "displayName": "Takeo, Cambodia",
+    "lat": 10.9908,
+    "lon": 104.785,
+    "country": "KH"
+  },
+  {
+    "name": "Ahvaz",
+    "displayName": "Ahvaz, Iran",
+    "lat": 31.319,
+    "lon": 48.6842,
+    "country": "IR"
+  },
+  {
+    "name": "Arequipa",
+    "displayName": "Arequipa, Peru",
+    "lat": -16.3989,
+    "lon": -71.535,
+    "country": "PE"
+  },
+  {
+    "name": "Padang",
+    "displayName": "Padang, Indonesia",
+    "lat": -0.9492,
+    "lon": 100.3543,
+    "country": "ID"
+  },
+  {
+    "name": "Marrakesh",
+    "displayName": "Marrakesh, Morocco",
+    "lat": 31.6342,
+    "lon": -7.9999,
+    "country": "MA"
+  },
+  {
+    "name": "Kampung Baru Subang",
+    "displayName": "Kampung Baru Subang, Malaysia",
+    "lat": 3.15,
+    "lon": 101.5333,
+    "country": "MY"
+  },
+  {
+    "name": "Fort Worth",
+    "displayName": "Fort Worth, Texas, United States",
+    "lat": 32.7254,
+    "lon": -97.3208,
+    "country": "US",
+    "admin1": "Texas"
+  },
+  {
+    "name": "Indianapolis",
+    "displayName": "Indianapolis, Indiana, United States",
+    "lat": 39.7684,
+    "lon": -86.158,
+    "country": "US",
+    "admin1": "Indiana"
+  },
+  {
+    "name": "Duque de Caxias",
+    "displayName": "Duque de Caxias, Brazil",
+    "lat": -22.7856,
+    "lon": -43.3117,
+    "country": "BR"
+  },
+  {
+    "name": "Jos",
+    "displayName": "Jos, Nigeria",
+    "lat": 9.9285,
+    "lon": 8.8921,
+    "country": "NG"
+  },
+  {
+    "name": "Ilorin",
+    "displayName": "Ilorin, Nigeria",
+    "lat": 8.4966,
+    "lon": 4.5421,
+    "country": "NG"
+  },
+  {
+    "name": "Callao",
+    "displayName": "Callao, Peru",
+    "lat": -12.0566,
+    "lon": -77.1181,
+    "country": "PE"
+  },
+  {
+    "name": "La Paz",
+    "displayName": "La Paz, Bolivia",
+    "lat": -16.5,
+    "lon": -68.15,
+    "country": "BO"
+  },
+  {
+    "name": "Barquisimeto",
+    "displayName": "Barquisimeto, Venezuela",
+    "lat": 10.0647,
+    "lon": -69.357,
+    "country": "VE"
+  },
+  {
+    "name": "Chihuahua",
+    "displayName": "Chihuahua, Mexico",
+    "lat": 28.6353,
+    "lon": -106.0889,
+    "country": "MX"
+  },
+  {
+    "name": "Nanning",
+    "displayName": "Nanning, China",
+    "lat": 22.8167,
+    "lon": 108.3167,
+    "country": "CN"
+  },
+  {
+    "name": "Freetown",
+    "displayName": "Freetown, Sierra Leone",
+    "lat": 8.4871,
+    "lon": -13.2356,
+    "country": "SL"
+  },
+  {
+    "name": "Bandar Lampung",
+    "displayName": "Bandar Lampung, Indonesia",
+    "lat": -5.4292,
+    "lon": 105.2611,
+    "country": "ID"
+  },
+  {
+    "name": "Bogor",
+    "displayName": "Bogor, Indonesia",
+    "lat": -6.5944,
+    "lon": 106.7892,
+    "country": "ID"
+  },
+  {
+    "name": "Narela",
+    "displayName": "Narela, India",
+    "lat": 28.8527,
+    "lon": 77.0929,
+    "country": "IN"
+  },
+  {
+    "name": "Zaporizhia",
+    "displayName": "Zaporizhia, Ukraine",
+    "lat": 47.8229,
+    "lon": 35.1903,
+    "country": "UA"
+  },
+  {
+    "name": "Zarqa",
+    "displayName": "Zarqa, Jordan",
+    "lat": 32.0728,
+    "lon": 36.088,
+    "country": "JO"
+  },
+  {
+    "name": "Rahim Yar Khan",
+    "displayName": "Rahim Yar Khan, Pakistan",
+    "lat": 28.4199,
+    "lon": 70.3035,
+    "country": "PK"
+  },
+  {
+    "name": "Pasragad Branch",
+    "displayName": "Pasragad Branch, Iran",
+    "lat": 34.7777,
+    "lon": 48.4717,
+    "country": "IR"
+  },
+  {
+    "name": "Boumerdas",
+    "displayName": "Boumerdas, Algeria",
+    "lat": 36.7664,
+    "lon": 3.4772,
+    "country": "DZ"
+  },
+  {
+    "name": "Sakai",
+    "displayName": "Sakai, Japan",
+    "lat": 34.5833,
+    "lon": 135.4667,
+    "country": "JP"
+  },
+  {
+    "name": "Anyang",
+    "displayName": "Anyang, China",
+    "lat": 36.096,
+    "lon": 114.3828,
+    "country": "CN"
+  },
+  {
+    "name": "San Miguel de Tucumán",
+    "displayName": "San Miguel de Tucumán, Argentina",
+    "lat": -26.8241,
+    "lon": -65.2226,
+    "country": "AR"
+  },
+  {
+    "name": "Cotonou",
+    "displayName": "Cotonou, Benin",
+    "lat": 6.3654,
+    "lon": 2.4183,
+    "country": "BJ"
+  },
+  {
+    "name": "Mérida",
+    "displayName": "Mérida, Mexico",
+    "lat": 20.9754,
+    "lon": -89.617,
+    "country": "MX"
+  },
+  {
+    "name": "Homs",
+    "displayName": "Homs, Syria",
+    "lat": 34.7268,
+    "lon": 36.7234,
+    "country": "SY"
+  },
+  {
+    "name": "Hohhot",
+    "displayName": "Hohhot, China",
+    "lat": 40.8106,
+    "lon": 111.6522,
+    "country": "CN"
+  },
+  {
+    "name": "Niamey",
+    "displayName": "Niamey, Niger",
+    "lat": 13.5137,
+    "lon": 2.1098,
+    "country": "NE"
+  },
+  {
+    "name": "Tainan",
+    "displayName": "Tainan, Taiwan",
+    "lat": 22.9908,
+    "lon": 120.2133,
+    "country": "TW"
+  },
+  {
+    "name": "Shangyu",
+    "displayName": "Shangyu, China",
+    "lat": 30.0156,
+    "lon": 120.8711,
+    "country": "CN"
+  },
+  {
+    "name": "Łódź",
+    "displayName": "Łódź, Poland",
+    "lat": 51.7706,
+    "lon": 19.4739,
+    "country": "PL"
+  },
+  {
+    "name": "Xining",
+    "displayName": "Xining, China",
+    "lat": 36.6255,
+    "lon": 101.7574,
+    "country": "CN"
+  },
+  {
+    "name": "Kahrīz",
+    "displayName": "Kahrīz, Iran",
+    "lat": 34.3838,
+    "lon": 47.0553,
+    "country": "IR"
+  },
+  {
+    "name": "Natal",
+    "displayName": "Natal, Brazil",
+    "lat": -5.795,
+    "lon": -35.2094,
+    "country": "BR"
+  },
+  {
+    "name": "Qinhuangdao",
+    "displayName": "Qinhuangdao, China",
+    "lat": 39.9317,
+    "lon": 119.5883,
+    "country": "CN"
+  },
+  {
+    "name": "Hengyang",
+    "displayName": "Hengyang, China",
+    "lat": 26.8895,
+    "lon": 112.6189,
+    "country": "CN"
+  },
+  {
+    "name": "Antalya",
+    "displayName": "Antalya, Turkey",
+    "lat": 36.9081,
+    "lon": 30.6956,
+    "country": "TR"
+  },
+  {
+    "name": "Kraków",
+    "displayName": "Kraków, Poland",
+    "lat": 50.0614,
+    "lon": 19.9366,
+    "country": "PL"
+  },
+  {
+    "name": "Da Nang",
+    "displayName": "Da Nang, Vietnam",
+    "lat": 16.0678,
+    "lon": 108.2208,
+    "country": "VN"
+  },
+  {
+    "name": "Pietermaritzburg",
+    "displayName": "Pietermaritzburg, South Africa",
+    "lat": -29.6168,
+    "lon": 30.3928,
+    "country": "ZA"
+  },
+  {
+    "name": "Lomé",
+    "displayName": "Lomé, Togo",
+    "lat": 6.1287,
+    "lon": 1.2215,
+    "country": "TG"
+  },
+  {
+    "name": "Trujillo",
+    "displayName": "Trujillo, Peru",
+    "lat": -8.116,
+    "lon": -79.03,
+    "country": "PE"
+  },
+  {
+    "name": "Malang",
+    "displayName": "Malang, Indonesia",
+    "lat": -7.9797,
+    "lon": 112.6304,
+    "country": "ID"
+  },
+  {
+    "name": "Ciudad Guayana",
+    "displayName": "Ciudad Guayana, Venezuela",
+    "lat": 8.3512,
+    "lon": -62.641,
+    "country": "VE"
+  },
+  {
+    "name": "Kigali",
+    "displayName": "Kigali, Rwanda",
+    "lat": -1.9499,
+    "lon": 30.0589,
+    "country": "RW"
+  },
+  {
+    "name": "Teresina",
+    "displayName": "Teresina, Brazil",
+    "lat": -5.0892,
+    "lon": -42.8019,
+    "country": "BR"
+  },
+  {
+    "name": "São Bernardo do Campo",
+    "displayName": "São Bernardo do Campo, Brazil",
+    "lat": -23.6939,
+    "lon": -46.565,
+    "country": "BR"
+  },
+  {
+    "name": "Hegang",
+    "displayName": "Hegang, China",
+    "lat": 47.3512,
+    "lon": 130.3001,
+    "country": "CN"
+  },
+  {
+    "name": "Riga",
+    "displayName": "Riga, Latvia",
+    "lat": 56.946,
+    "lon": 24.1059,
+    "country": "LV"
+  },
+  {
+    "name": "Oyo",
+    "displayName": "Oyo, Nigeria",
+    "lat": 7.8526,
+    "lon": 3.9313,
+    "country": "NG"
+  },
+  {
+    "name": "Nottingham",
+    "displayName": "Nottingham, United Kingdom",
+    "lat": 52.9536,
+    "lon": -1.1505,
+    "country": "GB"
+  },
+  {
+    "name": "Campo Grande",
+    "displayName": "Campo Grande, Brazil",
+    "lat": -20.4428,
+    "lon": -54.6464,
+    "country": "BR"
+  },
+  {
+    "name": "Ashgabat",
+    "displayName": "Ashgabat, Turkmenistan",
+    "lat": 37.95,
+    "lon": 58.3833,
+    "country": "TM"
+  },
+  {
+    "name": "Álvaro Obregón",
+    "displayName": "Álvaro Obregón, Mexico",
+    "lat": 19.3587,
+    "lon": -99.2033,
+    "country": "MX"
+  },
+  {
+    "name": "Muzaffarābād",
+    "displayName": "Muzaffarābād, Pakistan",
+    "lat": 34.37,
+    "lon": 73.4708,
+    "country": "PK"
+  },
+  {
+    "name": "Bağcılar",
+    "displayName": "Bağcılar, Turkey",
+    "lat": 41.039,
+    "lon": 28.8567,
+    "country": "TR"
+  },
+  {
+    "name": "As Sulaymānīyah",
+    "displayName": "As Sulaymānīyah, Iraq",
+    "lat": 35.565,
+    "lon": 45.4329,
+    "country": "IQ"
+  },
+  {
+    "name": "San Luis Potosí",
+    "displayName": "San Luis Potosí, Mexico",
+    "lat": 22.1498,
+    "lon": -100.9792,
+    "country": "MX"
+  },
+  {
+    "name": "Aguascalientes",
+    "displayName": "Aguascalientes, Mexico",
+    "lat": 21.8823,
+    "lon": -102.2826,
+    "country": "MX"
+  },
+  {
+    "name": "Cúcuta",
+    "displayName": "Cúcuta, Colombia",
+    "lat": 7.8939,
+    "lon": -72.5078,
+    "country": "CO"
+  },
+  {
+    "name": "N'Djamena",
+    "displayName": "N'Djamena, Chad",
+    "lat": 12.1067,
+    "lon": 15.0444,
+    "country": "TD"
+  },
+  {
+    "name": "Langfang",
+    "displayName": "Langfang, China",
+    "lat": 39.5097,
+    "lon": 116.6947,
+    "country": "CN"
+  },
+  {
+    "name": "Zhumadian",
+    "displayName": "Zhumadian, China",
+    "lat": 32.9794,
+    "lon": 114.0294,
+    "country": "CN"
+  },
+  {
+    "name": "Yantai",
+    "displayName": "Yantai, China",
+    "lat": 37.4765,
+    "lon": 121.4408,
+    "country": "CN"
+  },
+  {
+    "name": "Lviv",
+    "displayName": "Lviv, Ukraine",
+    "lat": 49.8383,
+    "lon": 24.0232,
+    "country": "UA"
+  },
+  {
+    "name": "Hermosillo",
+    "displayName": "Hermosillo, Mexico",
+    "lat": 29.1026,
+    "lon": -110.9773,
+    "country": "MX"
+  },
+  {
+    "name": "Jeonju",
+    "displayName": "Jeonju, South Korea",
+    "lat": 35.8219,
+    "lon": 127.1489,
+    "country": "KR"
+  },
+  {
+    "name": "Saltillo",
+    "displayName": "Saltillo, Mexico",
+    "lat": 25.4232,
+    "lon": -101.0053,
+    "country": "MX"
+  },
+  {
+    "name": "Zhuzhou",
+    "displayName": "Zhuzhou, China",
+    "lat": 27.8333,
+    "lon": 113.15,
+    "country": "CN"
+  },
+  {
+    "name": "Subang Jaya",
+    "displayName": "Subang Jaya, Malaysia",
+    "lat": 3.0438,
+    "lon": 101.5806,
+    "country": "MY"
+  },
+  {
+    "name": "Bhiwandi",
+    "displayName": "Bhiwandi, India",
+    "lat": 19.3002,
+    "lon": 73.0588,
+    "country": "IN"
+  },
+  {
+    "name": "Pekanbaru",
+    "displayName": "Pekanbaru, Indonesia",
+    "lat": 0.5167,
+    "lon": 101.4417,
+    "country": "ID"
+  },
+  {
+    "name": "Sevilla",
+    "displayName": "Sevilla, Spain",
+    "lat": 37.3828,
+    "lon": -5.9732,
+    "country": "ES"
+  },
+  {
+    "name": "Tol’yatti",
+    "displayName": "Tol’yatti, Russia",
+    "lat": 53.5303,
+    "lon": 49.3461,
+    "country": "RU"
+  },
+  {
+    "name": "Jaboatão",
+    "displayName": "Jaboatão, Brazil",
+    "lat": -8.1803,
+    "lon": -35.0014,
+    "country": "BR"
+  },
+  {
+    "name": "Shizuoka",
+    "displayName": "Shizuoka, Japan",
+    "lat": 34.9833,
+    "lon": 138.3833,
+    "country": "JP"
+  },
+  {
+    "name": "Rājshāhi",
+    "displayName": "Rājshāhi, Bangladesh",
+    "lat": 24.374,
+    "lon": 88.6011,
+    "country": "BD"
+  },
+  {
+    "name": "Changzhi",
+    "displayName": "Changzhi, China",
+    "lat": 35.2089,
+    "lon": 111.7386,
+    "country": "CN"
+  },
+  {
+    "name": "Bulawayo",
+    "displayName": "Bulawayo, Zimbabwe",
+    "lat": -20.15,
+    "lon": 28.5833,
+    "country": "ZW"
+  },
+  {
+    "name": "Zagreb",
+    "displayName": "Zagreb, Croatia",
+    "lat": 45.8144,
+    "lon": 15.978,
+    "country": "HR"
+  },
+  {
+    "name": "Agadir",
+    "displayName": "Agadir, Morocco",
+    "lat": 30.4202,
+    "lon": -9.5981,
+    "country": "MA"
+  },
+  {
+    "name": "Sarajevo",
+    "displayName": "Sarajevo, Bosnia and Herzegovina",
+    "lat": 43.8486,
+    "lon": 18.3564,
+    "country": "BA"
+  },
+  {
+    "name": "La Plata",
+    "displayName": "La Plata, Argentina",
+    "lat": -34.9214,
+    "lon": -57.9545,
+    "country": "AR"
+  },
+  {
+    "name": "Zhangjiakou",
+    "displayName": "Zhangjiakou, China",
+    "lat": 40.81,
+    "lon": 114.8794,
+    "country": "CN"
+  },
+  {
+    "name": "Zigong",
+    "displayName": "Zigong, China",
+    "lat": 29.3416,
+    "lon": 104.7769,
+    "country": "CN"
+  },
+  {
+    "name": "Mexicali",
+    "displayName": "Mexicali, Mexico",
+    "lat": 32.6278,
+    "lon": -115.4545,
+    "country": "MX"
+  },
+  {
+    "name": "Fuxin",
+    "displayName": "Fuxin, China",
+    "lat": 42.0156,
+    "lon": 121.6589,
+    "country": "CN"
+  },
+  {
+    "name": "Enugu",
+    "displayName": "Enugu, Nigeria",
+    "lat": 6.4413,
+    "lon": 7.4988,
+    "country": "NG"
+  },
+  {
+    "name": "Tangier",
+    "displayName": "Tangier, Morocco",
+    "lat": 35.7673,
+    "lon": -5.7998,
+    "country": "MA"
+  },
+  {
+    "name": "Huangshi",
+    "displayName": "Huangshi, China",
+    "lat": 30.2471,
+    "lon": 115.0481,
+    "country": "CN"
+  },
+  {
+    "name": "Liaoyang",
+    "displayName": "Liaoyang, China",
+    "lat": 41.2719,
+    "lon": 123.1731,
+    "country": "CN"
+  },
+  {
+    "name": "Sheffield",
+    "displayName": "Sheffield, United Kingdom",
+    "lat": 53.383,
+    "lon": -1.4659,
+    "country": "GB"
+  },
+  {
+    "name": "Kumamoto",
+    "displayName": "Kumamoto, Japan",
+    "lat": 32.8059,
+    "lon": 130.6918,
+    "country": "JP"
+  },
+  {
+    "name": "General Santos",
+    "displayName": "General Santos, Philippines",
+    "lat": 6.1128,
+    "lon": 125.1717,
+    "country": "PH"
+  },
+  {
+    "name": "Dushanbe",
+    "displayName": "Dushanbe, Tajikistan",
+    "lat": 38.5358,
+    "lon": 68.7791,
+    "country": "TJ"
+  },
+  {
+    "name": "Osasco",
+    "displayName": "Osasco, Brazil",
+    "lat": -23.5325,
+    "lon": -46.7917,
+    "country": "BR"
+  },
+  {
+    "name": "Culiacán",
+    "displayName": "Culiacán, Mexico",
+    "lat": 24.7903,
+    "lon": -107.3878,
+    "country": "MX"
+  },
+  {
+    "name": "Matola",
+    "displayName": "Matola, Mozambique",
+    "lat": -25.9622,
+    "lon": 32.4589,
+    "country": "MZ"
+  },
+  {
+    "name": "Zaragoza",
+    "displayName": "Zaragoza, Spain",
+    "lat": 41.6561,
+    "lon": -0.8773,
+    "country": "ES"
+  },
+  {
+    "name": "Guadalupe",
+    "displayName": "Guadalupe, Mexico",
+    "lat": 25.6768,
+    "lon": -100.2565,
+    "country": "MX"
+  },
+  {
+    "name": "Ipoh",
+    "displayName": "Ipoh, Malaysia",
+    "lat": 4.5841,
+    "lon": 101.0829,
+    "country": "MY"
+  },
+  {
+    "name": "Mississauga",
+    "displayName": "Mississauga, Canada",
+    "lat": 43.5789,
+    "lon": -79.6583,
+    "country": "CA"
+  },
+  {
+    "name": "Nantong",
+    "displayName": "Nantong, China",
+    "lat": 32.0303,
+    "lon": 120.8747,
+    "country": "CN"
+  },
+  {
+    "name": "Mudanjiang",
+    "displayName": "Mudanjiang, China",
+    "lat": 44.5833,
+    "lon": 129.6,
+    "country": "CN"
+  },
+  {
+    "name": "Nouakchott",
+    "displayName": "Nouakchott, Mauritania",
+    "lat": 18.0858,
+    "lon": -15.9785,
+    "country": "MR"
+  },
+  {
+    "name": "Pointe-Noire",
+    "displayName": "Pointe-Noire, Republic of the Congo",
+    "lat": -4.7761,
+    "lon": 11.8635,
+    "country": "CG"
+  },
+  {
+    "name": "Memphis",
+    "displayName": "Memphis, Tennessee, United States",
+    "lat": 35.1495,
+    "lon": -90.049,
+    "country": "US",
+    "admin1": "Tennessee"
+  },
+  {
+    "name": "Tlalnepantla",
+    "displayName": "Tlalnepantla, Mexico",
+    "lat": 19.5401,
+    "lon": -99.1954,
+    "country": "MX"
+  },
+  {
+    "name": "Kryvyi Rih",
+    "displayName": "Kryvyi Rih, Ukraine",
+    "lat": 47.9097,
+    "lon": 33.3804,
+    "country": "UA"
+  },
+  {
+    "name": "João Pessoa",
+    "displayName": "João Pessoa, Brazil",
+    "lat": -7.115,
+    "lon": -34.8631,
+    "country": "BR"
+  },
+  {
+    "name": "Ansan-si",
+    "displayName": "Ansan-si, South Korea",
+    "lat": 37.3236,
+    "lon": 126.8219,
+    "country": "KR"
+  },
+  {
+    "name": "Benghazi",
+    "displayName": "Benghazi, Libya",
+    "lat": 32.1149,
+    "lon": 20.0686,
+    "country": "LY"
+  },
+  {
+    "name": "Krasnodar",
+    "displayName": "Krasnodar, Russia",
+    "lat": 45.0448,
+    "lon": 38.976,
+    "country": "RU"
+  },
+  {
+    "name": "Guilin",
+    "displayName": "Guilin, China",
+    "lat": 25.2819,
+    "lon": 110.2864,
+    "country": "CN"
+  },
+  {
+    "name": "Palermo",
+    "displayName": "Palermo, Italy",
+    "lat": 38.1321,
+    "lon": 13.3356,
+    "country": "IT"
+  },
+  {
+    "name": "Lilongwe",
+    "displayName": "Lilongwe, Malawi",
+    "lat": -13.9669,
+    "lon": 33.7873,
+    "country": "MW"
+  },
+  {
+    "name": "Oran",
+    "displayName": "Oran, Algeria",
+    "lat": 35.6991,
+    "lon": -0.6359,
+    "country": "DZ"
+  },
+  {
+    "name": "Diyarbakır",
+    "displayName": "Diyarbakır, Turkey",
+    "lat": 37.9136,
+    "lon": 40.2172,
+    "country": "TR"
+  },
+  {
+    "name": "Taguig",
+    "displayName": "Taguig, Philippines",
+    "lat": 14.5243,
+    "lon": 121.0792,
+    "country": "PH"
+  },
+  {
+    "name": "Ulyanovsk",
+    "displayName": "Ulyanovsk, Russia",
+    "lat": 54.3282,
+    "lon": 48.3866,
+    "country": "RU"
+  },
+  {
+    "name": "Kotli",
+    "displayName": "Kotli, Pakistan",
+    "lat": 33.5184,
+    "lon": 73.9022,
+    "country": "PK"
+  },
+  {
+    "name": "Okayama",
+    "displayName": "Okayama, Japan",
+    "lat": 34.65,
+    "lon": 133.9333,
+    "country": "JP"
+  },
+  {
+    "name": "Zhanjiang",
+    "displayName": "Zhanjiang, China",
+    "lat": 21.2815,
+    "lon": 110.3427,
+    "country": "CN"
+  },
+  {
+    "name": "Al Aḩmadī",
+    "displayName": "Al Aḩmadī, Kuwait",
+    "lat": 29.0769,
+    "lon": 48.0839,
+    "country": "KW"
+  },
+  {
+    "name": "Yogyakarta",
+    "displayName": "Yogyakarta, Indonesia",
+    "lat": -7.8014,
+    "lon": 110.3647,
+    "country": "ID"
+  },
+  {
+    "name": "North York",
+    "displayName": "North York, Canada",
+    "lat": 43.7668,
+    "lon": -79.4163,
+    "country": "CA"
+  },
+  {
+    "name": "Chisinau",
+    "displayName": "Chisinau, Moldova, Republic of",
+    "lat": 47.0056,
+    "lon": 28.8575,
+    "country": "MD"
+  },
+  {
+    "name": "Wrocław",
+    "displayName": "Wrocław, Poland",
+    "lat": 51.1,
+    "lon": 17.0333,
+    "country": "PL"
+  },
+  {
+    "name": "Cheongju-si",
+    "displayName": "Cheongju-si, South Korea",
+    "lat": 36.6372,
+    "lon": 127.4897,
+    "country": "KR"
+  },
+  {
+    "name": "Tébessa",
+    "displayName": "Tébessa, Algeria",
+    "lat": 35.4042,
+    "lon": 8.1242,
+    "country": "DZ"
+  },
+  {
+    "name": "Zhenjiang",
+    "displayName": "Zhenjiang, China",
+    "lat": 32.2109,
+    "lon": 119.4551,
+    "country": "CN"
+  },
+  {
+    "name": "Dandong",
+    "displayName": "Dandong, China",
+    "lat": 40.1292,
+    "lon": 124.3947,
+    "country": "CN"
+  },
+  {
+    "name": "Oklahoma City",
+    "displayName": "Oklahoma City, Oklahoma, United States",
+    "lat": 35.4676,
+    "lon": -97.5164,
+    "country": "US",
+    "admin1": "Oklahoma"
+  },
+  {
+    "name": "Izhevsk",
+    "displayName": "Izhevsk, Russia",
+    "lat": 56.8498,
+    "lon": 53.2045,
+    "country": "RU"
+  },
+  {
+    "name": "Shaoguan",
+    "displayName": "Shaoguan, China",
+    "lat": 24.8,
+    "lon": 113.5833,
+    "country": "CN"
+  },
+  {
+    "name": "Yancheng",
+    "displayName": "Yancheng, China",
+    "lat": 33.3575,
+    "lon": 120.1573,
+    "country": "CN"
+  },
+  {
+    "name": "Cancún",
+    "displayName": "Cancún, Mexico",
+    "lat": 21.1743,
+    "lon": -86.8466,
+    "country": "MX"
+  },
+  {
+    "name": "Contagem",
+    "displayName": "Contagem, Brazil",
+    "lat": -19.9317,
+    "lon": -44.0536,
+    "country": "BR"
+  },
+  {
+    "name": "Djibouti",
+    "displayName": "Djibouti, Djibouti",
+    "lat": 11.589,
+    "lon": 43.145,
+    "country": "DJ"
+  },
+  {
+    "name": "Baltimore",
+    "displayName": "Baltimore, Maryland, United States",
+    "lat": 39.2904,
+    "lon": -76.6122,
+    "country": "US",
+    "admin1": "Maryland"
+  },
+  {
+    "name": "Kermanshah",
+    "displayName": "Kermanshah, Iran",
+    "lat": 34.3142,
+    "lon": 47.065,
+    "country": "IR"
+  },
+  {
+    "name": "Ribeirão Preto",
+    "displayName": "Ribeirão Preto, Brazil",
+    "lat": -21.1775,
+    "lon": -47.8103,
+    "country": "BR"
+  },
+  {
+    "name": "Al Ḩudaydah",
+    "displayName": "Al Ḩudaydah, Yemen",
+    "lat": 14.7978,
+    "lon": 42.9545,
+    "country": "YE"
+  },
+  {
+    "name": "Pasig City",
+    "displayName": "Pasig City, Philippines",
+    "lat": 14.5869,
+    "lon": 121.0614,
+    "country": "PH"
+  },
+  {
+    "name": "Haikou",
+    "displayName": "Haikou, China",
+    "lat": 20.0458,
+    "lon": 110.3417,
+    "country": "CN"
+  },
+  {
+    "name": "Ta‘izz",
+    "displayName": "Ta‘izz, Yemen",
+    "lat": 13.5795,
+    "lon": 44.0209,
+    "country": "YE"
+  },
+  {
+    "name": "São José dos Campos",
+    "displayName": "São José dos Campos, Brazil",
+    "lat": -23.1794,
+    "lon": -45.8869,
+    "country": "BR"
+  },
+  {
+    "name": "Santa María Chimalhuacán",
+    "displayName": "Santa María Chimalhuacán, Mexico",
+    "lat": 19.4216,
+    "lon": -98.9504,
+    "country": "MX"
+  },
+  {
+    "name": "Taizhou",
+    "displayName": "Taizhou, China",
+    "lat": 32.4907,
+    "lon": 119.9081,
+    "country": "CN"
+  },
+  {
+    "name": "Xingtai",
+    "displayName": "Xingtai, China",
+    "lat": 37.0631,
+    "lon": 114.4942,
+    "country": "CN"
+  },
+  {
+    "name": "Borivli",
+    "displayName": "Borivli, India",
+    "lat": 19.235,
+    "lon": 72.8598,
+    "country": "IN"
+  },
+  {
+    "name": "Torreón",
+    "displayName": "Torreón, Mexico",
+    "lat": 25.5439,
+    "lon": -103.419,
+    "country": "MX"
+  },
+  {
+    "name": "Yaroslavl",
+    "displayName": "Yaroslavl, Russia",
+    "lat": 57.6299,
+    "lon": 39.8737,
+    "country": "RU"
+  },
+  {
+    "name": "Benoni",
+    "displayName": "Benoni, South Africa",
+    "lat": -26.1885,
+    "lon": 28.3208,
+    "country": "ZA"
+  },
+  {
+    "name": "Hamamatsu",
+    "displayName": "Hamamatsu, Japan",
+    "lat": 34.7,
+    "lon": 137.7333,
+    "country": "JP"
+  },
+  {
+    "name": "Jinzhou",
+    "displayName": "Jinzhou, China",
+    "lat": 41.1078,
+    "lon": 121.1417,
+    "country": "CN"
+  },
+  {
+    "name": "Haiphong",
+    "displayName": "Haiphong, Vietnam",
+    "lat": 20.8648,
+    "lon": 106.6835,
+    "country": "VN"
+  },
+  {
+    "name": "Kirkuk",
+    "displayName": "Kirkuk, Iraq",
+    "lat": 35.4681,
+    "lon": 44.3922,
+    "country": "IQ"
+  },
+  {
+    "name": "Milwaukee",
+    "displayName": "Milwaukee, Wisconsin, United States",
+    "lat": 43.0389,
+    "lon": -87.9065,
+    "country": "US",
+    "admin1": "Wisconsin"
+  },
+  {
+    "name": "Scarborough",
+    "displayName": "Scarborough, Canada",
+    "lat": 43.7722,
+    "lon": -79.2567,
+    "country": "CA"
+  },
+  {
+    "name": "Shuangyashan",
+    "displayName": "Shuangyashan, China",
+    "lat": 46.6361,
+    "lon": 131.1539,
+    "country": "CN"
+  },
+  {
+    "name": "Situbondo",
+    "displayName": "Situbondo, Indonesia",
+    "lat": -7.7062,
+    "lon": 114.0098,
+    "country": "ID"
+  },
+  {
+    "name": "Barnaul",
+    "displayName": "Barnaul, Russia",
+    "lat": 53.3606,
+    "lon": 83.7636,
+    "country": "RU"
+  },
+  {
+    "name": "Morelia",
+    "displayName": "Morelia, Mexico",
+    "lat": 19.7008,
+    "lon": -101.1844,
+    "country": "MX"
+  },
+  {
+    "name": "Luancheng",
+    "displayName": "Luancheng, China",
+    "lat": 37.8792,
+    "lon": 114.6517,
+    "country": "CN"
+  },
+  {
+    "name": "Rasht",
+    "displayName": "Rasht, Iran",
+    "lat": 37.2761,
+    "lon": 49.5886,
+    "country": "IR"
+  },
+  {
+    "name": "Abeokuta",
+    "displayName": "Abeokuta, Nigeria",
+    "lat": 7.1557,
+    "lon": 3.3451,
+    "country": "NG"
+  },
+  {
+    "name": "Essen",
+    "displayName": "Essen, Germany",
+    "lat": 51.4566,
+    "lon": 7.0123,
+    "country": "DE"
+  },
+  {
+    "name": "Kayseri",
+    "displayName": "Kayseri, Turkey",
+    "lat": 38.7322,
+    "lon": 35.4853,
+    "country": "TR"
+  },
+  {
+    "name": "Gold Coast",
+    "displayName": "Gold Coast, Australia",
+    "lat": -28.0003,
+    "lon": 153.4309,
+    "country": "AU"
+  },
+  {
+    "name": "Yingkou",
+    "displayName": "Yingkou, China",
+    "lat": 40.6648,
+    "lon": 122.2283,
+    "country": "CN"
+  },
+  {
+    "name": "Abuja",
+    "displayName": "Abuja, Nigeria",
+    "lat": 9.0579,
+    "lon": 7.4951,
+    "country": "NG"
+  },
+  {
+    "name": "Las Piñas",
+    "displayName": "Las Piñas, Philippines",
+    "lat": 14.4506,
+    "lon": 120.9828,
+    "country": "PH"
+  },
+  {
+    "name": "Reynosa",
+    "displayName": "Reynosa, Mexico",
+    "lat": 26.0806,
+    "lon": -98.2883,
+    "country": "MX"
+  },
+  {
+    "name": "Dortmund",
+    "displayName": "Dortmund, Germany",
+    "lat": 51.5149,
+    "lon": 7.466,
+    "country": "DE"
+  },
+  {
+    "name": "Vladivostok",
+    "displayName": "Vladivostok, Russia",
+    "lat": 43.1056,
+    "lon": 131.8735,
+    "country": "RU"
+  },
+  {
+    "name": "Irkutsk",
+    "displayName": "Irkutsk, Russia",
+    "lat": 52.2978,
+    "lon": 104.2964,
+    "country": "RU"
+  },
+  {
+    "name": "Blantyre",
+    "displayName": "Blantyre, Malawi",
+    "lat": -15.785,
+    "lon": 35.0085,
+    "country": "MW"
+  },
+  {
+    "name": "Üsküdar",
+    "displayName": "Üsküdar, Turkey",
+    "lat": 41.0227,
+    "lon": 29.0137,
+    "country": "TR"
+  },
+  {
+    "name": "Genoa",
+    "displayName": "Genoa, Italy",
+    "lat": 44.4048,
+    "lon": 8.9444,
+    "country": "IT"
+  },
+  {
+    "name": "Hachiōji",
+    "displayName": "Hachiōji, Japan",
+    "lat": 35.6558,
+    "lon": 139.3239,
+    "country": "JP"
+  },
+  {
+    "name": "Khabarovsk",
+    "displayName": "Khabarovsk, Russia",
+    "lat": 48.4827,
+    "lon": 135.0838,
+    "country": "RU"
+  },
+  {
+    "name": "Libreville",
+    "displayName": "Libreville, Gabon",
+    "lat": 0.3924,
+    "lon": 9.4536,
+    "country": "GA"
+  },
+  {
+    "name": "Chiclayo",
+    "displayName": "Chiclayo, Peru",
+    "lat": -6.7714,
+    "lon": -79.8409,
+    "country": "PE"
+  },
+  {
+    "name": "Orūmīyeh",
+    "displayName": "Orūmīyeh, Iran",
+    "lat": 37.5527,
+    "lon": 45.0761,
+    "country": "IR"
+  },
+  {
+    "name": "Bengbu",
+    "displayName": "Bengbu, China",
+    "lat": 32.9408,
+    "lon": 117.3608,
+    "country": "CN"
+  },
+  {
+    "name": "Tlalpan",
+    "displayName": "Tlalpan, Mexico",
+    "lat": 19.2951,
+    "lon": -99.1621,
+    "country": "MX"
+  },
+  {
+    "name": "Umraniye",
+    "displayName": "Umraniye, Turkey",
+    "lat": 41.0164,
+    "lon": 29.1248,
+    "country": "TR"
+  },
+  {
+    "name": "Düsseldorf",
+    "displayName": "Düsseldorf, Germany",
+    "lat": 51.2217,
+    "lon": 6.7762,
+    "country": "DE"
+  },
+  {
+    "name": "Banjarmasin",
+    "displayName": "Banjarmasin, Indonesia",
+    "lat": -3.3199,
+    "lon": 114.5908,
+    "country": "ID"
+  },
+  {
+    "name": "Göteborg",
+    "displayName": "Göteborg, Sweden",
+    "lat": 57.7072,
+    "lon": 11.9668,
+    "country": "SE"
+  },
+  {
+    "name": "Shihezi",
+    "displayName": "Shihezi, China",
+    "lat": 44.3023,
+    "lon": 86.0369,
+    "country": "CN"
+  },
+  {
+    "name": "Bucaramanga",
+    "displayName": "Bucaramanga, Colombia",
+    "lat": 7.1254,
+    "lon": -73.1198,
+    "country": "CO"
+  },
+  {
+    "name": "Kuching",
+    "displayName": "Kuching, Malaysia",
+    "lat": 1.55,
+    "lon": 110.3333,
+    "country": "MY"
+  },
+  {
+    "name": "Poznań",
+    "displayName": "Poznań, Poland",
+    "lat": 52.4069,
+    "lon": 16.9299,
+    "country": "PL"
+  },
+  {
+    "name": "Málaga",
+    "displayName": "Málaga, Spain",
+    "lat": 36.7202,
+    "lon": -4.4203,
+    "country": "ES"
+  },
+  {
+    "name": "Bouaké",
+    "displayName": "Bouaké, Cote d'Ivoire",
+    "lat": 7.6939,
+    "lon": -5.0303,
+    "country": "CI"
+  },
+  {
+    "name": "Nyala",
+    "displayName": "Nyala, Sudan",
+    "lat": 12.0489,
+    "lon": 24.8807,
+    "country": "SD"
+  },
+  {
+    "name": "Asmara",
+    "displayName": "Asmara, Eritrea",
+    "lat": 15.3381,
+    "lon": 38.9318,
+    "country": "ER"
+  },
+  {
+    "name": "Sokoto",
+    "displayName": "Sokoto, Nigeria",
+    "lat": 13.0627,
+    "lon": 5.2432,
+    "country": "NG"
+  },
+  {
+    "name": "Uberlândia",
+    "displayName": "Uberlândia, Brazil",
+    "lat": -18.9186,
+    "lon": -48.2772,
+    "country": "BR"
+  },
+  {
+    "name": "Onitsha",
+    "displayName": "Onitsha, Nigeria",
+    "lat": 6.1498,
+    "lon": 6.7857,
+    "country": "NG"
+  },
+  {
+    "name": "Honchō",
+    "displayName": "Honchō, Japan",
+    "lat": 35.7013,
+    "lon": 139.9865,
+    "country": "JP"
+  },
+  {
+    "name": "Albuquerque",
+    "displayName": "Albuquerque, New Mexico, United States",
+    "lat": 35.0845,
+    "lon": -106.6511,
+    "country": "US",
+    "admin1": "New Mexico"
+  },
+  {
+    "name": "Hamhŭng",
+    "displayName": "Hamhŭng, North Korea",
+    "lat": 39.9183,
+    "lon": 127.5364,
+    "country": "KP"
+  },
+  {
+    "name": "Sorocaba",
+    "displayName": "Sorocaba, Brazil",
+    "lat": -23.5017,
+    "lon": -47.4581,
+    "country": "BR"
+  },
+  {
+    "name": "Siping",
+    "displayName": "Siping, China",
+    "lat": 43.1614,
+    "lon": 124.3779,
+    "country": "CN"
+  },
+  {
+    "name": "Kagoshima",
+    "displayName": "Kagoshima, Japan",
+    "lat": 31.5667,
+    "lon": 130.55,
+    "country": "JP"
+  },
+  {
+    "name": "Surakarta",
+    "displayName": "Surakarta, Indonesia",
+    "lat": -7.5561,
+    "lon": 110.8317,
+    "country": "ID"
+  },
+  {
+    "name": "Huai'an",
+    "displayName": "Huai'an, China",
+    "lat": 33.5886,
+    "lon": 119.0192,
+    "country": "CN"
+  },
+  {
+    "name": "Mar del Plata",
+    "displayName": "Mar del Plata, Argentina",
+    "lat": -38.0004,
+    "lon": -57.5562,
+    "country": "AR"
+  },
+  {
+    "name": "Bahawalpur",
+    "displayName": "Bahawalpur, Pakistan",
+    "lat": 29.3978,
+    "lon": 71.6752,
+    "country": "PK"
+  },
+  {
+    "name": "Zahedan",
+    "displayName": "Zahedan, Iran",
+    "lat": 29.4963,
+    "lon": 60.8629,
+    "country": "IR"
+  },
+  {
+    "name": "Aden",
+    "displayName": "Aden, Yemen",
+    "lat": 12.7794,
+    "lon": 45.0367,
+    "country": "YE"
+  },
+  {
+    "name": "Orenburg",
+    "displayName": "Orenburg, Russia",
+    "lat": 51.7727,
+    "lon": 55.0988,
+    "country": "RU"
+  },
+  {
+    "name": "Changwon",
+    "displayName": "Changwon, South Korea",
+    "lat": 35.2281,
+    "lon": 128.6811,
+    "country": "KR"
+  },
+  {
+    "name": "Pristina",
+    "displayName": "Pristina, Kosovo",
+    "lat": 42.6727,
+    "lon": 21.1669,
+    "country": "XK"
+  },
+  {
+    "name": "Jiamusi",
+    "displayName": "Jiamusi, China",
+    "lat": 46.7993,
+    "lon": 130.3163,
+    "country": "CN"
+  },
+  {
+    "name": "Antipolo",
+    "displayName": "Antipolo, Philippines",
+    "lat": 14.6258,
+    "lon": 121.1225,
+    "country": "PH"
+  },
+  {
+    "name": "Neijiang",
+    "displayName": "Neijiang, China",
+    "lat": 29.5835,
+    "lon": 105.0622,
+    "country": "CN"
+  },
+  {
+    "name": "Bremen",
+    "displayName": "Bremen, Germany",
+    "lat": 53.0758,
+    "lon": 8.8072,
+    "country": "DE"
+  },
+  {
+    "name": "Meknès",
+    "displayName": "Meknès, Morocco",
+    "lat": 33.8935,
+    "lon": -5.5473,
+    "country": "MA"
+  },
+  {
+    "name": "Banqiao",
+    "displayName": "Banqiao, Taiwan",
+    "lat": 25.0143,
+    "lon": 121.4672,
+    "country": "TW"
+  },
+  {
+    "name": "Sargodha",
+    "displayName": "Sargodha, Pakistan",
+    "lat": 32.0859,
+    "lon": 72.6742,
+    "country": "PK"
+  },
+  {
+    "name": "Bangui",
+    "displayName": "Bangui, Central African Republic",
+    "lat": 4.3612,
+    "lon": 18.555,
+    "country": "CF"
+  },
+  {
+    "name": "Vilnius",
+    "displayName": "Vilnius, Lithuania",
+    "lat": 54.6892,
+    "lon": 25.2798,
+    "country": "LT"
+  },
+  {
+    "name": "Yangzhou",
+    "displayName": "Yangzhou, China",
+    "lat": 32.3972,
+    "lon": 119.4358,
+    "country": "CN"
+  },
+  {
+    "name": "Novokuznetsk",
+    "displayName": "Novokuznetsk, Russia",
+    "lat": 53.7557,
+    "lon": 87.1099,
+    "country": "RU"
+  },
+  {
+    "name": "Kisangani",
+    "displayName": "Kisangani, Democratic Republic of the Congo",
+    "lat": 0.5153,
+    "lon": 25.191,
+    "country": "CD"
+  },
+  {
+    "name": "Port Said",
+    "displayName": "Port Said, Egypt",
+    "lat": 31.2653,
+    "lon": 32.3019,
+    "country": "EG"
+  },
+  {
+    "name": "Mersin",
+    "displayName": "Mersin, Turkey",
+    "lat": 36.812,
+    "lon": 34.6389,
+    "country": "TR"
+  },
+  {
+    "name": "Tuxtla",
+    "displayName": "Tuxtla, Mexico",
+    "lat": 16.7597,
+    "lon": -93.1131,
+    "country": "MX"
+  },
+  {
+    "name": "Warri",
+    "displayName": "Warri, Nigeria",
+    "lat": 5.5174,
+    "lon": 5.7501,
+    "country": "NG"
+  },
+  {
+    "name": "Guli",
+    "displayName": "Guli, China",
+    "lat": 28.8816,
+    "lon": 120.0331,
+    "country": "CN"
+  },
+  {
+    "name": "Ebute Ikorodu",
+    "displayName": "Ebute Ikorodu, Nigeria",
+    "lat": 6.6009,
+    "lon": 3.4882,
+    "country": "NG"
+  },
+  {
+    "name": "Tanggu",
+    "displayName": "Tanggu, China",
+    "lat": 39.0211,
+    "lon": 117.6469,
+    "country": "CN"
+  }
+]

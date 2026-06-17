@@ -1,0 +1,23 @@
+---
+description: Droplet paths and prewarmed cache pull commands
+alwaysApply: true
+---
+
+# Droplet deployment (this project)
+
+- **SSH:** `root@168.144.83.192`
+- **App dir on droplet:** `/root/klimate-kundli` — **not** `/opt/klimate-kundli`
+- **Prewarm cache:** `/root/klimate-kundli/data/cache.sqlite` (+ WAL sidecars)
+
+Pull all three SQLite files to local `./data/` (stop local dev server first):
+
+```bash
+mkdir -p data
+scp root@168.144.83.192:/root/klimate-kundli/data/cache.sqlite ./data/
+scp root@168.144.83.192:/root/klimate-kundli/data/cache.sqlite-wal ./data/
+scp root@168.144.83.192:/root/klimate-kundli/data/cache.sqlite-shm ./data/
+```
+
+Or wildcard: `scp root@168.144.83.192:/root/klimate-kundli/data/cache.sqlite* ./data/`
+
+Local default: `CACHE_PATH=./data/cache.sqlite` (`.env.example`).
