@@ -7,6 +7,8 @@ export interface TempTimelineYear {
   meanTempC: number;
   cityName: string;
   displayName: string;
+  peakTempC?: number;
+  peakDate?: string;
 }
 
 export interface TempTimelineCity {
@@ -53,6 +55,21 @@ export function annualMeanTemps(daily: WeatherDaily[]): Map<number, number> {
   return out;
 }
 
+export function annualPeaks(daily: WeatherDaily[]): Map<number, { peakTempC: number; peakDate: string }> {
+  const out = new Map<number, { peakTempC: number; peakDate: string }>();
+  for (const day of daily) {
+    if (day.tmax == null) {
+      continue;
+    }
+    const year = Number(day.date.slice(0, 4));
+    const existing = out.get(year);
+    if (!existing || day.tmax > existing.peakTempC) {
+      out.set(year, { peakTempC: day.tmax, peakDate: day.date });
+    }
+  }
+  return out;
+}
+
 export function buildTempTimelineInsight(
   stints: StintLike[],
   weatherByKey: Map<string, { daily: WeatherDaily[] }>,
@@ -79,6 +96,7 @@ export function buildTempTimelineInsight(
     }
 
     const annual = annualMeanTemps(weather.daily);
+    const peaks = annualPeaks(weather.daily);
     const start = Math.max(stint.startYear, birthYear);
     const end = Math.min(stint.endYear, latestCompleteYear);
 
@@ -87,11 +105,14 @@ export function buildTempTimelineInsight(
       if (meanTemp == null) {
         continue;
       }
+      const peak = peaks.get(year);
       byYear.set(year, {
         year,
         meanTempC: roundTemp(meanTemp),
         cityName: stint.city.name,
         displayName: stint.city.displayName,
+        peakTempC: peak ? roundTemp(peak.peakTempC) : undefined,
+        peakDate: peak ? peak.peakDate : undefined,
       });
     }
   }

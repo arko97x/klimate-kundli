@@ -118,9 +118,28 @@ function ChartPanel({ geometry, birthYear }: { geometry: Geometry; birthYear: nu
         onPointerMove={handlePointerMove}
         onPointerLeave={() => setHovered(null)}
       >
+        <defs>
+          <linearGradient id="sky-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#fce4c8" stopOpacity={0.4} />
+            <stop offset="45%" stopColor="#eaf3fb" stopOpacity={0.25} />
+            <stop offset="100%" stopColor="#d3e3f4" stopOpacity={0.12} />
+          </linearGradient>
+        </defs>
+
         <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
+          {/* Sky background box */}
+          <rect
+            x={0}
+            y={0}
+            width={INNER_WIDTH}
+            height={INNER_HEIGHT}
+            fill="url(#sky-gradient)"
+            rx={8}
+          />
+
           <YAxis ticks={geometry.yTicks} />
 
+          {/* Balloon anchor ropes (tethers) */}
           {geometry.points.map((point) => (
             <line
               key={`stem-${point.year}`}
@@ -129,23 +148,35 @@ function ChartPanel({ geometry, birthYear }: { geometry: Geometry; birthYear: nu
               y1={point.y}
               y2={geometry.yBaseline}
               stroke={point.color}
-              strokeOpacity={hovered?.year === point.year ? 0.55 : 0.28}
-              strokeWidth={hovered?.year === point.year ? 2 : 1.25}
+              strokeOpacity={hovered?.year === point.year ? 0.65 : 0}
+              strokeWidth={hovered?.year === point.year ? 1.75 : 1}
+              strokeDasharray="3 3"
               strokeLinecap="round"
+              style={{
+                transition: 'stroke-opacity 0.2s ease, stroke-width 0.2s ease',
+              }}
             />
           ))}
 
-          {geometry.points.map((point) => (
-            <circle
-              key={point.year}
-              cx={point.x}
-              cy={point.y}
-              r={hovered?.year === point.year ? 5.5 : 4}
-              fill={point.color}
-              stroke="var(--background)"
-              strokeWidth={1.5}
-            />
-          ))}
+          {/* Hot Air Balloons */}
+          {geometry.points.map((point) => {
+            const minScale = 1.35
+            const maxScale = 1.75
+            const range = geometry.yMax - geometry.yMin
+            const ratio = range > 0 ? (point.meanTempC - geometry.yMin) / range : 0.5
+            const scale = minScale + ratio * (maxScale - minScale)
+
+            return (
+              <HotAirBalloon
+                key={point.year}
+                x={point.x}
+                y={point.y}
+                color={point.color}
+                isHovered={hovered?.year === point.year}
+                scale={scale}
+              />
+            )
+          })}
 
           {birthX != null ? (
             <g aria-hidden>
@@ -176,17 +207,23 @@ function ChartPanel({ geometry, birthYear }: { geometry: Geometry; birthYear: nu
 
       {hovered ? (
         <div
-          className="pointer-events-none absolute z-10 rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs shadow-md"
+          className="pointer-events-none absolute z-10 flex flex-col gap-0.5 rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs shadow-md"
           style={{
             left: tooltipPos.x,
             top: tooltipPos.y,
-            transform: 'translate(-50%, calc(-100% - 10px))',
+            transform: 'translate(-50%, calc(-100% - 20px))',
           }}
         >
-          <p className="font-medium text-foreground">
-            {hovered.year} · {hovered.meanTempC.toFixed(1)}°C
+          <p className="font-semibold text-foreground leading-none mb-1">
+            {hovered.year} · {hovered.meanTempC.toFixed(1)}°C average
           </p>
-          <p className="text-muted-foreground">{shortCity(hovered.displayName)}</p>
+          {hovered.peakTempC && (
+            <p className="text-muted-foreground text-[11px] leading-tight">
+              Hottest: <span className="text-foreground font-medium">{hovered.peakTempC.toFixed(1)}°C</span>
+              {hovered.peakDate && ` (on ${formatDate(hovered.peakDate)})`}
+            </p>
+          )}
+          <p className="text-[10px] text-muted-foreground mt-0.5">{shortCity(hovered.displayName)}</p>
         </div>
       ) : null}
     </div>
@@ -344,4 +381,104 @@ function buildHeadline(insight: TempTimelineInsight): { main: string; sub: strin
 
 function shortCity(displayName: string): string {
   return displayName.split(',')[0]?.trim() ?? displayName
+}
+
+function formatDate(dateStr: string): string {
+  try {
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  } catch {
+    return dateStr
+  }
+}
+
+function HotAirBalloon({
+  x,
+  y,
+  color,
+  isHovered,
+  scale = 1
+}: {
+  x: number
+  y: number
+  color: string
+  isHovered: boolean
+  scale?: number
+}) {
+  const hoverScale = isHovered ? scale * 1.08 : scale
+
+  return (
+    <g
+      transform={`translate(${x}, ${y})`}
+      style={{
+        transform: `translate(${x}px, ${isHovered ? y - 10 : y}px) scale(${hoverScale})`,
+        transformOrigin: '0px 0px',
+        transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+      }}
+      className="cursor-pointer"
+    >
+      {/* Balloon Envelope */}
+      <path
+        d="M -9,-12 a 9,9 0 1,1 18,0 c 0,4.5 -3.5,9 -4.5,12 h -9 c -1,-3 -4.5,-7.5 -4.5,-12 z"
+        fill={color}
+        stroke="var(--background)"
+        strokeWidth={1.5}
+      />
+      {/* Decorative Stripes */}
+      <path
+        d="M -4.5,-21 c 2.5,3.5 2.5,13.5 0,21"
+        fill="none"
+        stroke="white"
+        strokeWidth={1}
+        strokeOpacity={0.4}
+      />
+      <path
+        d="M 4.5,-21 c -2.5,3.5 -2.5,13.5 0,21"
+        fill="none"
+        stroke="white"
+        strokeWidth={1}
+        strokeOpacity={0.4}
+      />
+      <line
+        x1={0}
+        y1={-21}
+        x2={0}
+        y2={0}
+        fill="none"
+        stroke="white"
+        strokeWidth={1.25}
+        strokeOpacity={0.25}
+      />
+      {/* Basket Ropes */}
+      <line
+        x1={-3}
+        y1={0}
+        x2={-2}
+        y2={4}
+        stroke="currentColor"
+        strokeWidth={0.75}
+        strokeOpacity={0.5}
+      />
+      <line
+        x1={3}
+        y1={0}
+        x2={2}
+        y2={4}
+        stroke="currentColor"
+        strokeWidth={0.75}
+        strokeOpacity={0.5}
+      />
+      {/* Wicker Basket */}
+      <rect
+        x={-2.5}
+        y={4}
+        width={5}
+        height={4}
+        rx={0.75}
+        fill="#c4976c"
+        stroke="#6e4f30"
+        strokeWidth={0.75}
+      />
+    </g>
+  )
 }

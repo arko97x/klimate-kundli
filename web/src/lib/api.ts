@@ -144,6 +144,8 @@ export interface TempTimelineYear {
   meanTempC: number
   cityName: string
   displayName: string
+  peakTempC?: number
+  peakDate?: string
 }
 
 export interface TempTimelineCity {

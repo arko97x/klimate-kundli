@@ -80,9 +80,14 @@ describe("kundlis API", () => {
       chunks: [{ index: 0, url: "/kundli-snapshots/demo/001.webp", width: 960, height: 1200 }],
     };
 
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (process.env.KUNDLI_SNAPSHOT_TOKEN) {
+      headers["Authorization"] = `Bearer ${process.env.KUNDLI_SNAPSHOT_TOKEN}`;
+    }
+
     const updateRes = await app.request(`/kundlis/${saved.slug}/snapshot`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ snapshot }),
     });
 

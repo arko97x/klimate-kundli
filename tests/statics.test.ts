@@ -29,6 +29,7 @@ function fixtureDir(): string {
   );
   writeFileSync(join(dir, "sea_level.csv"), ["year,mm", "1993,0", "2023,99", ""].join("\n"));
   writeFileSync(join(dir, "co2_ppm.csv"), ["year,ppm", "1993,357.2", "2025,427.4", ""].join("\n"));
+  writeFileSync(join(dir, "arctic_ice.csv"), ["year,extent_mkm2", "1993,6.2", "2025,4.3", ""].join("\n"));
   return dir;
 }
 

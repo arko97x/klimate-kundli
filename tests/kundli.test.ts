@@ -29,6 +29,7 @@ function fixtureStatics() {
   writeFileSync(join(dir, "emissions.csv"), "country,year,co2_mt\nIND,1993,677\nIND,2024,3193\n");
   writeFileSync(join(dir, "sea_level.csv"), "year,mm\n1993,0\n2023,99\n");
   writeFileSync(join(dir, "co2_ppm.csv"), "year,ppm\n1993,357.2\n2025,427.4\n");
+  writeFileSync(join(dir, "arctic_ice.csv"), "year,extent_mkm2\n1993,6.2\n2025,4.3\n");
   return loadStaticData(dir);
 }
 

@@ -24,7 +24,7 @@ export function createImdService(options: CreateImdServiceOptions = {}): ImdServ
   const cache = options.cache;
 
   return {
-    enabled: hasImdAuthConfigured() && map.stations.length > 0,
+    enabled: map.stations.length > 0,
     bindStation(city) {
       return bindNearestStation(city, map);
     },
