@@ -4,5 +4,6 @@
     "types": ["node"],
     "rootDir": "src"
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/scripts/**"]
 }
