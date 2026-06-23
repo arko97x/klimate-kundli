@@ -39,7 +39,7 @@ tests/                vitest suites, one file per area (mirror of src)
 web/src/              frontend (App.tsx routes, components/, pages/, expt/, lib/api.ts)
 deploy/               droplet systemd unit, Caddy, Cloudflare tunnel, redeploy script
 scripts/capture/      puppeteer screenshot/snapshot capture
-docs/                 IMD + Vercel API notes
+docs/                 IMD, data sourcing, and Vercel API notes
 ```
 
 ## Run / build / test
@@ -87,6 +87,7 @@ IMD access, and snapshot capture are all optional (gated by env vars).
 - `src/routes/kundli.ts` — main endpoint, input schema, card orchestration.
 - `src/cache/store.ts` — sqlite cache layer.
 - `src/resolvers/imd/` — India Meteorological Dept integration (auth/JWT, stations, client).
+- `docs/DATA_SOURCING.md` — Weather and climate data sourcing priorities and fallbacks.
 - `web/src/App.tsx` — frontend routes; `web/src/lib/api.ts` — backend client.
 - `.cursor/rules/droplet-cache.mdc` — prod droplet SSH host + how to pull the prewarmed cache.
 - `deploy/` — production deployment (DigitalOcean droplet, systemd, Cloudflare tunnel).

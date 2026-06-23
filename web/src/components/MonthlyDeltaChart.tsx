@@ -244,6 +244,7 @@ export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaCh
             birthYear={data.birthYear}
             data={data.indiaEmissions}
             parentsData={data.parentsIndiaEmissions}
+            globalContext={data.globalContext}
           />
         </>
       ) : null}
