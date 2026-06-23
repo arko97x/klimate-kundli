@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import { Budget } from "../lib/budget.js";
+import { countryArea } from "../lib/country-area.js";
 import { gridKey } from "../lib/grid.js";
 import { buildRainRingsInsight } from "../lib/rain-rings.js";
 import { buildRainfallInsight } from "../lib/rain-stats.js";
@@ -119,7 +120,12 @@ export function createMonthlyDeltaRoute(deps: MonthlyDeltaRouteDeps): Hono {
           ? buildIndiaEmissionsRings(deps.statics, parentsBirthYear, latestCompleteYear)
           : null;
       const parentsBirthWindow = buildParentsBirthWindow(birthWeather.daily, birthYear, latestCompleteYear);
-      const globalContext = buildGlobalContext(deps.statics, birthYear, latestCompleteYear);
+      const globalContext = buildGlobalContext(
+        deps.statics,
+        birthYear,
+        latestCompleteYear,
+        parsed.data.birthCity.country,
+      );
       const rainfall = buildRainfallInsight(
         birthWeather.daily,
         birthStart,
@@ -195,7 +201,12 @@ function buildParentsBirthWindow(
   };
 }
 
-function buildGlobalContext(statics: StaticData, birthYear: number, latestCompleteYear: number) {
+function buildGlobalContext(
+  statics: StaticData,
+  birthYear: number,
+  latestCompleteYear: number,
+  birthCountryCode: string,
+) {
   const seaAtBirth = statics.lookupSeaLevel(birthYear);
   const seaAtEnd = statics.lookupSeaLevel(latestCompleteYear);
   const seaLevelRiseMm =
@@ -210,7 +221,79 @@ function buildGlobalContext(statics: StaticData, birthYear: number, latestComple
     seaLevelRiseMm,
     co2PpmAtBirth: co2AtBirth.confidence !== "unavailable" ? Math.round(co2AtBirth.value * 10) / 10 : null,
     co2PpmNow: co2AtEnd.confidence !== "unavailable" ? Math.round(co2AtEnd.value * 10) / 10 : null,
+    arcticIce: buildArcticIce(statics, birthYear, latestCompleteYear, birthCountryCode),
   };
+}
+
+// Arctic September (summer-minimum) sea-ice extent lost since birth, expressed as multiples of
+// the birth country's surface area. Compares multi-year means (not single noisy years) for the
+// same reason the temperature insight uses windows: year-to-year extent swings ~1M km^2.
+function buildArcticIce(
+  statics: StaticData,
+  birthYear: number,
+  latestCompleteYear: number,
+  birthCountryCode: string,
+) {
+  const series = statics.arcticIce;
+  if (series.size === 0) {
+    return null;
+  }
+
+  const dataStart = Math.min(...series.keys());
+  const dataEnd = Math.min(latestCompleteYear, Math.max(...series.keys()));
+
+  const birthStart = Math.max(dataStart, birthYear - BIRTH_WINDOW_HALF);
+  const birthEnd = Math.min(dataEnd, birthYear + BIRTH_WINDOW_HALF);
+  const recentEnd = dataEnd;
+  const recentStart = Math.max(dataStart, recentEnd - RECENT_WINDOW_SIZE + 1);
+
+  const birthExtent = meanOverYears(series, birthStart, birthEnd);
+  const recentExtent = meanOverYears(series, recentStart, recentEnd);
+  if (birthExtent === null || recentExtent === null) {
+    return null;
+  }
+
+  const lostMkm2 = birthExtent - recentExtent; // million km^2; positive = ice lost
+  const lostKm2 = Math.round(lostMkm2 * 1e6);
+
+  // Comparison only when ice was actually lost and we know the country's area. The raw km^2 is
+  // always present so the metaphor (country / city / per-year) can be swapped on the frontend.
+  const country = countryArea(birthCountryCode);
+  const comparison =
+    country && country.km2 > 0 && lostKm2 > 0
+      ? {
+          unit: "country" as const,
+          name: country.name,
+          code: birthCountryCode.toUpperCase(),
+          areaKm2: country.km2,
+          multiple: Math.round((lostKm2 / country.km2) * 100) / 100,
+        }
+      : null;
+
+  return {
+    birthWindow: { startYear: birthStart, endYear: birthEnd, extentMkm2: round2(birthExtent) },
+    recentWindow: { startYear: recentStart, endYear: recentEnd, extentMkm2: round2(recentExtent) },
+    lostKm2,
+    lostMkm2: round2(lostMkm2),
+    comparison,
+  };
+}
+
+function meanOverYears(series: Map<number, number>, startYear: number, endYear: number): number | null {
+  let sum = 0;
+  let count = 0;
+  for (let year = startYear; year <= endYear; year += 1) {
+    const value = series.get(year);
+    if (value !== undefined) {
+      sum += value;
+      count += 1;
+    }
+  }
+  return count > 0 ? sum / count : null;
+}
+
+function round2(value: number): number {
+  return Math.round(value * 100) / 100;
 }
 
 function buildIndiaEmissionsRings(statics: StaticData, birthYear: number, latestCompleteYear: number) {

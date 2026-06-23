@@ -1,0 +1,950 @@
+{
+  "AD": {
+    "name": "Andorra",
+    "km2": 470
+  },
+  "AE": {
+    "name": "United Arab Emirates",
+    "km2": 98648
+  },
+  "AF": {
+    "name": "Afghanistan",
+    "km2": 652870
+  },
+  "AG": {
+    "name": "Antigua and Barbuda",
+    "km2": 440
+  },
+  "AL": {
+    "name": "Albania",
+    "km2": 28750
+  },
+  "AM": {
+    "name": "Armenia",
+    "km2": 29740
+  },
+  "AO": {
+    "name": "Angola",
+    "km2": 1246700
+  },
+  "AR": {
+    "name": "Argentina",
+    "km2": 2780400
+  },
+  "AS": {
+    "name": "American Samoa",
+    "km2": 200
+  },
+  "AT": {
+    "name": "Austria",
+    "km2": 83879
+  },
+  "AU": {
+    "name": "Australia",
+    "km2": 7741220
+  },
+  "AW": {
+    "name": "Aruba",
+    "km2": 180
+  },
+  "AZ": {
+    "name": "Azerbaijan",
+    "km2": 86600
+  },
+  "BA": {
+    "name": "Bosnia and Herzegovina",
+    "km2": 51210
+  },
+  "BB": {
+    "name": "Barbados",
+    "km2": 430
+  },
+  "BD": {
+    "name": "Bangladesh",
+    "km2": 147570
+  },
+  "BE": {
+    "name": "Belgium",
+    "km2": 30689
+  },
+  "BF": {
+    "name": "Burkina Faso",
+    "km2": 274200
+  },
+  "BG": {
+    "name": "Bulgaria",
+    "km2": 110997
+  },
+  "BH": {
+    "name": "Bahrain",
+    "km2": 800
+  },
+  "BI": {
+    "name": "Burundi",
+    "km2": 27830
+  },
+  "BJ": {
+    "name": "Benin",
+    "km2": 114760
+  },
+  "BM": {
+    "name": "Bermuda",
+    "km2": 4290
+  },
+  "BN": {
+    "name": "Brunei Darussalam",
+    "km2": 5770
+  },
+  "BO": {
+    "name": "Bolivia",
+    "km2": 1098580
+  },
+  "BR": {
+    "name": "Brazil",
+    "km2": 8510420
+  },
+  "BS": {
+    "name": "Bahamas, The",
+    "km2": 13880
+  },
+  "BT": {
+    "name": "Bhutan",
+    "km2": 38390
+  },
+  "BW": {
+    "name": "Botswana",
+    "km2": 581730
+  },
+  "BY": {
+    "name": "Belarus",
+    "km2": 207629
+  },
+  "BZ": {
+    "name": "Belize",
+    "km2": 22966
+  },
+  "CA": {
+    "name": "Canada",
+    "km2": 15634410
+  },
+  "CD": {
+    "name": "Congo, Dem. Rep.",
+    "km2": 2344860
+  },
+  "CF": {
+    "name": "Central African Republic",
+    "km2": 622980
+  },
+  "CG": {
+    "name": "Congo, Rep.",
+    "km2": 342000
+  },
+  "CH": {
+    "name": "Switzerland",
+    "km2": 41291
+  },
+  "CI": {
+    "name": "Cote d'Ivoire",
+    "km2": 322460
+  },
+  "CL": {
+    "name": "Chile",
+    "km2": 757245
+  },
+  "CM": {
+    "name": "Cameroon",
+    "km2": 475440
+  },
+  "CN": {
+    "name": "China",
+    "km2": 9562910
+  },
+  "CO": {
+    "name": "Colombia",
+    "km2": 1140619
+  },
+  "CR": {
+    "name": "Costa Rica",
+    "km2": 51100
+  },
+  "CU": {
+    "name": "Cuba",
+    "km2": 109880
+  },
+  "CV": {
+    "name": "Cabo Verde",
+    "km2": 4030
+  },
+  "CW": {
+    "name": "Curacao",
+    "km2": 444
+  },
+  "CY": {
+    "name": "Cyprus",
+    "km2": 9250
+  },
+  "CZ": {
+    "name": "Czechia",
+    "km2": 78871
+  },
+  "DE": {
+    "name": "Germany",
+    "km2": 357680
+  },
+  "DJ": {
+    "name": "Djibouti",
+    "km2": 23200
+  },
+  "DK": {
+    "name": "Denmark",
+    "km2": 42920
+  },
+  "DM": {
+    "name": "Dominica",
+    "km2": 750
+  },
+  "DO": {
+    "name": "Dominican Republic",
+    "km2": 146839
+  },
+  "DZ": {
+    "name": "Algeria",
+    "km2": 2381740
+  },
+  "EC": {
+    "name": "Ecuador",
+    "km2": 256370
+  },
+  "EE": {
+    "name": "Estonia",
+    "km2": 45340
+  },
+  "EG": {
+    "name": "Egypt, Arab Rep.",
+    "km2": 1001450
+  },
+  "ER": {
+    "name": "Eritrea",
+    "km2": 121766
+  },
+  "ES": {
+    "name": "Spain",
+    "km2": 505976
+  },
+  "ET": {
+    "name": "Ethiopia",
+    "km2": 1136240
+  },
+  "EU": {
+    "name": "European Union",
+    "km2": 4254541
+  },
+  "FI": {
+    "name": "Finland",
+    "km2": 338480
+  },
+  "FJ": {
+    "name": "Fiji",
+    "km2": 18270
+  },
+  "FM": {
+    "name": "Micronesia, Fed. Sts.",
+    "km2": 700
+  },
+  "FO": {
+    "name": "Faroe Islands",
+    "km2": 12960
+  },
+  "FR": {
+    "name": "France",
+    "km2": 606410
+  },
+  "GA": {
+    "name": "Gabon",
+    "km2": 267670
+  },
+  "GB": {
+    "name": "United Kingdom",
+    "km2": 243610
+  },
+  "GD": {
+    "name": "Grenada",
+    "km2": 340
+  },
+  "GE": {
+    "name": "Georgia",
+    "km2": 69700
+  },
+  "GH": {
+    "name": "Ghana",
+    "km2": 238539
+  },
+  "GI": {
+    "name": "Gibraltar",
+    "km2": 10
+  },
+  "GL": {
+    "name": "Greenland",
+    "km2": 410450
+  },
+  "GM": {
+    "name": "Gambia, The",
+    "km2": 11300
+  },
+  "GN": {
+    "name": "Guinea",
+    "km2": 245860
+  },
+  "GQ": {
+    "name": "Equatorial Guinea",
+    "km2": 28050
+  },
+  "GR": {
+    "name": "Greece",
+    "km2": 131960
+  },
+  "GT": {
+    "name": "Guatemala",
+    "km2": 108890
+  },
+  "GU": {
+    "name": "Guam",
+    "km2": 540
+  },
+  "GW": {
+    "name": "Guinea-Bissau",
+    "km2": 36130
+  },
+  "GY": {
+    "name": "Guyana",
+    "km2": 214970
+  },
+  "HK": {
+    "name": "Hong Kong SAR, China",
+    "km2": 1110
+  },
+  "HN": {
+    "name": "Honduras",
+    "km2": 112490
+  },
+  "HR": {
+    "name": "Croatia",
+    "km2": 88070
+  },
+  "HT": {
+    "name": "Haiti",
+    "km2": 27750
+  },
+  "HU": {
+    "name": "Hungary",
+    "km2": 93030
+  },
+  "ID": {
+    "name": "Indonesia",
+    "km2": 1916907
+  },
+  "IE": {
+    "name": "Ireland",
+    "km2": 70280
+  },
+  "IL": {
+    "name": "Israel",
+    "km2": 22070
+  },
+  "IM": {
+    "name": "Isle of Man",
+    "km2": 570
+  },
+  "IN": {
+    "name": "India",
+    "km2": 3287260
+  },
+  "IQ": {
+    "name": "Iraq",
+    "km2": 435050
+  },
+  "IR": {
+    "name": "Iran, Islamic Rep.",
+    "km2": 1745150
+  },
+  "IS": {
+    "name": "Iceland",
+    "km2": 103000
+  },
+  "IT": {
+    "name": "Italy",
+    "km2": 302070
+  },
+  "JG": {
+    "name": "Channel Islands",
+    "km2": 198
+  },
+  "JM": {
+    "name": "Jamaica",
+    "km2": 10990
+  },
+  "JO": {
+    "name": "Jordan",
+    "km2": 89318
+  },
+  "JP": {
+    "name": "Japan",
+    "km2": 377969
+  },
+  "KE": {
+    "name": "Kenya",
+    "km2": 591969
+  },
+  "KG": {
+    "name": "Kyrgyz Republic",
+    "km2": 199950
+  },
+  "KH": {
+    "name": "Cambodia",
+    "km2": 181040
+  },
+  "KI": {
+    "name": "Kiribati",
+    "km2": 810
+  },
+  "KM": {
+    "name": "Comoros",
+    "km2": 1861
+  },
+  "KN": {
+    "name": "St. Kitts and Nevis",
+    "km2": 260
+  },
+  "KP": {
+    "name": "Korea, Dem. People's Rep.",
+    "km2": 120540
+  },
+  "KR": {
+    "name": "Korea, Rep.",
+    "km2": 100450
+  },
+  "KW": {
+    "name": "Kuwait",
+    "km2": 17820
+  },
+  "KY": {
+    "name": "Cayman Islands",
+    "km2": 264
+  },
+  "KZ": {
+    "name": "Kazakhstan",
+    "km2": 2724902
+  },
+  "LA": {
+    "name": "Lao PDR",
+    "km2": 236800
+  },
+  "LB": {
+    "name": "Lebanon",
+    "km2": 10450
+  },
+  "LC": {
+    "name": "St. Lucia",
+    "km2": 620
+  },
+  "LI": {
+    "name": "Liechtenstein",
+    "km2": 160
+  },
+  "LK": {
+    "name": "Sri Lanka",
+    "km2": 65610
+  },
+  "LR": {
+    "name": "Liberia",
+    "km2": 111370
+  },
+  "LS": {
+    "name": "Lesotho",
+    "km2": 30360
+  },
+  "LT": {
+    "name": "Lithuania",
+    "km2": 65290
+  },
+  "LU": {
+    "name": "Luxembourg",
+    "km2": 2590
+  },
+  "LV": {
+    "name": "Latvia",
+    "km2": 64590
+  },
+  "LY": {
+    "name": "Libya",
+    "km2": 1759540
+  },
+  "MA": {
+    "name": "Morocco",
+    "km2": 446550
+  },
+  "MC": {
+    "name": "Monaco",
+    "km2": 75
+  },
+  "MD": {
+    "name": "Moldova",
+    "km2": 33850
+  },
+  "ME": {
+    "name": "Montenegro",
+    "km2": 13888
+  },
+  "MF": {
+    "name": "St. Martin (French part)",
+    "km2": 50
+  },
+  "MG": {
+    "name": "Madagascar",
+    "km2": 587295
+  },
+  "MH": {
+    "name": "Marshall Islands",
+    "km2": 180
+  },
+  "MK": {
+    "name": "North Macedonia",
+    "km2": 25710
+  },
+  "ML": {
+    "name": "Mali",
+    "km2": 1240190
+  },
+  "MM": {
+    "name": "Myanmar",
+    "km2": 676590
+  },
+  "MN": {
+    "name": "Mongolia",
+    "km2": 1564116
+  },
+  "MO": {
+    "name": "Macao SAR, China",
+    "km2": 33
+  },
+  "MP": {
+    "name": "Northern Mariana Islands",
+    "km2": 460
+  },
+  "MR": {
+    "name": "Mauritania",
+    "km2": 1030700
+  },
+  "MT": {
+    "name": "Malta",
+    "km2": 320
+  },
+  "MU": {
+    "name": "Mauritius",
+    "km2": 2010
+  },
+  "MV": {
+    "name": "Maldives",
+    "km2": 300
+  },
+  "MW": {
+    "name": "Malawi",
+    "km2": 118480
+  },
+  "MX": {
+    "name": "Mexico",
+    "km2": 1957194
+  },
+  "MY": {
+    "name": "Malaysia",
+    "km2": 330411
+  },
+  "MZ": {
+    "name": "Mozambique",
+    "km2": 799380
+  },
+  "NA": {
+    "name": "Namibia",
+    "km2": 824290
+  },
+  "NC": {
+    "name": "New Caledonia",
+    "km2": 18580
+  },
+  "NE": {
+    "name": "Niger",
+    "km2": 1267000
+  },
+  "NG": {
+    "name": "Nigeria",
+    "km2": 923770
+  },
+  "NI": {
+    "name": "Nicaragua",
+    "km2": 130370
+  },
+  "NL": {
+    "name": "Netherlands",
+    "km2": 41540
+  },
+  "NO": {
+    "name": "Norway",
+    "km2": 624500
+  },
+  "NP": {
+    "name": "Nepal",
+    "km2": 147180
+  },
+  "NR": {
+    "name": "Nauru",
+    "km2": 20
+  },
+  "NZ": {
+    "name": "New Zealand",
+    "km2": 267710
+  },
+  "OE": {
+    "name": "OECD members",
+    "km2": 43471305
+  },
+  "OM": {
+    "name": "Oman",
+    "km2": 309500
+  },
+  "PA": {
+    "name": "Panama",
+    "km2": 75320
+  },
+  "PE": {
+    "name": "Peru",
+    "km2": 1285216
+  },
+  "PF": {
+    "name": "French Polynesia",
+    "km2": 3471
+  },
+  "PG": {
+    "name": "Papua New Guinea",
+    "km2": 462840
+  },
+  "PH": {
+    "name": "Philippines",
+    "km2": 300000
+  },
+  "PK": {
+    "name": "Pakistan",
+    "km2": 796100
+  },
+  "PL": {
+    "name": "Poland",
+    "km2": 313930
+  },
+  "PR": {
+    "name": "Puerto Rico (US)",
+    "km2": 8870
+  },
+  "PS": {
+    "name": "West Bank and Gaza",
+    "km2": 6025
+  },
+  "PT": {
+    "name": "Portugal",
+    "km2": 92230
+  },
+  "PW": {
+    "name": "Palau",
+    "km2": 460
+  },
+  "PY": {
+    "name": "Paraguay",
+    "km2": 406752
+  },
+  "QA": {
+    "name": "Qatar",
+    "km2": 11490
+  },
+  "RO": {
+    "name": "Romania",
+    "km2": 238400
+  },
+  "RS": {
+    "name": "Serbia",
+    "km2": 84990
+  },
+  "RU": {
+    "name": "Russian Federation",
+    "km2": 17125190
+  },
+  "RW": {
+    "name": "Rwanda",
+    "km2": 26338
+  },
+  "SA": {
+    "name": "Saudi Arabia",
+    "km2": 2149690
+  },
+  "SB": {
+    "name": "Solomon Islands",
+    "km2": 28900
+  },
+  "SC": {
+    "name": "Seychelles",
+    "km2": 460
+  },
+  "SD": {
+    "name": "Sudan",
+    "km2": 1878000
+  },
+  "SE": {
+    "name": "Sweden",
+    "km2": 528660
+  },
+  "SG": {
+    "name": "Singapore",
+    "km2": 728
+  },
+  "SI": {
+    "name": "Slovenia",
+    "km2": 20480
+  },
+  "SK": {
+    "name": "Slovak Republic",
+    "km2": 49030
+  },
+  "SL": {
+    "name": "Sierra Leone",
+    "km2": 72300
+  },
+  "SM": {
+    "name": "San Marino",
+    "km2": 60
+  },
+  "SN": {
+    "name": "Senegal",
+    "km2": 196710
+  },
+  "SO": {
+    "name": "Somalia, Fed. Rep.",
+    "km2": 637660
+  },
+  "SR": {
+    "name": "Suriname",
+    "km2": 163820
+  },
+  "SS": {
+    "name": "South Sudan",
+    "km2": 646883
+  },
+  "ST": {
+    "name": "Sao Tome and Principe",
+    "km2": 960
+  },
+  "SV": {
+    "name": "El Salvador",
+    "km2": 21040
+  },
+  "SX": {
+    "name": "Sint Maarten (Dutch part)",
+    "km2": 34
+  },
+  "SY": {
+    "name": "Syrian Arab Republic",
+    "km2": 185180
+  },
+  "SZ": {
+    "name": "Eswatini",
+    "km2": 17360
+  },
+  "TC": {
+    "name": "Turks and Caicos Islands",
+    "km2": 950
+  },
+  "TD": {
+    "name": "Chad",
+    "km2": 1284000
+  },
+  "TG": {
+    "name": "Togo",
+    "km2": 56790
+  },
+  "TH": {
+    "name": "Thailand",
+    "km2": 513115
+  },
+  "TJ": {
+    "name": "Tajikistan",
+    "km2": 141379
+  },
+  "TL": {
+    "name": "Timor-Leste",
+    "km2": 14870
+  },
+  "TM": {
+    "name": "Turkmenistan",
+    "km2": 491209
+  },
+  "TN": {
+    "name": "Tunisia",
+    "km2": 163610
+  },
+  "TO": {
+    "name": "Tonga",
+    "km2": 750
+  },
+  "TR": {
+    "name": "Turkiye",
+    "km2": 785350
+  },
+  "TT": {
+    "name": "Trinidad and Tobago",
+    "km2": 5130
+  },
+  "TV": {
+    "name": "Tuvalu",
+    "km2": 30
+  },
+  "TZ": {
+    "name": "Tanzania",
+    "km2": 947300
+  },
+  "UA": {
+    "name": "Ukraine",
+    "km2": 603550
+  },
+  "UG": {
+    "name": "Uganda",
+    "km2": 241550
+  },
+  "US": {
+    "name": "United States",
+    "km2": 9831510
+  },
+  "UY": {
+    "name": "Uruguay",
+    "km2": 176220
+  },
+  "UZ": {
+    "name": "Uzbekistan",
+    "km2": 448920
+  },
+  "VC": {
+    "name": "St. Vincent and the Grenadines",
+    "km2": 390
+  },
+  "VE": {
+    "name": "Venezuela, RB",
+    "km2": 912050
+  },
+  "VG": {
+    "name": "British Virgin Islands",
+    "km2": 150
+  },
+  "VI": {
+    "name": "Virgin Islands (U.S.)",
+    "km2": 350
+  },
+  "VN": {
+    "name": "Viet Nam",
+    "km2": 331338
+  },
+  "VU": {
+    "name": "Vanuatu",
+    "km2": 12190
+  },
+  "WS": {
+    "name": "Samoa",
+    "km2": 2840
+  },
+  "XC": {
+    "name": "Euro area",
+    "km2": 2848740
+  },
+  "XE": {
+    "name": "Heavily indebted poor countries (HIPC)",
+    "km2": 19801739
+  },
+  "XF": {
+    "name": "IBRD only",
+    "km2": 72802987
+  },
+  "XG": {
+    "name": "IDA total",
+    "km2": 25844145
+  },
+  "XH": {
+    "name": "IDA blend",
+    "km2": 4986084
+  },
+  "XI": {
+    "name": "IDA only",
+    "km2": 20858061
+  },
+  "XJ": {
+    "name": "Latin America & Caribbean (excluding high income)",
+    "km2": 18299873
+  },
+  "XL": {
+    "name": "Least developed countries: UN classification",
+    "km2": 20774839
+  },
+  "XO": {
+    "name": "Low & middle income",
+    "km2": 77699312
+  },
+  "XP": {
+    "name": "Middle income",
+    "km2": 63806594
+  },
+  "XQ": {
+    "name": "Middle East, North Africa, Afghanistan & Pakistan (excluding high income)",
+    "km2": 10218169
+  },
+  "XU": {
+    "name": "North America",
+    "km2": 25470210
+  },
+  "YE": {
+    "name": "Yemen, Rep.",
+    "km2": 527970
+  },
+  "ZA": {
+    "name": "South Africa",
+    "km2": 1219090
+  },
+  "ZF": {
+    "name": "Sub-Saharan Africa (excluding high income)",
+    "km2": 23191552
+  },
+  "ZG": {
+    "name": "Sub-Saharan Africa",
+    "km2": 24328252
+  },
+  "ZH": {
+    "name": "Africa Eastern and Southern",
+    "km2": 15162009
+  },
+  "ZI": {
+    "name": "Africa Western and Central",
+    "km2": 9166243
+  },
+  "ZJ": {
+    "name": "Latin America & Caribbean",
+    "km2": 20517665
+  },
+  "ZM": {
+    "name": "Zambia",
+    "km2": 752610
+  },
+  "ZQ": {
+    "name": "Middle East, North Africa, Afghanistan & Pakistan",
+    "km2": 12806427
+  },
+  "ZT": {
+    "name": "IDA & IBRD total",
+    "km2": 98647132
+  },
+  "ZW": {
+    "name": "Zimbabwe",
+    "km2": 390760
+  }
+}

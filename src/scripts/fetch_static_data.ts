@@ -10,6 +10,8 @@ const SOURCES = {
   seaLevel:
     "https://www.star.nesdis.noaa.gov/socd/lsa/SeaLevelRise/slr/slr_sla_gbl_free_ref_90.csv",
   co2Ppm: "https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_annmean_mlo.csv",
+  // NSIDC Sea Ice Index v4.0 — Arctic September (summer-minimum) monthly-mean extent, million km^2.
+  arcticIce: "https://noaadata.apps.nsidc.org/NOAA/G02135/north/monthly/data/N_09_extent_v4.0.csv",
 } as const;
 
 async function main(): Promise<void> {
@@ -17,16 +19,18 @@ async function main(): Promise<void> {
   const tempDir = await mkdtemp(join(tmpdir(), "klimate-static-"));
 
   try {
-    const [emissionsRaw, seaLevelRaw, co2Raw] = await Promise.all([
+    const [emissionsRaw, seaLevelRaw, co2Raw, arcticRaw] = await Promise.all([
       fetchText(SOURCES.emissions),
       fetchText(SOURCES.seaLevel),
       fetchText(SOURCES.co2Ppm),
+      fetchText(SOURCES.arcticIce),
     ]);
 
     const outputs = [
       ["emissions.csv", cleanEmissions(emissionsRaw)],
       ["sea_level.csv", cleanSeaLevel(seaLevelRaw)],
       ["co2_ppm.csv", cleanCo2Ppm(co2Raw)],
+      ["arctic_ice.csv", cleanArcticIce(arcticRaw)],
     ] as const;
 
     for (const [name, content] of outputs) {
@@ -130,6 +134,25 @@ function cleanCo2Ppm(raw: string): string {
   return toCsv(
     ["year", "ppm"],
     rows.map((row) => [row.year, round(row.ppm, 2)]),
+  );
+}
+
+function cleanArcticIce(raw: string): string {
+  const rows = parseCsv(raw)
+    .map((row) => ({
+      year: Number(row.year),
+      extent: Number(row.extent),
+    }))
+    .filter((row) => Number.isFinite(row.year) && Number.isFinite(row.extent) && row.extent > 0)
+    .sort((a, b) => a.year - b.year);
+
+  if (rows.length < 30) {
+    throw new Error(`arctic ice validation failed: ${rows.length} rows`);
+  }
+
+  return toCsv(
+    ["year", "extent_mkm2"],
+    rows.map((row) => [row.year, round(row.extent, 2)]),
   );
 }
 

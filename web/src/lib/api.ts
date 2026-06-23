@@ -91,10 +91,30 @@ export interface IndiaEmissionsRings {
   growthFactor: number | null
 }
 
+export interface ArcticIceComparison {
+  unit: 'country'
+  name: string
+  code: string
+  areaKm2: number
+  multiple: number
+}
+
+export interface ArcticIce {
+  birthWindow: { startYear: number; endYear: number; extentMkm2: number }
+  recentWindow: { startYear: number; endYear: number; extentMkm2: number }
+  /** Summer (September minimum) sea ice lost since birth, in km^2. Signed; negative = no net loss. */
+  lostKm2: number
+  lostMkm2: number
+  /** null when no net loss or the birth country's area is unknown. */
+  comparison: ArcticIceComparison | null
+}
+
 export interface GlobalContext {
   seaLevelRiseMm: number | null
   co2PpmAtBirth: number | null
   co2PpmNow: number | null
+  /** Absent on kundlis saved before this feature shipped. */
+  arcticIce?: ArcticIce | null
 }
 
 export interface RainRingYear {

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { HandFanChart } from '@/components/HandFanChart'
 import { MonthlyRainSection } from '@/components/MonthlyRainSection'
 import { RainRingsChart } from '@/components/RainRingsChart'
-import type { MonthlyDeltaResponse } from '@/lib/api'
+import type { ArcticIce, MonthlyDeltaResponse } from '@/lib/api'
 import { formatDataSource } from '@/lib/utils'
 import { latestCompleteYearUtc } from '@/lib/years'
 import type { LivedCity } from '@/types'
@@ -248,6 +248,13 @@ export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaCh
         </>
       ) : null}
 
+      {data.globalContext?.arcticIce ? (
+        <>
+          <hr className="border-border" />
+          <ArcticIceSection arctic={data.globalContext.arcticIce} />
+        </>
+      ) : null}
+
       <hr className="border-border" />
       <InsightsSection data={data} />
 
@@ -263,6 +270,62 @@ export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaCh
       ) : null}
     </div>
   )
+}
+
+function ArcticIceSection({ arctic }: { arctic: ArcticIce }) {
+  const { birthWindow, recentWindow, lostMkm2, comparison } = arctic
+  const lostText = `${lostMkm2.toFixed(2)} million km²`
+
+  return (
+    <section className="space-y-6 pb-4">
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">The melting north</p>
+        <h2 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
+          The Arctic you were born into is gone.
+        </h2>
+      </div>
+
+      <div className="rounded-xl border border-border bg-muted/20 p-5 space-y-4">
+        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+          Summer sea ice lost since you were born
+        </p>
+
+        {arctic.lostKm2 > 0 ? (
+          <p className="text-pretty text-lg">
+            Since you were born, Arctic summer sea ice covering{' '}
+            <span className="font-semibold">
+              {comparison ? comparisonPhrase(comparison) : `roughly ${lostText}`}
+            </span>{' '}
+            has melted away.
+          </p>
+        ) : (
+          <p className="text-pretty text-lg">
+            Arctic summer sea ice is roughly unchanged across your lifetime so far — the steep
+            decline came in the decades before you were born.
+          </p>
+        )}
+
+        <p className="text-sm text-muted-foreground">
+          The September minimum shrank from {birthWindow.extentMkm2.toFixed(2)} to{' '}
+          {recentWindow.extentMkm2.toFixed(2)} million km²
+          {' '}({birthWindow.startYear}–{birthWindow.endYear} → {recentWindow.startYear}–
+          {recentWindow.endYear}) — a loss of about {lostText}.
+        </p>
+
+        <p className="text-xs text-muted-foreground">
+          Source: NSIDC Sea Ice Index, Arctic September extent · 5-year means
+        </p>
+      </div>
+    </section>
+  )
+}
+
+// >=1 reads naturally as a multiplier; <1 reads better as a percentage of the country's area.
+function comparisonPhrase(c: NonNullable<ArcticIce['comparison']>): string {
+  if (c.multiple >= 1) {
+    return `${c.multiple.toFixed(c.multiple >= 10 ? 0 : 1)}× the size of ${c.name}`
+  }
+  return `an area ${Math.round(c.multiple * 100)}% the size of ${c.name}`
 }
 
 function PeakSourceFootnote({ blades }: { blades: NonNullable<MonthlyDeltaResponse['hottestYears']>['blades'] }) {
