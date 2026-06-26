@@ -299,14 +299,36 @@ function round2(value: number): number {
 function buildIndiaEmissionsRings(statics: StaticData, birthYear: number, latestCompleteYear: number) {
   const latestDataYear = statics.latestEmissionsYear(INDIA_EMISSIONS_CODE) ?? latestCompleteYear;
   const endYear = Math.min(latestCompleteYear, latestDataYear);
-  const years: { year: number; co2Mt: number }[] = [];
+  const years: {
+    year: number;
+    co2Mt: number;
+    coalMt: number;
+    oilMt: number;
+    cementMt: number;
+    gasMt: number;
+    flaringMt: number;
+  }[] = [];
 
   for (let year = birthYear; year <= endYear; year += 1) {
     const lookup = statics.lookupEmissions(INDIA_EMISSIONS_CODE, year);
     if (lookup.confidence === "unavailable") {
       continue;
     }
-    years.push({ year, co2Mt: Math.round(lookup.value * 10) / 10 });
+    const coal = statics.lookupEmissionsCategory(INDIA_EMISSIONS_CODE, year, "coal").value || 0;
+    const oil = statics.lookupEmissionsCategory(INDIA_EMISSIONS_CODE, year, "oil").value || 0;
+    const cement = statics.lookupEmissionsCategory(INDIA_EMISSIONS_CODE, year, "cement").value || 0;
+    const gas = statics.lookupEmissionsCategory(INDIA_EMISSIONS_CODE, year, "gas").value || 0;
+    const flaring = statics.lookupEmissionsCategory(INDIA_EMISSIONS_CODE, year, "flaring").value || 0;
+
+    years.push({
+      year,
+      co2Mt: Math.round(lookup.value * 10) / 10,
+      coalMt: Math.round(coal * 10) / 10,
+      oilMt: Math.round(oil * 10) / 10,
+      cementMt: Math.round(cement * 10) / 10,
+      gasMt: Math.round(gas * 10) / 10,
+      flaringMt: Math.round(flaring * 10) / 10,
+    });
   }
 
   if (years.length === 0) {

@@ -60,11 +60,22 @@ async function fetchText(url: string): Promise<string> {
 }
 
 function cleanEmissions(raw: string): string {
+  const parseVal = (val: string | undefined): number => {
+    if (!val || val.trim() === "") return 0;
+    const num = Number(val);
+    return Number.isFinite(num) ? num : 0;
+  };
+
   const rows = parseCsv(raw)
     .map((row) => ({
       country: row.iso_code?.trim().toUpperCase(),
       year: Number(row.year),
       co2Mt: Number(row.co2),
+      coalMt: parseVal(row.coal_co2),
+      oilMt: parseVal(row.oil_co2),
+      cementMt: parseVal(row.cement_co2),
+      gasMt: parseVal(row.gas_co2),
+      flaringMt: parseVal(row.flaring_co2),
     }))
     .filter((row) => row.country?.length === 3 && Number.isFinite(row.year) && Number.isFinite(row.co2Mt))
     .sort((a, b) => a.country.localeCompare(b.country) || a.year - b.year);
@@ -74,8 +85,17 @@ function cleanEmissions(raw: string): string {
   }
 
   return toCsv(
-    ["country", "year", "co2_mt"],
-    rows.map((row) => [row.country, row.year, round(row.co2Mt, 3)]),
+    ["country", "year", "co2_mt", "coal_mt", "oil_mt", "cement_mt", "gas_mt", "flaring_mt"],
+    rows.map((row) => [
+      row.country,
+      row.year,
+      round(row.co2Mt, 3),
+      round(row.coalMt, 3),
+      round(row.oilMt, 3),
+      round(row.cementMt, 3),
+      round(row.gasMt, 3),
+      round(row.flaringMt, 3),
+    ]),
   );
 }
 

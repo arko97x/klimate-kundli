@@ -1,10 +1,36 @@
 import { useMemo, useRef, useState } from 'react'
-import { Calendar, Info, TrendingUp, Activity } from 'lucide-react'
+import { Calendar, Info, TrendingUp, Flame } from 'lucide-react'
+import matchstickImg from '@/assets/matchstick.png'
 
 import type { IndiaEmissionsRings, GlobalContext } from '@/lib/api'
 
 const SIZE = 400
-const CENTER = SIZE / 2
+
+function getForwardCurveSegments(points: { x: number; y: number }[]): string {
+  const N = points.length
+  if (N < 2) return ''
+  let d = ''
+  const tension = 0.25
+  for (let i = 0; i < N - 1; i++) {
+    const p0 = points[Math.max(0, i - 1)]!
+    const p1 = points[i]!
+    const p2 = points[i + 1]!
+    const p3 = points[Math.min(N - 1, i + 2)]!
+
+    const cp1x = p1.x + (p2.x - p0.x) * tension
+    const cp1y = p1.y + (p2.y - p0.y) * tension
+    const cp2x = p2.x - (p3.x - p1.x) * tension
+    const cp2y = p2.y - (p3.y - p1.y) * tension
+
+    d += ` C ${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p2.x.toFixed(2)},${p2.y.toFixed(2)}`
+  }
+  return d
+}
+
+function getBackwardCurveSegments(points: { x: number; y: number }[]): string {
+  const pointsRev = [...points].reverse()
+  return getForwardCurveSegments(pointsRev)
+}
 
 
 type EmissionsRingsChartProps = {
@@ -14,143 +40,201 @@ type EmissionsRingsChartProps = {
   globalContext?: GlobalContext | null
 }
 
-type RingGeometry = {
-  year: number
-  co2Mt: number
-  yTop: number
-  yBottom: number
-  wTop: number
-  wBottom: number
-  points: string
-  color: string
-  isShared: boolean
-}
+const CATEGORIES = [
+  { key: 'coalMt', label: 'Coal', color: '#5c0606' },
+  { key: 'oilMt', label: 'Oil', color: '#cc1111' },
+  { key: 'cementMt', label: 'Cement', color: '#e65100' },
+  { key: 'gasMt', label: 'Gas', color: '#ff9800' },
+  { key: 'flaringMt', label: 'Flaring', color: '#ffe082' },
+] as const
 
-type Branch = {
-  id: string
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-  w: number
-}
-
-// Procedural fractal bronchial airway generator
-function buildBronchioles(
-  startX: number,
-  startY: number,
-  angle: number,
-  length: number,
-  depth: number,
-  prefix: string,
-): Branch[] {
-  const branches: Branch[] = []
-
-  function recurse(
-    x: number,
-    y: number,
-    a: number,
-    l: number,
-    d: number,
-    idPrefix: string,
-  ) {
-    if (d === 0) return
-
-    const rad = (a * Math.PI) / 180
-    const x2 = x + l * Math.cos(rad)
-    const y2 = y + l * Math.sin(rad)
-
-    branches.push({
-      id: `${idPrefix}-${d}-${branches.length}`,
-      x1: x,
-      y1: y,
-      x2,
-      y2,
-      w: d * 0.65,
-    })
-
-    const nextL = l * 0.74
-    recurse(x2, y2, a - 28, nextL, d - 1, `${idPrefix}L`)
-    recurse(x2, y2, a + 28, nextL, d - 1, `${idPrefix}R`)
-  }
-
-  recurse(startX, startY, angle, length, depth, prefix)
-  return branches
-}
-
-export function EmissionsRingsChart({ birthYear, data, parentsData, globalContext }: EmissionsRingsChartProps) {
-  const hasComparison = parentsData != null && parentsData.years.length > 0
-  const parentsBirthYear = hasComparison ? (parentsData?.startYear ?? birthYear - 25) : birthYear - 25
-
-  // Use the longest dataset available for the unified timeline
-  const baseYears = useMemo(() => {
-    return hasComparison ? parentsData.years : data.years
-  }, [hasComparison, parentsData, data])
-
-  // Shared color scale min/max across all available years
-  const colorScale = useMemo(() => {
-    const values = baseYears.map((p) => p.co2Mt)
-    if (values.length === 0) {
-      return { min: 0, max: 1 }
-    }
-    return { min: Math.min(...values), max: Math.max(...values) }
-  }, [baseYears])
-
-  // Generate the wiggled/constrained diamond year polygons
-  const rings = useMemo(() => {
-    return buildRingGeometry(
-      baseYears,
-      colorScale.min,
-      colorScale.max,
-      birthYear,
-    )
-  }, [baseYears, colorScale.min, colorScale.max, birthYear])
-
-  // Locate the birth year ring to draw the boundary divider line
-  const birthRing = useMemo(() => {
-    return rings.find((r) => r.year === birthYear)
-  }, [rings, birthYear])
-
-  // Pre-generate procedural bronchiole airway trees
-  const leftLung = useMemo(() => buildBronchioles(194, 110, 145, 42, 5, 'left'), [])
-  const rightLung = useMemo(() => buildBronchioles(206, 110, 35, 42, 5, 'right'), [])
-
+export function EmissionsRingsChart({ birthYear, data, globalContext }: EmissionsRingsChartProps) {
   const [hoveredYear, setHoveredYear] = useState<number | null>(null)
+  const [hoveredCategoryKey, setHoveredCategoryKey] = useState<string | null>(null)
+  const [hoveredCategoryLabel, setHoveredCategoryLabel] = useState<string | null>(null)
+  const [hoveredValue, setHoveredValue] = useState<number | null>(null)
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
   const svgRef = useRef<SVGSVGElement>(null)
 
-  // Fallback to the latest year's data if no year is hovered or selected
-  const activeYear = hoveredYear ?? selectedYear ?? data.endYear
-  const activeRing = rings.find((r) => r.year === activeYear)
-  const activeCo2 = activeRing?.co2Mt ?? 0
+  // 1. Process data coordinates
+  const coords = useMemo(() => {
+    const N = data.years.length
+    if (N === 0) return []
 
-  // Key stats for milestones
-  const parentsBirthCo2 = baseYears[0]?.co2Mt ?? 0
-  const attendeeBirthCo2 = baseYears.find((y) => y.year === birthYear)?.co2Mt ?? 0
+    // Smoke starts at y=310 (match head) and ends at y=12 (top vertex of the diamond)
+    const y_start = 310
+    const y_end = 12
+    const maxTotal = Math.max(...data.years.map((y) => y.coalMt + y.oilMt + y.cementMt + y.gasMt + y.flaringMt))
+    // Max width is 130px (half-width 65px) so it stays beautifully inside the diamond
+    const baseScale = 130 / (maxTotal || 1)
+
+    return data.years.map((pt, i) => {
+      const y = N > 1 ? y_start - (i / (N - 1)) * (y_start - y_end) : y_start
+      
+      // Perfectly centered along the vertical axis of the diamond for symmetry
+      const cx = 200
+
+      // Pinch the smoke narrow at the match tip
+      const taper = Math.min(1.0, (y_start - y) / 25)
+      const scale = baseScale * Math.max(0.08, taper)
+
+      const w_coal = pt.coalMt * scale
+      const w_oil = pt.oilMt * scale
+      const w_cement = pt.cementMt * scale
+      const w_gas = pt.gasMt * scale
+      const w_flaring = pt.flaringMt * scale
+      const W = w_coal + w_oil + w_cement + w_gas + w_flaring
+
+      // Cumulative stacking positions
+      const x0 = cx - W / 2
+      const x1 = x0 + w_coal
+      const x2 = x1 + w_oil
+      const x3 = x2 + w_cement
+      const x4 = x3 + w_gas
+      const x5 = x4 + w_flaring
+
+      return {
+        year: pt.year,
+        y,
+        x: [x0, x1, x2, x3, x4, x5],
+        values: {
+          coalMt: pt.coalMt,
+          oilMt: pt.oilMt,
+          cementMt: pt.cementMt,
+          gasMt: pt.gasMt,
+          flaringMt: pt.flaringMt,
+        },
+        co2Mt: pt.co2Mt,
+      }
+    })
+  }, [data])
+
+  // 2. Build the continuous smooth SVG paths for each category ribbon
+  const paths = useMemo(() => {
+    return CATEGORIES.map((cat, j) => {
+      const leftPoints = coords.map((c) => ({ x: c.x[j]!, y: c.y }))
+      const rightPoints = coords.map((c) => ({ x: c.x[j + 1]!, y: c.y }))
+
+      if (leftPoints.length === 0) {
+        return {
+          key: cat.key,
+          label: cat.label,
+          color: cat.color,
+          d: '',
+        }
+      }
+
+      const p0 = leftPoints[0]!
+      const forward = getForwardCurveSegments(leftPoints)
+      const pTop = rightPoints[rightPoints.length - 1]!
+      const backward = getBackwardCurveSegments(rightPoints)
+
+      // Start at bottom-left, curve up, line to top-right, curve down, close to bottom-left
+      const d = `M ${p0.x.toFixed(2)},${p0.y.toFixed(2)} ${forward} L ${pTop.x.toFixed(2)},${pTop.y.toFixed(2)} ${backward} Z`
+
+      return {
+        key: cat.key,
+        label: cat.label,
+        color: cat.color,
+        d,
+      }
+    })
+  }, [coords])
+
+  const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
+    const svg = svgRef.current
+    if (!svg) return
+
+    const rect = svg.getBoundingClientRect()
+    // Convert client coordinates to SVG local coordinates (viewBox is 0 0 400 400)
+    const localX = ((e.clientX - rect.left) / rect.width) * SIZE
+    const localY = ((e.clientY - rect.top) / rect.height) * SIZE
+
+    if (coords.length === 0) return
+
+    // Find the closest year based on localY
+    let closestCoord = coords[0]!
+    let minDiff = Math.abs(coords[0]!.y - localY)
+
+    for (let i = 1; i < coords.length; i++) {
+      const diff = Math.abs(coords[i]!.y - localY)
+      if (diff < minDiff) {
+        minDiff = diff
+        closestCoord = coords[i]!
+      }
+    }
+
+    // Only activate hover if we are within the vertical limits of the streamgraph (with some padding)
+    if (localY < 8 || localY > 325) {
+      setHoveredYear(null)
+      setHoveredCategoryKey(null)
+      setHoveredCategoryLabel(null)
+      setHoveredValue(null)
+      return
+    }
+
+    setHoveredYear(closestCoord.year)
+    setTooltipPos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    })
+
+    // Find the category by checking localX against the cumulative x boundaries of closestCoord
+    const { x: xBounds, values } = closestCoord
+    let foundCat = false
+
+    for (let j = 0; j < CATEGORIES.length; j++) {
+      const xStart = xBounds[j]!
+      const xEnd = xBounds[j + 1]!
+      
+      if (localX >= xStart && localX <= xEnd) {
+        const cat = CATEGORIES[j]!
+        setHoveredCategoryKey(cat.key)
+        setHoveredCategoryLabel(cat.label)
+        setHoveredValue(values[cat.key])
+        foundCat = true
+        break
+      }
+    }
+
+    if (!foundCat) {
+      setHoveredCategoryKey(null)
+      setHoveredCategoryLabel(null)
+      setHoveredValue(null)
+    }
+  }
+
+  const handlePointerLeave = () => {
+    setHoveredYear(null)
+    setHoveredCategoryKey(null)
+    setHoveredCategoryLabel(null)
+    setHoveredValue(null)
+  }
+
+  const handleClick = () => {
+    if (hoveredYear !== null) {
+      setSelectedYear(hoveredYear)
+    }
+  }
+
+
+  const activeYear = hoveredYear ?? selectedYear ?? data.endYear
+  const activeCoord = coords.find((c) => c.year === activeYear)
+  const activeCo2 = activeCoord?.co2Mt ?? 0
+  const activeYearData = data.years.find((y) => y.year === activeYear)
+
+  const activeYCoord = activeCoord?.y ?? 310
+  const activeHalfWidth = activeYCoord < 200 ? activeYCoord - 12 : 388 - activeYCoord
+
+  // Baseline values
+  const attendeeBirthCo2 = coords.find((c) => c.year === birthYear)?.co2Mt ?? data.firstCo2Mt
   const latestCo2 = data.lastCo2Mt
 
-  // Multiplier ratios
-  const ratioToParentsBirth = parentsBirthCo2 > 0 ? activeCo2 / parentsBirthCo2 : 0
   const ratioToAttendeeBirth = attendeeBirthCo2 > 0 ? activeCo2 / attendeeBirthCo2 : 0
-
   const latestRatioToAttendeeBirth = attendeeBirthCo2 > 0 ? latestCo2 / attendeeBirthCo2 : 0
-  const latestRatioToParentsBirth = parentsBirthCo2 > 0 ? latestCo2 / parentsBirthCo2 : 0
 
-  const attendeeGrowth =
-    data.growthFactor != null
-      ? `${data.growthFactor}× higher than the year you were born`
-      : 'higher now than when you were born'
-  const parentsGrowth =
-    parentsData?.growthFactor != null
-      ? `${parentsData.growthFactor}× higher than when they were born`
-      : 'higher now than when they were born'
-
-  // Silence unused local variable checks
-  void [attendeeGrowth, parentsGrowth]
-
-  // Climate global CO2 ppm lookup
-  const parentsCo2 = useMemo(() => getCo2Ppm(parentsBirthYear), [parentsBirthYear])
+  // CO₂ PPM lookup
   const yourCo2 = useMemo(() => globalContext?.co2PpmAtBirth ?? getCo2Ppm(birthYear), [globalContext, birthYear])
   const todayCo2 = useMemo(() => globalContext?.co2PpmNow ?? getCo2Ppm(data.endYear), [globalContext, data.endYear])
 
@@ -160,38 +244,65 @@ export function EmissionsRingsChart({ birthYear, data, parentsData, globalContex
     return `Age ${year - birthYear}`
   }
 
-  function getParentsAgeLabel(year: number) {
-    return `Age ${year - parentsBirthYear}`
-  }
+  // Generate visitor-centric milestones
+  const milestones = useMemo(() => {
+    const list = [
+      {
+        label: 'Your Birth Year',
+        year: birthYear,
+        co2: attendeeBirthCo2,
+        growthText: 'Baseline',
+      },
+    ]
 
-  // Milestones list for the right dashboard panel
-  const milestones = [
-    ...(hasComparison
-      ? [
-          {
-            label: "Parents' Birth Year",
-            year: parentsBirthYear,
-            co2: parentsBirthCo2,
-            growthText: 'Baseline',
-            isActive: activeYear === parentsBirthYear,
-          },
-        ]
-      : []),
-    {
-      label: 'Your Birth Year',
-      year: birthYear,
-      co2: attendeeBirthCo2,
-      growthText: hasComparison ? `${(attendeeBirthCo2 / parentsBirthCo2).toFixed(1)}× baseline` : 'Baseline',
-      isActive: activeYear === birthYear,
-    },
-    {
+    const ageTenYear = birthYear + 10
+    if (ageTenYear < data.endYear) {
+      const co2 = coords.find((c) => c.year === ageTenYear)?.co2Mt ?? 0
+      const ratio = attendeeBirthCo2 > 0 ? co2 / attendeeBirthCo2 : 0
+      list.push({
+        label: 'Age 10',
+        year: ageTenYear,
+        co2,
+        growthText: ratio > 1 ? `${ratio.toFixed(1)}× since birth` : 'Baseline',
+      })
+    }
+
+    const ageTwentyYear = birthYear + 20
+    if (ageTwentyYear < data.endYear) {
+      const co2 = coords.find((c) => c.year === ageTwentyYear)?.co2Mt ?? 0
+      const ratio = attendeeBirthCo2 > 0 ? co2 / attendeeBirthCo2 : 0
+      list.push({
+        label: 'Age 20',
+        year: ageTwentyYear,
+        co2,
+        growthText: ratio > 1 ? `${ratio.toFixed(1)}× since birth` : 'Baseline',
+      })
+    }
+
+    list.push({
       label: 'Today',
       year: data.endYear,
       co2: latestCo2,
       growthText: `${latestRatioToAttendeeBirth.toFixed(1)}× since birth`,
-      isActive: activeYear === data.endYear,
-    },
-  ]
+    })
+
+    return list
+  }, [birthYear, data, coords, attendeeBirthCo2, latestCo2, latestRatioToAttendeeBirth])
+
+  // Identify the largest category for the narrative text
+  const largestCategory = useMemo(() => {
+    if (!activeYearData) return null
+    let maxVal = -1
+    let maxCat: typeof CATEGORIES[number] = CATEGORIES[0]
+    for (const cat of CATEGORIES) {
+      const val = activeYearData[cat.key] as number
+      if (val > maxVal) {
+        maxVal = val
+        maxCat = cat
+      }
+    }
+    return { ...maxCat, value: maxVal }
+  }, [activeYearData])
 
   return (
     <section className="space-y-6 pb-6">
@@ -200,148 +311,96 @@ export function EmissionsRingsChart({ birthYear, data, parentsData, globalContex
           India&apos;s carbon emissions across your lifetime
         </h3>
         <p className="max-w-3xl text-pretty text-sm text-muted-foreground leading-relaxed select-none">
-          {hasComparison ? (
-            <>
-              Same national CO₂ story, two starting years — you from {data.startYear}, your parents&apos; generation
-              from {parentsData?.startYear}. Both run to {data.endYear}. India&apos;s emissions are {data.growthFactor}×{' '}
-              higher than when you were born for you and {parentsData?.growthFactor}× higher for them.
-            </>
-          ) : (
-            <>
-              National CO₂ from {data.startYear} to {data.endYear} — {formatMt(data.firstCo2Mt)} Mt in{' '}
-              {data.startYear}, {formatMt(data.lastCo2Mt)} Mt in {data.endYear}. India&apos;s emissions are{' '}
-              {data.growthFactor}× higher today.
-            </>
-          )}
+          National CO₂ emissions from {data.startYear} to {data.endYear} by fuel and industry source. 
+          In your birth year ({birthYear}), India emitted {formatMt(data.firstCo2Mt)} Mt of CO₂, which has since grown 
+          to {formatMt(data.lastCo2Mt)} Mt today ({data.growthFactor}× higher).
         </p>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-12 items-start mt-6">
-        {/* LEFT COLUMN: Diamond Negative Space Lung Visualization */}
+        {/* LEFT COLUMN: Diamond Matchstick Visualization */}
         <div className="lg:col-span-7 flex flex-col items-center select-none">
           <div className="relative w-full max-w-sm aspect-square bg-muted/5 rounded-2xl border border-border/60 p-4 shadow-sm flex items-center justify-center overflow-hidden">
             
-            {/* Metaphor Indicator Overlay at Top Left */}
+            {/* Metaphor Overlay at Top Left */}
             <div className="absolute top-3 left-3 bg-background/85 backdrop-blur-xs px-2.5 py-1 rounded-md border border-border/80 text-[10px] text-muted-foreground flex items-center gap-1.5 z-10">
-              <Activity className="size-3 text-red-500" />
-              <span>Negative Space Lungs</span>
+              <Flame className="size-3 text-amber-500 animate-pulse" />
+              <span>Emissions Matchstick</span>
             </div>
 
             <svg
               ref={svgRef}
               viewBox={`0 0 ${SIZE} ${SIZE}`}
-              className="h-auto w-full touch-none overflow-visible"
+              className="h-auto w-full touch-none overflow-visible cursor-pointer"
               role="img"
-              aria-label={`Carbon emissions plume and negative space lung lobes from ${baseYears[0]?.year} to ${data.endYear}.`}
+              aria-label={`Carbon emissions streamgraph rising from a matchstick from birth year ${birthYear} to ${data.endYear}.`}
+              onPointerMove={handlePointerMove}
+              onPointerLeave={handlePointerLeave}
+              onClick={handleClick}
             >
               <defs>
-                {/* Clip path inside the square diamond */}
                 <clipPath id="diamond-clip">
                   <polygon points="200,12 388,200 200,388 12,200" />
                 </clipPath>
               </defs>
 
-              {/* Clipped group containing background, bronchial trees, and plume */}
+              {/* Clipped group containing background, matchstick, and streamgraph smoke */}
               <g clipPath="url(#diamond-clip)">
                 {/* Diamond Background */}
                 <polygon points="200,12 388,200 200,388 12,200" fill="var(--color-muted)" fillOpacity={0.2} />
 
-                {/* Bronchiole branches (Negative space lungs layout) */}
-                <g opacity={0.6}>
-                  {leftLung.map((b) => (
-                    <line
-                      key={b.id}
-                      x1={b.x1}
-                      y1={b.y1}
-                      x2={b.x2}
-                      y2={b.y2}
-                      stroke="currentColor"
-                      strokeOpacity={0.16}
-                      strokeWidth={b.w}
-                      strokeLinecap="round"
-                    />
-                  ))}
-                  {rightLung.map((b) => (
-                    <line
-                      key={b.id}
-                      x1={b.x1}
-                      y1={b.y1}
-                      x2={b.x2}
-                      y2={b.y2}
-                      stroke="currentColor"
-                      strokeOpacity={0.16}
-                      strokeWidth={b.w}
-                      strokeLinecap="round"
-                    />
-                  ))}
-                </g>
+                {/* Matchstick PNG Image at Bottom */}
+                <image
+                  href={matchstickImg}
+                  x={162.5}
+                  y={200}
+                  width={75}
+                  height={260}
+                  pointerEvents="none"
+                />
 
-                {/* Central Carbon Emissions Plume (Trapezoid segments) */}
-                {rings.map((ring) => {
-                  const isHovered = hoveredYear === ring.year
-                  const isSelected = selectedYear === ring.year
+                {/* Streamgraph segments (rising smoke) */}
+                <g pointerEvents="none">
+                  {paths.map((path) => {
+                    const isCatHovered = hoveredCategoryKey === path.key
 
-                  let opacity = 0.95
-                  if (hoveredYear != null) {
-                    opacity = isHovered ? 1.0 : 0.4
-                  } else if (selectedYear != null) {
-                    opacity = isSelected ? 1.0 : 0.65
-                  } else {
-                    if (hasComparison && !ring.isShared) {
-                      opacity = 0.75
+                    let opacity = 0.85
+                    if (hoveredCategoryKey !== null) {
+                      opacity = isCatHovered ? 1.0 : 0.25
                     }
-                  }
 
-                  return (
-                    <polygon
-                      key={ring.year}
-                      points={ring.points}
-                      fill={ring.color}
-                      stroke={ring.color}
-                      strokeWidth={0.5} // prevents anti-aliasing seams
-                      opacity={opacity}
-                      className="cursor-pointer transition-all duration-100 ease-out"
-                      onPointerOver={(e) => {
-                        setHoveredYear(ring.year)
-                        const rect = svgRef.current?.getBoundingClientRect()
-                        if (rect) {
-                          setTooltipPos({
-                            x: e.clientX - rect.left,
-                            y: e.clientY - rect.top,
-                          })
-                        }
-                      }}
-                      onPointerLeave={() => setHoveredYear(null)}
-                      onClick={() => setSelectedYear(ring.year)}
-                    />
-                  )
-                })}
+                    return (
+                      <path
+                        key={path.key}
+                        d={path.d}
+                        fill={path.color}
+                        stroke={path.color}
+                        strokeWidth={0.5} // prevents anti-aliasing seams
+                        opacity={opacity}
+                        className="transition-all duration-100 ease-out"
+                      />
+                    )
+                  })}
+                </g>
               </g>
 
-              {/* Dashed Birth Year Boundary Divider (drawn outside clip so it sits on top cleanly) */}
-              {hasComparison && birthRing && (
-                <line
-                  x1={CENTER - birthRing.wTop}
-                  y1={birthRing.yTop}
-                  x2={CENTER + birthRing.wTop}
-                  y2={birthRing.yTop}
-                  stroke="var(--color-foreground)"
-                  strokeWidth={1.5}
-                  strokeDasharray="3 3"
-                  opacity={0.8}
-                  pointerEvents="none"
-                />
-              )}
-
-              {/* Active Year Overlay (Drawn last to maintain clean borders) */}
-              {activeRing && (
-                <polygon
-                  points={activeRing.points}
-                  fill="none"
-                  stroke="var(--color-foreground)"
-                  strokeWidth={1.5}
-                  pointerEvents="none"
-                />
+              {/* Horizontal dotted active year guide line */}
+              {hoveredYear !== null && (
+                <g pointerEvents="none">
+                  <line
+                    x1={200 - activeHalfWidth}
+                    y1={activeYCoord}
+                    x2={200 + activeHalfWidth}
+                    y2={activeYCoord}
+                    stroke="var(--color-foreground)"
+                    strokeWidth={1}
+                    strokeDasharray="2 3"
+                    opacity={0.6}
+                  />
+                  {/* Floating tick indicator on the border */}
+                  <circle cx={200 - activeHalfWidth} cy={activeYCoord} r={2} fill="var(--color-foreground)" />
+                  <circle cx={200 + activeHalfWidth} cy={activeYCoord} r={2} fill="var(--color-foreground)" />
+                </g>
               )}
 
               {/* Crisp border frame around the rotated diamond */}
@@ -355,30 +414,44 @@ export function EmissionsRingsChart({ birthYear, data, parentsData, globalContex
             </svg>
 
             {/* Float Tooltip */}
-            {hoveredYear && (
+            {hoveredYear && hoveredCategoryLabel && (
               <div
-                className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-full rounded-md border border-border bg-popover px-2 py-1 text-[11px] shadow-sm tabular-nums text-popover-foreground transition-all duration-75 select-none"
+                className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-full rounded-md border border-border bg-popover px-2.5 py-1.5 text-[11px] shadow-sm tabular-nums text-popover-foreground transition-all duration-75 select-none"
                 style={{ left: tooltipPos.x, top: tooltipPos.y - 12 }}
               >
-                <div className="font-semibold">{hoveredYear}</div>
-                <div className="opacity-90 text-[10px]">{formatMt(baseYears.find((y) => y.year === hoveredYear)?.co2Mt ?? 0)} Mt CO₂</div>
+                <div className="font-semibold flex items-center justify-between gap-4">
+                  <span>{hoveredYear}</span>
+                  <span className="text-[10px] text-muted-foreground">{getYourAgeLabel(hoveredYear)}</span>
+                </div>
+                <div className="mt-0.5 flex items-center gap-1.5">
+                  <span
+                    className="size-1.5 rounded-full"
+                    style={{ backgroundColor: CATEGORIES.find((c) => c.key === hoveredCategoryKey)?.color }}
+                  />
+                  <span>{hoveredCategoryLabel}: <strong>{formatMt(hoveredValue ?? 0)} Mt</strong></span>
+                </div>
+                <div className="text-[9px] text-muted-foreground mt-0.5">
+                  Total: {formatMt(coords.find((c) => c.year === hoveredYear)?.co2Mt ?? 0)} Mt
+                </div>
               </div>
             )}
           </div>
 
-          {/* Color Scale Legend */}
-          <div className="mt-4 flex flex-col items-center gap-1.5 w-full max-w-sm px-2">
-            <div className="flex justify-between text-[10px] text-muted-foreground w-full">
-              <span>{baseYears[0]?.year} ({formatMt(parentsBirthCo2)} Mt)</span>
-              <span>Today ({formatMt(latestCo2)} Mt)</span>
-            </div>
-            <div
-              className="h-2 w-full rounded-full bg-linear-to-r from-[#5584ac] via-[#7b1fa2] via-[#c2185b] to-[#b71c1c]"
-              aria-hidden
-            />
-            <div className="text-[10px] text-muted-foreground/80 flex items-center justify-center gap-1 mt-0.5 select-none">
-              <span>Carbon Plume (gradient) constricts air spaces (negative space lungs)</span>
-            </div>
+          {/* Color scale / Categories legend */}
+          <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1.5 w-full max-w-sm px-2">
+            {CATEGORIES.map((cat) => (
+              <div
+                key={cat.key}
+                onPointerOver={() => setHoveredCategoryKey(cat.key)}
+                onPointerLeave={() => setHoveredCategoryKey(null)}
+                className={`flex items-center gap-1.5 text-[10px] select-none transition-all duration-150 cursor-pointer ${
+                  hoveredCategoryKey === cat.key ? 'text-foreground font-semibold scale-105' : 'text-muted-foreground'
+                }`}
+              >
+                <span className="size-2.5 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
+                <span>{cat.label}</span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -403,7 +476,7 @@ export function EmissionsRingsChart({ birthYear, data, parentsData, globalContex
                   onPointerOver={() => setHoveredYear(m.year)}
                   onPointerOut={() => setHoveredYear(null)}
                   className={`w-full text-left p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
-                    m.isActive
+                    activeYear === m.year
                       ? 'border-primary bg-primary/5 shadow-xs'
                       : 'border-border/80 bg-muted/15 hover:bg-muted/30 hover:border-muted-foreground/30'
                   }`}
@@ -442,10 +515,11 @@ export function EmissionsRingsChart({ birthYear, data, parentsData, globalContex
                 </span>
               </div>
 
+              {/* General snapshot details */}
               <div className="grid grid-cols-2 gap-4 border-t border-border/60 pt-3">
                 <div>
                   <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">
-                    India&apos;s CO₂
+                    India&apos;s CO₂ Total
                   </p>
                   <p className="text-base font-bold text-foreground tabular-nums mt-0.5">
                     {formatMt(activeCo2)} <span className="text-xs font-normal text-muted-foreground">Mt</span>
@@ -453,75 +527,81 @@ export function EmissionsRingsChart({ birthYear, data, parentsData, globalContex
                 </div>
                 <div>
                   <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">
-                    Growth vs Baseline
+                    Your Age
                   </p>
-                  <p className="text-base font-bold text-foreground tabular-nums mt-0.5">
-                    {ratioToParentsBirth > 1 ? `${ratioToParentsBirth.toFixed(1)}×` : 'Baseline'}
-                    <span className="text-[9px] font-normal text-muted-foreground block text-pretty leading-tight">
-                      {activeYear === parentsBirthYear ? 'Parents\' birth year' : `compared to ${parentsBirthYear}`}
-                    </span>
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 border-t border-border/60 pt-3">
-                <div>
-                  <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Your Age</p>
-                  <p className="text-xs font-semibold text-foreground mt-0.5">
+                  <p className="text-base font-bold text-foreground mt-0.5">
                     {getYourAgeLabel(activeYear)}
                   </p>
                 </div>
-                <div>
-                  <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Parents&apos; Age</p>
-                  <p className="text-xs font-semibold text-foreground mt-0.5">
-                    {getParentsAgeLabel(activeYear)}
-                  </p>
+              </div>
+
+              {/* 5-Category Detailed Grid */}
+              <div className="border-t border-border/60 pt-3.5 space-y-2">
+                <p className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">
+                  Emissions Source Breakdown ({activeYear})
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {CATEGORIES.map((cat) => {
+                    const val = activeYearData ? (activeYearData[cat.key] as number) : 0
+                    const pct = activeCo2 > 0 ? (val / activeCo2) * 100 : 0
+                    const isCatHovered = hoveredCategoryKey === cat.key
+
+                    return (
+                      <div
+                        key={cat.key}
+                        className={`p-2 rounded-md border transition-all duration-150 flex flex-col justify-between cursor-pointer ${
+                          isCatHovered
+                            ? 'border-primary bg-primary/5 shadow-2xs'
+                            : 'border-border/50 bg-muted/5 hover:bg-muted/15'
+                        }`}
+                        onPointerOver={() => setHoveredCategoryKey(cat.key)}
+                        onPointerLeave={() => setHoveredCategoryKey(null)}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className="size-2 rounded-full shrink-0"
+                            style={{ backgroundColor: cat.color }}
+                          />
+                          <span className="text-[10px] font-medium text-foreground">{cat.label}</span>
+                        </div>
+                        <div className="mt-1.5 flex items-baseline justify-between">
+                          <span className="text-xs font-bold text-foreground tabular-nums">
+                            {formatMt(val)} <span className="text-[8px] font-normal text-muted-foreground">Mt</span>
+                          </span>
+                          <span className="text-[9px] text-muted-foreground tabular-nums font-semibold">
+                            {pct.toFixed(0)}%
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
 
-              {/* Dynamic comparison narrative block */}
+              {/* Dynamic narrative block */}
               <div className="border-t border-border/60 pt-3 text-xs text-muted-foreground leading-relaxed text-pretty">
-                {activeYear === birthYear ? (
-                  <span>
-                    In <strong>{activeYear}</strong>, the year you were born, global CO₂ was <strong>{yourCo2} ppm</strong>. India emitted{' '}
-                    <strong>{formatMt(activeCo2)} Mt</strong> of CO₂.
-                    {hasComparison && (
-                      <>
-                        {' '}This was already <strong>{ratioToParentsBirth.toFixed(1)}×</strong> higher than when your parents were born (global CO₂ was <strong>{parentsCo2} ppm</strong>).
-                      </>
-                    )}
-                  </span>
-                ) : activeYear === data.endYear ? (
-                  <span>
-                    Today (<strong>{activeYear}</strong>), global CO₂ stands at <strong>{todayCo2} ppm</strong>. India&apos;s emissions are{' '}
-                    <strong>{formatMt(activeCo2)} Mt</strong> — an increase of{' '}
-                    <strong>{latestRatioToAttendeeBirth.toFixed(1)}×</strong> since your birth year
-                    {hasComparison && (
-                      <>
-                        , and <strong>{latestRatioToParentsBirth.toFixed(1)}×</strong> since your parents were born (when global CO₂ was <strong>{parentsCo2} ppm</strong>).
-                      </>
-                    )}
-                  </span>
-                ) : activeYear < birthYear ? (
-                  <span>
-                    In <strong>{activeYear}</strong>, before you were born, global CO₂ was <strong>{getCo2Ppm(activeYear)} ppm</strong>. Your parents were{' '}
-                    <strong>{activeYear - parentsBirthYear}</strong> years old. India&apos;s carbon footprint was{' '}
-                    <strong>{formatMt(activeCo2)} Mt</strong>.
-                  </span>
-                ) : (
-                  <span>
-                    When you were <strong>{activeYear - birthYear}</strong> years old (in <strong>{activeYear}</strong>), global CO₂ was <strong>{getCo2Ppm(activeYear)} ppm</strong>. India&apos;s emissions had grown to{' '}
-                    <strong>{formatMt(activeCo2)} Mt</strong> — which is{' '}
-                    <strong>{ratioToAttendeeBirth.toFixed(1)}×</strong> higher than when you were born.
-                  </span>
-                )}
+                <span>
+                  In <strong>{activeYear}</strong>, {activeYear === birthYear ? 'the year you were born' : `when you were ${getYourAgeLabel(activeYear).toLowerCase()}`}, global CO₂ was <strong>{getCo2Ppm(activeYear)} ppm</strong>. India emitted <strong>{formatMt(activeCo2)} Mt</strong> of CO₂.
+                  {largestCategory && largestCategory.value > 0 && (
+                    <>
+                      {' '}<strong>{largestCategory.label}</strong> was the leading source, contributing{' '}
+                      <strong>{formatMt(largestCategory.value)} Mt</strong> (
+                      {((largestCategory.value / (activeCo2 || 1)) * 100).toFixed(0)}% of the total).
+                    </>
+                  )}
+                  {activeYear > birthYear && (
+                    <>
+                      {' '}This is <strong>{ratioToAttendeeBirth.toFixed(1)}×</strong> the emissions level of your birth year ({formatMt(attendeeBirthCo2)} Mt, when global CO₂ was {yourCo2} ppm; today it is {todayCo2} ppm).
+                    </>
+                  )}
+                </span>
               </div>
             </div>
 
             <div className="flex gap-2 items-start text-[10px] text-muted-foreground leading-normal bg-muted/10 p-2.5 rounded-lg border border-border/40 text-pretty select-none mt-1">
               <Info className="size-4 text-primary shrink-0 mt-0.5" />
               <span>
-                <strong>Interpretation:</strong> The diamond shapes your timeline from birth (top) to present (bottom). As carbon emissions grow (red flare), they physically crowd out the light grey breathing spaces representing the lungs.
+                <strong>Interpretation:</strong> The diamond shapes your timeline from birth (bottom matchstick head) to today (top vertex). The organic stacked plume represents CO₂ emissions contributions by source: Coal, Oil, Cement, Gas, and Flaring, which expand like smoke as emissions grow.
               </span>
             </div>
           </div>
@@ -529,73 +609,6 @@ export function EmissionsRingsChart({ birthYear, data, parentsData, globalContex
       </div>
     </section>
   )
-}
-
-function buildRingGeometry(
-  years: { year: number; co2Mt: number }[],
-  colorMin: number,
-  colorMax: number,
-  birthYear: number,
-): RingGeometry[] {
-  if (years.length === 0) {
-    return []
-  }
-
-  const N = years.length
-  const yMin = 12
-  const yMax = 388
-  const colorSpan = colorMax - colorMin
-  const maxCo2 = Math.max(...years.map((y) => y.co2Mt))
-
-  // Sizing parameters
-  const minHalfW = 4
-  const maxPlumeHalfW = 100
-
-  const rings: RingGeometry[] = []
-
-  for (let i = 0; i < N; i += 1) {
-    const point = years[i]!
-    const yTop = yMin + (i / N) * (yMax - yMin)
-    const yBottom = yMin + ((i + 1) / N) * (yMax - yMin)
-
-    // Emissions value at top and bottom of slice
-    const co2Top = point.co2Mt
-    const co2Bottom = i < N - 1 ? years[i + 1]!.co2Mt : maxCo2
-
-    // Target half widths
-    const emissionsHalfWTop = minHalfW + (co2Top / maxCo2) * (maxPlumeHalfW - minHalfW)
-    const emissionsHalfWBottom = minHalfW + (co2Bottom / maxCo2) * (maxPlumeHalfW - minHalfW)
-
-    // Constrain by diamond boundaries
-    const maxHalfWTop = Math.min(yTop - yMin, yMax - yTop)
-    const maxHalfWBottom = Math.min(yBottom - yMin, yMax - yBottom)
-
-    const wTop = Math.max(1.5, Math.min(emissionsHalfWTop, maxHalfWTop))
-    const wBottom = Math.max(1.5, Math.min(emissionsHalfWBottom, maxHalfWBottom))
-
-    const pointsStr = [
-      `${CENTER - wTop},${yTop}`,
-      `${CENTER + wTop},${yTop}`,
-      `${CENTER + wBottom},${yBottom}`,
-      `${CENTER - wBottom},${yBottom}`,
-    ].join(' ')
-
-    const norm = colorSpan > 0 ? (point.co2Mt - colorMin) / colorSpan : 0.5
-
-    rings.push({
-      year: point.year,
-      co2Mt: point.co2Mt,
-      yTop,
-      yBottom,
-      wTop,
-      wBottom,
-      points: pointsStr,
-      color: emissionColor(norm),
-      isShared: point.year >= birthYear,
-    })
-  }
-
-  return rings
 }
 
 const CO2_LOOKUP: { [year: number]: number } = {
@@ -623,6 +636,7 @@ const CO2_LOOKUP: { [year: number]: number } = {
   2020: 414,
   2023: 421,
   2024: 424,
+  2025: 426,
 }
 
 function getCo2Ppm(year: number): number {
@@ -647,41 +661,6 @@ function getCo2Ppm(year: number): number {
   return Math.round(val)
 }
 
-function hashLabel(label: string): number {
-  let hash = 0
-  for (let i = 0; i < label.length; i += 1) {
-    hash = (hash * 31 + label.charCodeAt(i)) >>> 0
-  }
-  return hash
-}
-
-// Silence unused local variable check
-void [hashLabel]
-
-function emissionColor(norm: number): string {
-  if (norm < 0.3) {
-    return mixHex('#5584ac', '#7b1fa2', norm / 0.3) // Blue to Purple
-  }
-  if (norm < 0.7) {
-    return mixHex('#7b1fa2', '#c2185b', (norm - 0.3) / 0.4) // Purple to Rose
-  }
-  return mixHex('#c2185b', '#b71c1c', (norm - 0.7) / 0.3) // Rose to Crimson
-}
-
 function formatMt(value: number): string {
   return value.toLocaleString(undefined, { maximumFractionDigits: 1 })
-}
-
-function mixHex(a: string, b: string, t: number): string {
-  const clamp = Math.max(0, Math.min(1, t))
-  const ar = parseInt(a.slice(1, 3), 16)
-  const ag = parseInt(a.slice(3, 5), 16)
-  const ab = parseInt(a.slice(5, 7), 16)
-  const br = parseInt(b.slice(1, 3), 16)
-  const bg = parseInt(b.slice(3, 5), 16)
-  const bb = parseInt(b.slice(5, 7), 16)
-  const r = Math.round(ar + (br - ar) * clamp)
-  const g = Math.round(ag + (bg - ag) * clamp)
-  const bl = Math.round(ab + (bb - ab) * clamp)
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${bl.toString(16).padStart(2, '0')}`
 }

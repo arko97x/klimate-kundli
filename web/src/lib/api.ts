@@ -79,6 +79,11 @@ export interface HottestYearsInsight {
 export interface IndiaEmissionsYear {
   year: number
   co2Mt: number
+  coalMt: number
+  oilMt: number
+  cementMt: number
+  gasMt: number
+  flaringMt: number
 }
 
 export interface IndiaEmissionsRings {

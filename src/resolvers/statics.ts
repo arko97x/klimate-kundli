@@ -19,6 +19,11 @@ export interface StaticData {
   latestCo2Year(): number | null;
   latestArcticYear(): number | null;
   lookupEmissions(country: string, year: number): StaticLookup;
+  lookupEmissionsCategory(
+    country: string,
+    year: number,
+    category: "coal" | "oil" | "cement" | "gas" | "flaring"
+  ): StaticLookup;
   lookupSeaLevel(year: number): StaticLookup;
   lookupCo2Ppm(year: number): StaticLookup;
   lookupArctic(year: number): StaticLookup;
@@ -30,18 +35,18 @@ export function loadStaticData(dataDir = join(process.cwd(), "src", "data")): St
   warnIfStale(join(dataDir, "co2_ppm.csv"));
   warnIfStale(join(dataDir, "arctic_ice.csv"));
 
-  const emissions = loadEmissions(join(dataDir, "emissions.csv"));
+  const { co2Map, coalMap, oilMap, cementMap, gasMap, flaringMap } = loadEmissionsMaps(join(dataDir, "emissions.csv"));
   const seaLevel = loadSeries(join(dataDir, "sea_level.csv"), "mm");
   const co2Ppm = loadSeries(join(dataDir, "co2_ppm.csv"), "ppm");
   const arcticIce = loadSeries(join(dataDir, "arctic_ice.csv"), "extent_mkm2");
 
   return {
-    emissions,
+    emissions: co2Map,
     seaLevel,
     co2Ppm,
     arcticIce,
     latestEmissionsYear(country) {
-      return latestYear(emissions.get(country.toUpperCase()) ?? null);
+      return latestYear(co2Map.get(country.toUpperCase()) ?? null);
     },
     latestSeaLevelYear() {
       return latestYear(seaLevel);
@@ -53,7 +58,31 @@ export function loadStaticData(dataDir = join(process.cwd(), "src", "data")): St
       return latestYear(arcticIce);
     },
     lookupEmissions(country, year) {
-      const series = emissions.get(country.toUpperCase());
+      const series = co2Map.get(country.toUpperCase());
+      return series ? lookupSeries(series, year) : unavailable("country-not-found");
+    },
+    lookupEmissionsCategory(country, year, category) {
+      let mapToUse: Map<string, Map<number, number>>;
+      switch (category) {
+        case "coal":
+          mapToUse = coalMap;
+          break;
+        case "oil":
+          mapToUse = oilMap;
+          break;
+        case "cement":
+          mapToUse = cementMap;
+          break;
+        case "gas":
+          mapToUse = gasMap;
+          break;
+        case "flaring":
+          mapToUse = flaringMap;
+          break;
+        default:
+          return unavailable("category-not-found");
+      }
+      const series = mapToUse.get(country.toUpperCase());
       return series ? lookupSeries(series, year) : unavailable("country-not-found");
     },
     lookupSeaLevel(year) {
@@ -108,25 +137,46 @@ export function lookupSeries(series: Map<number, number>, year: number): StaticL
   };
 }
 
-function loadEmissions(path: string): Map<string, Map<number, number>> {
+function loadEmissionsMaps(path: string) {
   const rows = parseCsv(readFileSync(path, "utf8"));
-  const byCountry = new Map<string, Map<number, number>>();
+  const co2Map = new Map<string, Map<number, number>>();
+  const coalMap = new Map<string, Map<number, number>>();
+  const oilMap = new Map<string, Map<number, number>>();
+  const cementMap = new Map<string, Map<number, number>>();
+  const gasMap = new Map<string, Map<number, number>>();
+  const flaringMap = new Map<string, Map<number, number>>();
 
   for (const row of rows) {
     const country = row.country?.toUpperCase();
     const year = Number(row.year);
-    const co2 = Number(row.co2_mt);
-
-    if (!country || !Number.isFinite(year) || !Number.isFinite(co2)) {
+    if (!country || !Number.isFinite(year)) {
       continue;
     }
 
-    const series = byCountry.get(country) ?? new Map<number, number>();
-    series.set(year, co2);
-    byCountry.set(country, series);
+    const co2 = Number(row.co2_mt || 0);
+    const coal = Number(row.coal_mt || 0);
+    const oil = Number(row.oil_mt || 0);
+    const cement = Number(row.cement_mt || 0);
+    const gas = Number(row.gas_mt || 0);
+    const flaring = Number(row.flaring_mt || 0);
+
+    const getOrInit = (m: Map<string, Map<number, number>>) => {
+      const existing = m.get(country);
+      if (existing) return existing;
+      const newMap = new Map<number, number>();
+      m.set(country, newMap);
+      return newMap;
+    };
+
+    getOrInit(co2Map).set(year, co2);
+    getOrInit(coalMap).set(year, coal);
+    getOrInit(oilMap).set(year, oil);
+    getOrInit(cementMap).set(year, cement);
+    getOrInit(gasMap).set(year, gas);
+    getOrInit(flaringMap).set(year, flaring);
   }
 
-  return byCountry;
+  return { co2Map, coalMap, oilMap, cementMap, gasMap, flaringMap };
 }
 
 function loadSeries(path: string, valueColumn: string): Map<number, number> {

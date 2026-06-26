@@ -23,9 +23,14 @@ function fixtureDir(): string {
   mkdirSync(dir, { recursive: true });
   writeFileSync(
     join(dir, "emissions.csv"),
-    ["country,year,co2_mt", "IND,1990,600", "IND,1993,677", "IND,2024,3193", "GBR,2024,302", ""].join(
-      "\n",
-    ),
+    [
+      "country,year,co2_mt,coal_mt,oil_mt,cement_mt,gas_mt,flaring_mt",
+      "IND,1990,600,300,200,50,40,10",
+      "IND,1993,677,330,220,60,50,17",
+      "IND,2024,3193,1600,1000,300,240,53",
+      "GBR,2024,302,50,150,20,70,12",
+      "",
+    ].join("\n"),
   );
   writeFileSync(join(dir, "sea_level.csv"), ["year,mm", "1993,0", "2023,99", ""].join("\n"));
   writeFileSync(join(dir, "co2_ppm.csv"), ["year,ppm", "1993,357.2", "2025,427.4", ""].join("\n"));
@@ -38,6 +43,9 @@ describe("static data loader", () => {
     const statics = loadStaticData(fixtureDir());
 
     expect(statics.lookupEmissions("INd", 1993)).toEqual({ value: 677, confidence: "high" });
+    expect(statics.lookupEmissionsCategory("IND", 1993, "coal")).toEqual({ value: 330, confidence: "high" });
+    expect(statics.lookupEmissionsCategory("IND", 1993, "oil")).toEqual({ value: 220, confidence: "high" });
+    expect(statics.lookupEmissionsCategory("IND", 1993, "cement")).toEqual({ value: 60, confidence: "high" });
     expect(statics.lookupSeaLevel(2023)).toEqual({ value: 99, confidence: "high" });
     expect(statics.lookupCo2Ppm(2025)).toEqual({ value: 427.4, confidence: "high" });
   });
