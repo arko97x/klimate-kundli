@@ -156,24 +156,40 @@ async function storeChunk(slug, snapshotId, filename, buffer) {
   const objectPath = `${slug}/${snapshotId}/${filename}`
 
   if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
-    const upload = await fetch(`${SUPABASE_URL}/storage/v1/object/${SNAPSHOT_BUCKET}/${objectPath}`, {
-      method: 'PUT',
-      headers: {
-        apikey: SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-        'Content-Type': 'image/webp',
-        'Cache-Control': 'public, max-age=31536000, immutable',
-        'x-upsert': 'true',
-      },
-      body: buffer,
-    })
+    const maxAttempts = 3
+    let lastError = null
 
-    if (!upload.ok) {
-      const text = await upload.text().catch(() => '')
-      throw new Error(`snapshot upload failed (${upload.status}): ${text}`)
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      try {
+        const upload = await fetch(`${SUPABASE_URL}/storage/v1/object/${SNAPSHOT_BUCKET}/${objectPath}`, {
+          method: 'PUT',
+          headers: {
+            apikey: SUPABASE_SERVICE_ROLE_KEY,
+            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'image/webp',
+            'Cache-Control': 'public, max-age=31536000, immutable',
+            'x-upsert': 'true',
+          },
+          body: buffer,
+        })
+
+        if (!upload.ok) {
+          const text = await upload.text().catch(() => '')
+          throw new Error(`snapshot upload failed (${upload.status}): ${text}`)
+        }
+
+        return `${SUPABASE_URL}/storage/v1/object/public/${SNAPSHOT_BUCKET}/${objectPath}`
+      } catch (err) {
+        lastError = err
+        console.warn(`  [attempt ${attempt}/${maxAttempts}] failed to upload ${filename} to Supabase: ${err.message}`)
+        if (attempt < maxAttempts) {
+          const delay = attempt * 2000 + Math.floor(Math.random() * 1000)
+          await sleep(delay)
+        }
+      }
     }
 
-    return `${SUPABASE_URL}/storage/v1/object/public/${SNAPSHOT_BUCKET}/${objectPath}`
+    throw lastError
   }
 
   const outDir = path.join(ROOT, 'web/public/kundli-snapshots', slug, snapshotId)
@@ -188,11 +204,28 @@ async function updateSnapshot(slug, snapshot) {
     headers.Authorization = `Bearer ${SNAPSHOT_TOKEN}`
   }
 
-  await api(`/kundlis/${slug}/snapshot`, {
-    method: 'PUT',
-    headers,
-    body: JSON.stringify({ snapshot }),
-  })
+  const maxAttempts = 3
+  let lastError = null
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      await api(`/kundlis/${slug}/snapshot`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ snapshot }),
+      })
+      return
+    } catch (err) {
+      lastError = err
+      console.warn(`  [attempt ${attempt}/${maxAttempts}] failed to update snapshot record on API: ${err.message}`)
+      if (attempt < maxAttempts) {
+        const delay = attempt * 2000 + Math.floor(Math.random() * 1000)
+        await sleep(delay)
+      }
+    }
+  }
+
+  throw lastError
 }
 
 function snapshotId(createdAt) {
