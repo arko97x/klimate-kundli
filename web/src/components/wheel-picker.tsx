@@ -39,12 +39,12 @@ function WheelPicker<T extends WheelPickerValue = string>({
           classNames?.optionItem
         ),
         highlightWrapper: cn(
-          "bg-white text-black dark:bg-white dark:text-black",
+          "bg-purple-950 text-white dark:bg-white dark:text-black",
           "data-rwp-focused:inset-ring-2 data-rwp-focused:inset-ring-zinc-300 dark:data-rwp-focused:inset-ring-zinc-600",
           classNames?.highlightWrapper
         ),
         highlightItem: cn(
-          "text-black dark:text-black data-disabled:opacity-40",
+          "text-white dark:text-black data-disabled:opacity-40",
           classNames?.highlightItem
         ),
       }}

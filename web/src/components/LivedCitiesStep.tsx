@@ -115,7 +115,7 @@ export function LivedCitiesStep({
       <div className={`shrink-0 bg-transparent pb-4 ${sectionPadding}`}>
         <div className={LIVED_CITIES_CONTENT}>
           <div className="space-y-2 pb-3 text-left">
-            <Label className="font-alegreya text-3xl md:text-5xl font-normal text-white leading-normal">
+            <Label className="font-alegreya-sans text-3xl md:text-5xl font-semibold tracking-tight text-purple-950 dark:text-white leading-normal">
               Where all have you lived / travelled to?
             </Label>
             <p className="text-sm text-muted-foreground">
@@ -155,7 +155,7 @@ export function LivedCitiesStep({
                 >
                   <div className="col-span-1 w-full min-w-0 self-center order-1">
                     {isBirthRow ? (
-                      <p className="truncate text-sm font-medium text-white px-1" title={row.city?.displayName}>
+                      <p className="truncate text-sm font-medium text-purple-950 dark:text-white px-1" title={row.city?.displayName}>
                         {row.city?.displayName ?? '—'}
                       </p>
                     ) : (

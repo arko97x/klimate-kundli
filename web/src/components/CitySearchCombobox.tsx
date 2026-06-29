@@ -236,7 +236,7 @@ export function CitySearchCombobox({
           id={`${id}-listbox`}
           role="listbox"
           ref={listRef}
-          className="absolute top-full right-0 left-0 z-50 mt-1 overflow-hidden rounded-none border border-input bg-[#1a0c2e] text-popover-foreground shadow-md ring-1 ring-foreground/10"
+          className="absolute top-full right-0 left-0 z-50 mt-1 overflow-hidden rounded-none border border-input bg-[#faf9ff] text-purple-950 dark:bg-[#1a0c2e] dark:text-popover-foreground shadow-md ring-1 ring-foreground/10"
         >
           <Command
             shouldFilter={false}

@@ -31,7 +31,7 @@ export function BirthStep({
   return (
     <div className="w-full max-w-3xl space-y-8 px-1.5 mx-auto md:pt-8">
       <div className="grid grid-cols-1 md:grid-cols-[350px_1fr] items-start gap-4 md:gap-8">
-        <Label htmlFor="birth-city" className="font-alegreya text-3xl md:text-5xl font-normal text-white">
+        <Label htmlFor="birth-city" className="font-alegreya-sans text-3xl md:text-5xl font-semibold tracking-tight text-purple-950 dark:text-white">
           Where were you born?
         </Label>
         <div className="w-full max-w-sm md:pt-4">
@@ -46,7 +46,7 @@ export function BirthStep({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[350px_1fr] items-start gap-4 md:gap-8">
-        <Label className="font-alegreya text-3xl md:text-5xl font-normal text-white leading-normal">
+        <Label className="font-alegreya-sans text-3xl md:text-5xl font-semibold tracking-tight text-purple-950 dark:text-white leading-normal">
           And when?
         </Label>
         <div className="w-full max-w-sm md:pt-4">

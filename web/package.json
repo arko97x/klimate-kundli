@@ -12,6 +12,7 @@
   "dependencies": {
     "@base-ui/react": "^1.1.0",
     "@fontsource-variable/alegreya": "^5.2.8",
+    "@fontsource/alegreya-sans": "^5.2.8",
     "@fontsource/cormorant-garamond": "^5.2.11",
     "@mdx-js/rollup": "^3.1.1",
     "@ncdai/react-wheel-picker": "^1.2.2",

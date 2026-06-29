@@ -35,7 +35,7 @@ export function Footer(props: FooterProps) {
 
     return (
       <footer className="w-full shrink-0 bg-transparent">
-        <div className="relative border-t border-white/40 -mx-3 sm:-mx-6">
+        <div className="relative border-t border-purple-950/20 dark:border-white/40 -mx-3 sm:-mx-6">
           <div className="flex w-full items-center justify-between gap-4 px-3 sm:px-6 py-4">
             <Button
               type="button"
@@ -58,8 +58,8 @@ export function Footer(props: FooterProps) {
             </DisabledTooltip>
           </div>
           {/* Divider horizontal extensions */}
-          <div className="absolute top-[-1px] right-full w-screen h-px bg-white/15 pointer-events-none" />
-          <div className="absolute top-[-1px] left-full w-screen h-px bg-white/15 pointer-events-none" />
+          <div className="absolute top-[-1px] right-full w-screen h-px bg-purple-950/10 dark:bg-white/15 pointer-events-none" />
+          <div className="absolute top-[-1px] left-full w-screen h-px bg-purple-950/10 dark:bg-white/15 pointer-events-none" />
         </div>
       </footer>
     )
@@ -69,7 +69,7 @@ export function Footer(props: FooterProps) {
 
   return (
     <footer className="w-full shrink-0 bg-transparent">
-      <div className="relative border-t border-white/40 -mx-3 sm:-mx-6">
+      <div className="relative border-t border-purple-950/20 dark:border-white/40 -mx-3 sm:-mx-6">
         <div className="flex w-full justify-end px-3 sm:px-6 py-4">
           <DisabledTooltip disabled={!canContinue} content={continueLabel}>
             <Button
@@ -84,8 +84,8 @@ export function Footer(props: FooterProps) {
           </DisabledTooltip>
         </div>
         {/* Divider horizontal extensions */}
-        <div className="absolute top-[-1px] right-full w-screen h-px bg-white/15 pointer-events-none" />
-        <div className="absolute top-[-1px] left-full w-screen h-px bg-white/15 pointer-events-none" />
+        <div className="absolute top-[-1px] right-full w-screen h-px bg-purple-950/10 dark:bg-white/15 pointer-events-none" />
+        <div className="absolute top-[-1px] left-full w-screen h-px bg-purple-950/10 dark:bg-white/15 pointer-events-none" />
       </div>
     </footer>
   )
