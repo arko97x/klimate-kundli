@@ -29,7 +29,8 @@ Five shipped v0.3 iterations on `main` — four retired or superseded. Each sect
 | 0.3.2 | Superseded | `main` (wizard + monthly delta, 24 May 2026) |
 | 0.3.3 | Superseded | `main` (generational emissions rings, 24 May 2026) |
 | 0.3.4 | Superseded | `main` (fan, IMD, deploy, exhibit polish, Jun 2026) |
-| 0.3.5 | Current | `main` (life trails, public saves, frozen snapshots, Jun 2026) |
+| 0.3.5 | Superseded | `main` (life trails, public saves, frozen snapshots, Jun 2026) |
+| 0.3.6 | Current | `main` (hot air balloons, lungs diamond, Arctic ice lab, prewarm expansion, Jun 2026) |
 
 Archive rationale: `docs/RETIREMENT-v0.1-v0.2.md` on the `retired-0.1-0.2` branch.
 
@@ -555,7 +556,17 @@ Snapshot capture can be triggered by either:
 
 ### Images
 
-`<Refer Figma>`
+<Figure
+  src="/documentation/v0-3-5/rainfall-orbit.png"
+  caption="Life Rainfall Orbit chart — wrapping annual rainfall into a clockwise radial timeline from birth to the latest complete year."
+  wide
+/>
+
+<Figure
+  src="/documentation/v0-3-5/gallery.png"
+  caption="Explore gallery page (/gallery) — listing public saved kundlis, indicating which cards belong to the visitor's local browser."
+  wide
+/>
 
 ### Tests
 
@@ -567,6 +578,52 @@ Snapshot capture can be triggered by either:
 - Rainfall orbit depends on `rainRings` data; if rain rings are unavailable, the orbit intentionally does not render.
 - Snapshot capture depends on API + web app reachability from the runner (`KUNDLI_SNAPSHOT_WEB_URL`, `KUNDLI_SNAPSHOT_API_URL`) and Supabase service-role storage writes.
 - Frozen snapshots are immutable by convention, not by bucket policy; `--force` intentionally overwrites a saved manifest for recapture.
+
+---
+
+## v0.3.6 — hot air balloons, lungs diamond, and Arctic ice lab
+
+**June 2026** · Current work on `main`
+
+### What changed in thinking
+
+v0.3.5 added lifetime orbits, galleries, and snapshot rendering. v0.3.6 focus shifts to **refined visual metaphors and interactive sandboxing**:
+1. Redesigning the lifetime temperature chart (formerly dots and lines) to use an evocative **hot air balloon metaphor**.
+2. Redesigning the national emissions rings chart to use a centered **lungs-like diamond container with a rising matchstick smoke plume** representing Coal, Oil, Cement, Gas, and Flaring.
+3. Adding a dedicated **Arctic Ice Lab sandbox** (`/ice-lab`) to test five different visual representations of sea ice decline (berg cross-section, floes nesting, flooded country outlines, lifetime ice-stripes, and dial gauge).
+4. Substantially expanding the prewarm cache to **933 global cities** to ensure robust performance under poor venue network conditions.
+
+### Product additions
+
+- **Hot Air Balloon Temperature Trail:** In `LifeTempChart.tsx`, each lived year is rendered as a colored hot air balloon. Its vertical height encodes the annual mean temperature, and hovering displays specific peak temperatures, date of occurrence, and grid-point metadata.
+- **Lungs Diamond Emissions Plume:** In `EmissionsRingsChart.tsx`, the original concentric circles are replaced by a stacked streamgraph centered along the vertical axis of a rotated diamond container. A matchstick sits at the base, and emissions are rendered as a rising smoke plume. The right side features an interactive storyline timeline allowing visitors to highlight individual years, view percentage contributions per fuel source, and compare their birth year baseline to today.
+- **Arctic Sea Ice Sandbox:** A new route `/ice-lab` renders five distinct visualization concepts for representing the loss of Arctic summer sea ice (millions of km²) over a visitor's lifetime:
+  - **Iceberg cross-section**: Faded/transparent iceberg cap representing ice volume lost since birth.
+  - **Two floes nested**: A birth-year ice floe with a smaller today's floe nested inside, showing cracked gap losses.
+  - **Your country drowned**: An outline of India filled with the equivalent area of lost ice.
+  - **Lifetime ice-stripes**: One stripe per year (1979-now) where white indicates high ice extent and dark indicates low extent.
+  - **Ice-lost dial**: A ring scaled to birth ice with the melted portion omitted as a missing sector.
+- **Prewarm Batch and Ingest Expansion:** Scaled prewarming targets to `933` cities. Introduced `scripts/imd-ingest.py` for direct historical IMD station data ingestion.
+
+### Images
+
+<Figure
+  src="/documentation/v0-3-6/hot-air-balloon-trail.png"
+  caption="v0.3.6 climate trail — annual mean temperatures rendered as colored hot air balloons floating over a sky gradient background."
+  wide
+/>
+
+<Figure
+  src="/documentation/v0-3-6/lungs-diamond-emissions.png"
+  caption="v0.3.6 emissions chart — stacked streamgraph styled as a smoke plume rising from a matchstick, centered inside a rotated diamond container with interactive yearly stories."
+  wide
+/>
+
+<Figure
+  src="/documentation/v0-3-6/ice-lab-sandbox.png"
+  caption="v0.3.6 Arctic Ice Lab (/ice-lab) — sandbox rendering five interactive prototypes showing Arctic summer sea ice loss."
+  wide
+/>
 
 ---
 

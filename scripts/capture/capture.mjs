@@ -241,7 +241,7 @@ async function runV033Scenario(page, scenario, latestYear) {
     waitUntil: 'networkidle0',
     timeout: 30_000,
   })
-  await page.waitForSelector('h1', { timeout: 10_000 })
+  await page.waitForSelector('#birth-city', { timeout: 10_000 })
 
   await selectCity(page, scenario.birthCity)
   await page.click('button[aria-label="Continue"]')
@@ -287,6 +287,122 @@ async function scrollToRecordHotSection(page) {
   await sleep(400)
 }
 
+async function captureV035(browser) {
+  console.log('\nv0.3.5 — life trails, public saves, explore gallery')
+  const latestYear = new Date().getUTCFullYear() - 1
+
+  const page = await browser.newPage()
+  await page.setViewport({ width: 1280, height: 900, deviceScaleFactor: 2 })
+
+  try {
+    const scenario = V033_SCENARIOS[0]
+    console.log(`  generating scenario ${scenario.slug} to populate gallery`)
+    await runV033Scenario(page, scenario, latestYear)
+    await sleep(2000)
+
+    // Capture the Life Rainfall Orbit chart
+    await page.evaluate(() => {
+      const orbit = document.querySelector('svg[aria-label*="Radial line chart of annual rainfall"]') || [...document.querySelectorAll('section')].find(s => s.textContent?.includes('rainfall') || s.textContent?.includes('orbit'));
+      orbit?.scrollIntoView({ block: 'center', behavior: 'instant' })
+    })
+    await sleep(500)
+
+    const orbitSvg = await page.$('svg[aria-label*="Radial line chart of annual rainfall"]')
+    const box = orbitSvg ? await orbitSvg.boundingBox() : null
+    if (box) {
+      const pad = 12
+      await screenshot(page, path.join(OUT, 'v0-3-5/rainfall-orbit.png'), {
+        clip: {
+          x: Math.max(0, box.x - pad),
+          y: Math.max(0, box.y - pad),
+          width: box.width + pad * 2,
+          height: box.height + pad * 2,
+        },
+      })
+    }
+
+    // Now navigate to /gallery to capture the explore gallery page
+    console.log('  navigating to /gallery')
+    await page.goto(`${WEB_URL}/gallery`, { waitUntil: 'networkidle0', timeout: 30_000 })
+    await page.waitForSelector('h1', { timeout: 10_000 })
+    await sleep(1500)
+    await screenshot(page, path.join(OUT, 'v0-3-5/gallery.png'))
+
+  } catch (err) {
+    console.log(`  failed v0.3.5 capture — ${err.message}`)
+  }
+  await page.close()
+}
+
+async function captureV036(browser) {
+  console.log('\nv0.3.6 — hot air balloons, lungs diamond, and Arctic ice lab')
+  const latestYear = new Date().getUTCFullYear() - 1
+
+  const page = await browser.newPage()
+  await page.setViewport({ width: 1280, height: 900, deviceScaleFactor: 2 })
+
+  try {
+    const scenario = V033_SCENARIOS[0]
+    console.log(`  generating scenario ${scenario.slug} for v0.3.6`)
+    await runV033Scenario(page, scenario, latestYear)
+    await sleep(2000)
+
+    // Capture the Hot Air Balloon chart
+    await page.evaluate(() => {
+      const chart = document.querySelector('svg[aria-label*="Annual mean temperature by year"]') || [...document.querySelectorAll('section')].find(s => s.textContent?.includes('temperature') || s.textContent?.includes('trail'));
+      chart?.scrollIntoView({ block: 'center', behavior: 'instant' })
+    })
+    await sleep(500)
+
+    const tempSvg = await page.$('svg[aria-label*="Annual mean temperature by year"]')
+    const tempBox = tempSvg ? await tempSvg.boundingBox() : null
+    if (tempBox) {
+      const pad = 12
+      await screenshot(page, path.join(OUT, 'v0-3-6/hot-air-balloon-trail.png'), {
+        clip: {
+          x: Math.max(0, tempBox.x - pad),
+          y: Math.max(0, tempBox.y - pad),
+          width: tempBox.width + pad * 2,
+          height: tempBox.height + pad * 2,
+        },
+      })
+    }
+
+    // Capture the Lungs Diamond Emissions Matchstick chart
+    await page.evaluate(() => {
+      const chart = document.querySelector('svg[aria-label*="Carbon emissions streamgraph"]') || [...document.querySelectorAll('section')].find(s => s.textContent?.includes('carbon') || s.textContent?.includes('emissions'));
+      chart?.scrollIntoView({ block: 'center', behavior: 'instant' })
+    })
+    await sleep(500)
+
+    const emissionsSvg = await page.$('svg[aria-label*="Carbon emissions streamgraph"]')
+    const emissionsBox = emissionsSvg ? await emissionsSvg.boundingBox() : null
+    if (emissionsBox) {
+      const pad = 12
+      await screenshot(page, path.join(OUT, 'v0-3-6/lungs-diamond-emissions.png'), {
+        clip: {
+          x: Math.max(0, emissionsBox.x - pad),
+          y: Math.max(0, emissionsBox.y - pad),
+          width: emissionsBox.width + pad * 2,
+          height: emissionsBox.height + pad * 2,
+        },
+      })
+    }
+
+    // Now navigate to /ice-lab and capture the Arctic Ice sandbox page
+    console.log('  navigating to /ice-lab')
+    await page.goto(`${WEB_URL}/ice-lab`, { waitUntil: 'networkidle0', timeout: 30_000 })
+    await page.waitForSelector('h1', { timeout: 10_000 })
+    await sleep(1500)
+    await expandScrollContainers(page)
+    await screenshot(page, path.join(OUT, 'v0-3-6/ice-lab-sandbox.png'), { fullPage: true })
+
+  } catch (err) {
+    console.log(`  failed v0.3.6 capture — ${err.message}`)
+  }
+  await page.close()
+}
+
 async function captureV034(browser) {
   console.log('\nv0.3.4 — fan, IMD peaks, typography, lived-cities polish')
   const latestYear = new Date().getUTCFullYear() - 1
@@ -296,7 +412,7 @@ async function captureV034(browser) {
     const page = await browser.newPage()
     await page.setViewport({ width: 1280, height: 800, deviceScaleFactor: 2 })
     await page.goto(WEB_URL, { waitUntil: 'networkidle0', timeout: 30_000 })
-    await page.waitForSelector('h1', { timeout: 10_000 })
+    await page.waitForSelector('#birth-city', { timeout: 10_000 })
     await screenshot(page, path.join(OUT, 'v0-3-4/birth-step.png'))
 
     await selectDelhi(page)
@@ -371,7 +487,7 @@ async function captureV032(browser) {
   await page.setViewport({ width: 1280, height: 800, deviceScaleFactor: 2 })
 
   await page.goto(WEB_URL, { waitUntil: 'networkidle0', timeout: 30_000 })
-  await page.waitForSelector('h1', { timeout: 10_000 })
+  await page.waitForSelector('#birth-city', { timeout: 10_000 })
   await screenshot(page, path.join(OUT, 'v0-3-2/birth-step.png'))
 
   await selectDelhi(page)
@@ -561,6 +677,8 @@ async function main() {
   })
 
   try {
+    if (!only || only === 'v0-3-6') await captureV036(browser)
+    if (!only || only === 'v0-3-5') await captureV035(browser)
     if (!only || only === 'v0-3-4') await captureV034(browser)
     if (!only || only === 'v0-3-3') await captureV033(browser)
     if (!only || only === 'v0-3-2') await captureV032(browser)
