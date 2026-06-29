@@ -2,7 +2,6 @@ import { ChevronRightIcon } from 'lucide-react'
 
 import { BirthYearPicker } from '@/components/BirthYearPicker'
 import { DisabledTooltip } from '@/components/DisabledTooltip'
-import { cn } from '@/lib/utils'
 import { CitySearchCombobox } from '@/components/CitySearchCombobox'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -28,28 +27,35 @@ export function BirthStep({
   showContinue = true,
 }: BirthStepProps) {
   const canContinue = birthCity !== null
-  const controlWidth = 'w-full max-w-sm'
 
   return (
-    <div className="w-full max-w-md space-y-10 px-1.5">
-      <div className={cn('space-y-3', controlWidth)}>
-        <Label htmlFor="birth-city">Where were you born…</Label>
-        <CitySearchCombobox
-          id="birth-city"
-          className={controlWidth}
-          value={birthCity}
-          onValueChange={onBirthCityChange}
-          placeholder="Search for your birth city"
-        />
+    <div className="w-full max-w-3xl space-y-8 px-1.5 mx-auto md:pt-8">
+      <div className="grid grid-cols-1 md:grid-cols-[350px_1fr] items-start gap-4 md:gap-8">
+        <Label htmlFor="birth-city" className="font-alegreya text-3xl md:text-5xl font-normal text-white">
+          Where were you born?
+        </Label>
+        <div className="w-full max-w-sm md:pt-4">
+          <CitySearchCombobox
+            id="birth-city"
+            className="w-full"
+            value={birthCity}
+            onValueChange={onBirthCityChange}
+            placeholder="Search for your birth city"
+          />
+        </div>
       </div>
 
-      <div className={cn('flex flex-col items-start gap-4', controlWidth)}>
-        <Label>…and when?</Label>
-        <BirthYearPicker
-          value={birthYear}
-          onValueChange={onBirthYearChange}
-          maxYear={latestCompleteYear}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-[350px_1fr] items-start gap-4 md:gap-8">
+        <Label className="font-alegreya text-3xl md:text-5xl font-normal text-white leading-normal">
+          And when?
+        </Label>
+        <div className="w-full max-w-sm md:pt-4">
+          <BirthYearPicker
+            value={birthYear}
+            onValueChange={onBirthYearChange}
+            maxYear={latestCompleteYear}
+          />
+        </div>
       </div>
 
       {showContinue ? (

@@ -1,6 +1,12 @@
 import { NeuroNoise } from '@paper-design/shaders-react'
+import { Link } from 'react-router-dom'
 
-export function KundliWizardLayout() {
+import { buttonVariants } from '@/components/ui/button'
+import { HeaderMenu } from '@/expt/Header'
+import { useIsExhibition } from '@/lib/exhibition-context'
+
+export function KundliWizardLayout({ children }: { children?: React.ReactNode }) {
+  const isExhibition = useIsExhibition()
   return (
     <div className="dark relative flex min-h-dvh flex-col bg-black text-white overflow-hidden font-sans">
       {/* Background Gradient */}
@@ -14,16 +20,31 @@ export function KundliWizardLayout() {
           scale={1.5}
           brightness={0.05}
           contrast={0.15}
-          speed={0.25}
+          speed={0.12}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
       </div>
 
       {/* Header Bar */}
-      <header className="relative z-10 mx-4 md:mx-auto mt-4 md:mt-6 flex w-auto md:w-full max-w-5xl items-center border border-white/40 bg-black/10 px-6 py-4 backdrop-blur-md">
+      <header className="relative z-10 mx-4 md:mx-auto mt-4 md:mt-6 flex h-[62px] w-auto md:w-full max-w-5xl items-center border border-white/40 bg-black/10 px-3 sm:px-6 py-0 backdrop-blur-xl">
         <span className="font-alegreya text-xl font-regular tracking-wider text-white">
           Klimate Kundli
         </span>
+
+        {!isExhibition && (
+          <nav className="ml-auto flex items-center gap-2 sm:gap-3">
+            <Link
+              to="/gallery"
+              className="text-sm font-medium text-white/80 transition-colors hover:text-white"
+            >
+              Explore
+            </Link>
+            <Link to="/" className={buttonVariants()}>
+              New Kundli
+            </Link>
+            <HeaderMenu />
+          </nav>
+        )}
 
         {/* --- Grid Lines --- */}
         {/* Horizontal lines */}
@@ -69,6 +90,19 @@ export function KundliWizardLayout() {
         </div>
       </header>
 
+      {/* Main Content Card / Form Inputs Container */}
+      {children && (
+        <main className="relative z-10 mx-4 md:mx-auto mt-4 md:mt-6 mb-4 md:mb-6 flex-1 flex flex-col min-h-0 w-auto md:w-full max-w-5xl border border-white/40 bg-black/10 backdrop-blur-xl px-3 sm:px-6 pt-6 sm:pt-8 pb-0">
+          {children}
+
+          {/* Horizontal border extensions */}
+          <div className="absolute top-0 right-full w-screen h-px bg-white/15 pointer-events-none" />
+          <div className="absolute top-0 left-full w-screen h-px bg-white/15 pointer-events-none" />
+          <div className="absolute bottom-0 right-full w-screen h-px bg-white/15 pointer-events-none" />
+          <div className="absolute bottom-0 left-full w-screen h-px bg-white/15 pointer-events-none" />
+        </main>
+      )}
+
       {/* Semi-circle at the left edge of the screen, aligned with the bottom header grid line */}
       <div className="absolute left-0 top-[78px] md:top-[86px] w-6 h-12 -translate-y-1/2 rounded-r-full border-t border-b border-r border-white/15 bg-white/5 pointer-events-none z-10">
         {/* Pulsating sparkle star at the center flat edge intersection */}
@@ -98,7 +132,7 @@ export function KundliWizardLayout() {
 
       {/* --- Ambient Twinkling Stars strewn across the screen --- */}
       {/* Ambient Star 1 (Left-middle) */}
-      <div 
+      <div
         className="absolute top-[35%] left-[12%] w-3 h-3 text-white/50 pointer-events-none z-0"
         style={{ animation: 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '0.3s' }}
       >
@@ -108,7 +142,7 @@ export function KundliWizardLayout() {
       </div>
 
       {/* Ambient Star 2 (Right-middle) */}
-      <div 
+      <div
         className="absolute top-[48%] right-[22%] w-4 h-4 text-white/60 pointer-events-none z-0"
         style={{ animation: 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '1.1s' }}
       >
@@ -118,7 +152,7 @@ export function KundliWizardLayout() {
       </div>
 
       {/* Ambient Star 3 (Bottom-left/middle) */}
-      <div 
+      <div
         className="absolute top-[75%] left-[28%] w-3.5 h-3.5 text-white/55 pointer-events-none z-0"
         style={{ animation: 'pulse 3.5s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '2.3s' }}
       >

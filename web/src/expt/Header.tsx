@@ -20,7 +20,7 @@ const MENU_ITEMS = [
   { label: 'Climate Twin', path: '/klimate-twin' },
 ] as const
 
-function HeaderMenu() {
+export function HeaderMenu() {
   return (
     <Popover>
       <PopoverTrigger
@@ -35,7 +35,7 @@ function HeaderMenu() {
             <li key={item.label}>
               <Link
                 to={item.path}
-                className="flex w-full rounded-sm px-3 py-2 text-left text-sm text-foreground hover:bg-muted"
+                className="flex w-full rounded-none px-3 py-2 text-left text-sm text-foreground hover:bg-muted"
               >
                 {item.label}
               </Link>

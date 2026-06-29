@@ -32,10 +32,7 @@ type LivedCitiesStepProps = {
   embedded?: boolean
 }
 
-const LIVED_CITIES_GRID =
-  'grid grid-cols-[11rem_minmax(0,1fr)_2.25rem] gap-x-4'
-
-const LIVED_CITIES_CONTENT = 'mx-auto w-full max-w-2xl'
+const LIVED_CITIES_CONTENT = 'mx-auto w-full max-w-3xl md:pt-8'
 
 export function LivedCitiesStep({
   birthYear,
@@ -115,32 +112,36 @@ export function LivedCitiesStep({
 
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col">
-      <div className={`shrink-0 bg-background pb-4 ${sectionPadding}`}>
+      <div className={`shrink-0 bg-transparent pb-4 ${sectionPadding}`}>
         <div className={LIVED_CITIES_CONTENT}>
-          <div className="space-y-2 pb-3 text-center sm:text-left">
-            <Label>Where all have you lived / travelled to?</Label>
+          <div className="space-y-2 pb-3 text-left">
+            <Label className="font-alegreya text-3xl md:text-5xl font-normal text-white leading-normal">
+              Where all have you lived / travelled to?
+            </Label>
             <p className="text-sm text-muted-foreground">
               Years are approximate. If you moved during a year, both places can include that year.
             </p>
           </div>
 
-          <div className={LIVED_CITIES_GRID}>
-            <div aria-hidden />
-            <TimelineYearAxis
-              birthYear={birthYear}
-              latestCompleteYear={latestCompleteYear}
-              dragPreview={
-                dragPreview
-                  ? { year: dragPreview.year, percent: dragPreview.percent }
-                  : null
-              }
-            />
-            <div className="size-9 shrink-0" aria-hidden />
+          <div className="grid grid-cols-1 md:grid-cols-[30%_1fr_36px] gap-x-4 gap-y-2 md:gap-8 items-start">
+            <div className="hidden md:block" aria-hidden />
+            <div className="w-full pt-4 md:pt-8">
+              <TimelineYearAxis
+                birthYear={birthYear}
+                latestCompleteYear={latestCompleteYear}
+                dragPreview={
+                  dragPreview
+                    ? { year: dragPreview.year, percent: dragPreview.percent }
+                    : null
+                }
+              />
+            </div>
+            <div className="hidden md:block size-9 shrink-0" aria-hidden />
           </div>
         </div>
       </div>
 
-      <div className={`min-h-0 w-full flex-1 overflow-y-auto overscroll-contain ${sectionPadding}`}>
+      <div className={`min-h-0 w-full flex-1 overflow-y-auto overscroll-contain bg-transparent ${sectionPadding}`}>
         <div className={LIVED_CITIES_CONTENT}>
           <div className="flex flex-col gap-8 pt-8">
             {rows.map((row, index) => {
@@ -150,11 +151,11 @@ export function LivedCitiesStep({
               return (
                 <div
                   key={row.id}
-                  className={`${LIVED_CITIES_GRID} grid-rows-[auto_auto] items-center gap-y-0.5`}
+                  className="grid grid-cols-[1fr_36px] md:grid-cols-[30%_1fr_36px] gap-x-4 gap-y-2 md:gap-8 items-center"
                 >
-                  <div className="col-start-1 row-start-1 min-w-0 self-center">
+                  <div className="col-span-1 w-full min-w-0 self-center order-1">
                     {isBirthRow ? (
-                      <p className="truncate text-sm font-medium" title={row.city?.displayName}>
+                      <p className="truncate text-sm font-medium text-white px-1" title={row.city?.displayName}>
                         {row.city?.displayName ?? '—'}
                       </p>
                     ) : (
@@ -168,48 +169,46 @@ export function LivedCitiesStep({
                         placeholder="Search city"
                       />
                     )}
+                    <p className="mt-1 text-sm text-muted-foreground tabular-nums px-1">
+                      ({yearStart}–{yearEnd})
+                    </p>
                   </div>
 
-                  <Slider
-                    min={birthYear}
-                    max={latestCompleteYear}
-                    step={1}
-                    minStepsBetweenValues={0}
-                    value={row.range}
-                    onValueChange={(value, details) =>
-                      handleSliderChange(index, value, details)
-                    }
-                    onValueCommitted={(value) => handleSliderCommit(index, value)}
-                    className="col-start-2 row-start-1 w-full self-center py-2"
-                    aria-label={`Years in ${row.city?.displayName ?? (isBirthRow ? 'birth city' : 'city')}, ${yearStart} to ${yearEnd}`}
-                  />
-
-                  {isBirthRow ? (
-                    <div
-                      className="col-start-3 row-start-1 size-9 shrink-0 self-center"
-                      aria-hidden
+                  <div className="col-span-2 md:col-span-1 w-full py-2 order-3 md:order-2">
+                    <Slider
+                      min={birthYear}
+                      max={latestCompleteYear}
+                      step={1}
+                      minStepsBetweenValues={0}
+                      value={row.range}
+                      onValueChange={(value, details) =>
+                        handleSliderChange(index, value, details)
+                      }
+                      onValueCommitted={(value) => handleSliderCommit(index, value)}
+                      className="w-full self-center py-2"
+                      aria-label={`Years in ${row.city?.displayName ?? (isBirthRow ? 'birth city' : 'city')}, ${yearStart} to ${yearEnd}`}
                     />
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="col-start-3 row-start-1 size-9 shrink-0 self-center rounded-md"
-                      onClick={() => handleDeleteRow(index)}
-                      aria-label="Remove city"
-                    >
-                      <XIcon className="size-4" />
-                    </Button>
-                  )}
+                  </div>
 
-                  <p className="col-start-1 row-start-2 text-xs text-muted-foreground tabular-nums">
-                    ({yearStart}–{yearEnd})
-                  </p>
+                  <div className="col-span-1 flex justify-end md:justify-center items-center h-9 order-2 md:order-3">
+                    {isBirthRow ? null : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="size-9 shrink-0 rounded-md"
+                        onClick={() => handleDeleteRow(index)}
+                        aria-label="Remove city"
+                      >
+                        <XIcon className="size-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )
             })}
 
-            <div className={LIVED_CITIES_GRID}>
+            <div className="grid grid-cols-1 md:grid-cols-[30%_1fr_36px] gap-4 md:gap-8">
               <div className="col-start-1 self-center">
                 <DisabledTooltip disabled={!canAdd} content={addDisabledReason}>
                   <Button

@@ -35,8 +35,8 @@ export function Footer(props: FooterProps) {
 
     return (
       <footer className="w-full shrink-0 bg-transparent">
-        <div className="border-t border-white/10">
-          <div className="flex w-full items-center justify-between gap-4 py-4">
+        <div className="relative border-t border-white/40 -mx-3 sm:-mx-6">
+          <div className="flex w-full items-center justify-between gap-4 px-3 sm:px-6 py-4">
             <Button
               type="button"
               variant="outline"
@@ -57,6 +57,9 @@ export function Footer(props: FooterProps) {
               </Button>
             </DisabledTooltip>
           </div>
+          {/* Divider horizontal extensions */}
+          <div className="absolute top-[-1px] right-full w-screen h-px bg-white/15 pointer-events-none" />
+          <div className="absolute top-[-1px] left-full w-screen h-px bg-white/15 pointer-events-none" />
         </div>
       </footer>
     )
@@ -66,8 +69,8 @@ export function Footer(props: FooterProps) {
 
   return (
     <footer className="w-full shrink-0 bg-transparent">
-      <div className="border-t border-white/10">
-        <div className="flex w-full justify-end py-4">
+      <div className="relative border-t border-white/40 -mx-3 sm:-mx-6">
+        <div className="flex w-full justify-end px-3 sm:px-6 py-4">
           <DisabledTooltip disabled={!canContinue} content={continueLabel}>
             <Button
               type="button"
@@ -80,6 +83,9 @@ export function Footer(props: FooterProps) {
             </Button>
           </DisabledTooltip>
         </div>
+        {/* Divider horizontal extensions */}
+        <div className="absolute top-[-1px] right-full w-screen h-px bg-white/15 pointer-events-none" />
+        <div className="absolute top-[-1px] left-full w-screen h-px bg-white/15 pointer-events-none" />
       </div>
     </footer>
   )

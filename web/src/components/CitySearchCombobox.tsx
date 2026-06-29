@@ -236,10 +236,11 @@ export function CitySearchCombobox({
           id={`${id}-listbox`}
           role="listbox"
           ref={listRef}
-          className="absolute top-full right-0 left-0 z-50 mt-1 overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10"
+          className="absolute top-full right-0 left-0 z-50 mt-1 overflow-hidden rounded-none border border-input bg-[#1a0c2e] text-popover-foreground shadow-md ring-1 ring-foreground/10"
         >
           <Command
             shouldFilter={false}
+            className="bg-transparent dark:bg-transparent"
             value={activeItemValue}
             onValueChange={(selected) => {
               const index = results.findIndex((city) => city.displayName === selected)
