@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { KundliSnapshotFrame } from '@/components/KundliSnapshotFrame'
 import { MonthlyDeltaChart } from '@/components/MonthlyDeltaChart'
 import { Button } from '@/components/ui/button'
 import { KundliResultLayout } from '@/expt/KundliResultLayout'
@@ -66,16 +65,7 @@ export function KundliViewPage() {
           </div>
         ) : null}
 
-        {!loading && record?.snapshot?.chunks.length ? (
-          <KundliSnapshotFrame
-            snapshot={record.snapshot}
-            createdAt={record.createdAt}
-            birthCityDisplay={record.birthCityDisplay}
-            birthYear={record.birthYear}
-          />
-        ) : null}
-
-        {!loading && record && !record.snapshot?.chunks.length ? (
+        {!loading && record ? (
           <MonthlyDeltaChart
             data={record.result}
             livedCities={record.livedCities}

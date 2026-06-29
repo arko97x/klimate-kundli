@@ -16,8 +16,7 @@
     "imd:diagnose": "tsx src/scripts/imd-diagnose.ts",
     "imd:build-station-map": "tsx src/scripts/imd-build-station-map.ts",
     "imd:ingest": "./.venv/bin/python scripts/imd-ingest.py",
-    "capture:docs": "node scripts/capture/capture.mjs",
-    "capture:kundlis": "node scripts/capture/kundli-snapshots.mjs"
+    "capture:docs": "node scripts/capture/capture.mjs"
   },
   "dependencies": {
     "@hono/node-server": "latest",

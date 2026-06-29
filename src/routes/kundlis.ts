@@ -68,7 +68,6 @@ export function createKundlisRoute(store: KundliStore, options: KundlisRouteOpti
 
     try {
       const saved = await store.save(parsed.data);
-      triggerSnapshotWebhook(saved.slug, options);
       return c.json(
         {
           slug: saved.slug,
