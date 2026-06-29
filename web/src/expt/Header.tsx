@@ -2,7 +2,6 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MenuIcon } from 'lucide-react'
 
-import { DisabledTooltip } from '@/components/DisabledTooltip'
 import { buttonVariants } from '@/components/ui/button'
 import {
   Popover,
@@ -10,10 +9,16 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { buildWavyRectPath, WAVE_BORDER_PAD, wavyBorderViewBox } from '@/expt/wavy-border'
+import { useIsExhibition } from '@/lib/exhibition-context'
 
 type FrameSize = { width: number; height: number }
 
-const COMING_SOON_ITEMS = ['About', 'Privacy Policy', 'Disclaimer'] as const
+const MENU_ITEMS = [
+  { label: 'About', path: '/about' },
+  { label: 'Privacy Policy', path: '/privacy' },
+  { label: 'Disclaimer', path: '/disclaimer' },
+  { label: 'Climate Twin', path: '/klimate-twin' },
+] as const
 
 function HeaderMenu() {
   return (
@@ -26,17 +31,14 @@ function HeaderMenu() {
       </PopoverTrigger>
       <PopoverContent align="end" sideOffset={8} className="w-52 gap-0 p-1">
         <ul className="flex flex-col">
-          {COMING_SOON_ITEMS.map((label) => (
-            <li key={label}>
-              <DisabledTooltip disabled content="Coming soon">
-                <button
-                  type="button"
-                  disabled
-                  className="flex w-full rounded-sm px-3 py-2 text-left text-sm text-foreground opacity-60"
-                >
-                  {label}
-                </button>
-              </DisabledTooltip>
+          {MENU_ITEMS.map((item) => (
+            <li key={item.label}>
+              <Link
+                to={item.path}
+                className="flex w-full rounded-sm px-3 py-2 text-left text-sm text-foreground hover:bg-muted"
+              >
+                {item.label}
+              </Link>
             </li>
           ))}
         </ul>
@@ -46,6 +48,7 @@ function HeaderMenu() {
 }
 
 export function Header() {
+  const isExhibition = useIsExhibition()
   const headerRef = useRef<HTMLElement>(null)
   const [frameSize, setFrameSize] = useState<FrameSize>(() => ({
     width: 0,
@@ -76,7 +79,7 @@ export function Header() {
       className="relative z-10 w-full shrink-0 overflow-visible bg-background"
     >
       <div className="relative z-10 flex items-center px-4 py-4 sm:px-6 sm:py-6">
-        <Link to="/" className="shrink-0" aria-label="Klimate Kundli home">
+        <Link to={isExhibition ? '/exhibition' : '/'} className="shrink-0" aria-label="Klimate Kundli home">
           <img
             src="/kk-icon-beta.svg"
             alt="Klimate Kundli (Beta)"
@@ -85,18 +88,20 @@ export function Header() {
             className="h-12 w-auto"
           />
         </Link>
-        <nav className="ml-auto flex items-center gap-2 sm:gap-3">
-          <Link
-            to="/gallery"
-            className="text-sm font-medium text-foreground transition-colors hover:text-foreground/70"
-          >
-            Explore
-          </Link>
-          <Link to="/" className={buttonVariants()}>
-            New Kundli
-          </Link>
-          <HeaderMenu />
-        </nav>
+        {!isExhibition && (
+          <nav className="ml-auto flex items-center gap-2 sm:gap-3">
+            <Link
+              to="/gallery"
+              className="text-sm font-medium text-foreground transition-colors hover:text-foreground/70"
+            >
+              Explore
+            </Link>
+            <Link to="/" className={buttonVariants()}>
+              New Kundli
+            </Link>
+            <HeaderMenu />
+          </nav>
+        )}
       </div>
       {frameSize.width > 0 ? (
         <svg
@@ -124,3 +129,4 @@ export function Header() {
     </header>
   )
 }
+

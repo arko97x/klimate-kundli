@@ -5,10 +5,12 @@ import { MonthlyDeltaChart } from '@/components/MonthlyDeltaChart'
 import { Button } from '@/components/ui/button'
 import { KundliResultLayout } from '@/expt/KundliResultLayout'
 import { fetchKundliBySlug, type SavedKundliRecord } from '@/lib/api'
+import { useIsExhibition } from '@/lib/exhibition-context'
 
 export function KundliViewPage() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
+  const isExhibition = useIsExhibition()
   const [record, setRecord] = useState<SavedKundliRecord | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -59,7 +61,7 @@ export function KundliViewPage() {
             <p className="text-sm text-destructive" role="alert">
               {error}
             </p>
-            <Button type="button" variant="outline" size="sm" onClick={() => navigate('/')}>
+            <Button type="button" variant="outline" size="sm" onClick={() => navigate(isExhibition ? '/exhibition' : '/')}>
               Make your own
             </Button>
           </div>
@@ -69,10 +71,11 @@ export function KundliViewPage() {
           <MonthlyDeltaChart
             data={record.result}
             livedCities={record.livedCities}
-            onReset={() => navigate('/')}
+            onReset={() => navigate(isExhibition ? '/exhibition' : '/')}
           />
         ) : null}
       </div>
     </KundliResultLayout>
   )
 }
+

@@ -16,6 +16,7 @@ import {
 import { addMyKundliSlug } from '@/lib/my-kundlis'
 import { latestCompleteYearUtc, MIN_BIRTH_YEAR } from '@/lib/years'
 import type { City, ResidenceRow } from '@/types'
+import { useIsExhibition } from '@/lib/exhibition-context'
 
 type Step = 'birth' | 'lived'
 
@@ -36,6 +37,7 @@ function initialBirthYear(): number {
 
 export default function KundliApp() {
   const navigate = useNavigate()
+  const isExhibition = useIsExhibition()
   const latestCompleteYear = useMemo(() => latestCompleteYearUtc(), [])
   const [step, setStep] = useState<Step>('birth')
   const [birthCity, setBirthCity] = useState<City | null>(null)
@@ -71,8 +73,9 @@ export default function KundliApp() {
         result,
       })
       addMyKundliSlug(saved.slug)
-      navigate(`/k/${saved.slug}`)
+      navigate(isExhibition ? `/exhibition/k/${saved.slug}` : `/k/${saved.slug}`)
     } catch (err) {
+
       setError(
         err instanceof Error
           ? err.message

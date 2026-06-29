@@ -30,7 +30,8 @@ Five shipped v0.3 iterations on `main` — four retired or superseded. Each sect
 | 0.3.3 | Superseded | `main` (generational emissions rings, 24 May 2026) |
 | 0.3.4 | Superseded | `main` (fan, IMD, deploy, exhibit polish, Jun 2026) |
 | 0.3.5 | Superseded | `main` (life trails, public saves, frozen snapshots, Jun 2026) |
-| 0.3.6 | Current | `main` (hot air balloons, lungs diamond, Arctic ice lab, prewarm expansion, Jun 2026) |
+| 0.3.6 | Superseded | `main` (hot air balloons, lungs diamond, Arctic ice lab, prewarm expansion, Jun 2026) |
+| 0.3.7 | Current | `main` (separate exhibition layout, kiosk mode isolation, public stub pages, Jun 2026) |
 
 Archive rationale: `docs/RETIREMENT-v0.1-v0.2.md` on the `retired-0.1-0.2` branch.
 
@@ -605,6 +606,35 @@ v0.3.5 added lifetime orbits, galleries, and snapshot rendering. v0.3.6 focus sh
   - **Ice-lost dial**: A ring scaled to birth ice with the melted portion omitted as a missing sector.
 - **Prewarm Batch and Ingest Expansion:** Scaled prewarming targets to `933` cities. Introduced `scripts/imd-ingest.py` for direct historical IMD station data ingestion.
 
+---
+
+## v0.3.7 — separate exhibition routing & kiosk mode
+
+**June 2026** · Current work on `main`
+
+### What changed in thinking
+
+As we prepare for the physical exhibition, we need to balance two distinct user experiences. A fully featured public site (with Gallery, About, Privacy Policy, Disclaimer, and Documentation) needs to be browsable on personal devices. However, the physical exhibit iPad needs a locked-down, distraction-free environment to prevent visitors from wandering away from the intake flow.
+
+### Product additions
+
+- **Exhibition Layout Wrapper:** Created `/exhibition` routes utilizing a nested layout wrapper that injects a context state (`useIsExhibition()`).
+- **Kiosk Hardening:** The navigation header is adapted to hide the main menu popover, "Explore" gallery link, and "New Kundli" button when in exhibition mode. The home logo links back to `/exhibition` rather than `/`.
+- **Exhibition Result Mode:** The generated Kundli page on the iPad kiosk targets `/exhibition/k/:slug`, and resetting or running into errors redirects back to `/exhibition` to maintain the exhibit loop.
+- **Public Page Stubs:** Built clean, styling-consistent page layouts for the public pages: About (`/about`), Privacy Policy (`/privacy`), Disclaimer (`/disclaimer`), and Climate Twin (`/klimate-twin`).
+
+### Web
+
+| Component / File | Change |
+| --- | --- |
+| `exhibition-context.tsx` | New context provider and `useIsExhibition` hook in `web/src/lib/` |
+| `Layouts.tsx` | New nested layout wrapper in `web/src/components/` injecting context state |
+| `App.tsx` | Restructured routing configuration splitting `/exhibition/*` from `/*` |
+| `Header.tsx` | Hides menu popover and explore buttons, points logo back to `/exhibition` when in kiosk mode |
+| `KundliApp.tsx` | Dynamic form redirection to `/exhibition/k/:slug` when in kiosk mode |
+| `KundliViewPage.tsx` | Redirects chart resets and error buttons to `/exhibition` when in kiosk mode |
+| `StubPages.tsx` | Added clean placeholder pages for the public pages |
+
 ### Images
 
 <Figure
@@ -640,6 +670,8 @@ v0.3.4 Vercel UI ──tunnel──► droplet Hono (same as above)
 v0.3.5 Vercel UI ──► droplet Hono ──► Supabase Postgres (saved kundlis)
                                       └── Supabase Storage (frozen WebP chunks)
                          GitHub Actions/Puppeteer ──► /capture/k/:slug ──► PUT snapshot manifest
+v0.3.7 iPad Kiosk ──► /exhibition ──► /exhibition/k/:slug (distraction-free kiosk flow)
+       Personal ──► / ──► /k/:slug & public pages (gallery, twin, etc.)
 ```
 
 The through-line: **Open-Meteo keeps winning for city-scale exhibit queries.** v0.2's full Postgres ingest stayed retired; v0.3.4 adds a **minimal IMD sidecar** (station map JSON + peak cache + API on the droplet) for hotter, more credible Indian peak temperatures on the fan without reviving Python ingest at exhibit time. v0.3.5 uses Supabase narrowly: durable saved kundli JSON plus frozen snapshot assets, not climate computation.
