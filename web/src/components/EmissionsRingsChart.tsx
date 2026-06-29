@@ -65,7 +65,7 @@ export function EmissionsRingsChart({ birthYear, data, globalContext }: Emission
     // Smoke starts at y=310 (match head) and ends at y=12 (top vertex of the diamond)
     const y_start = 310
     const y_end = 12
-    const maxTotal = Math.max(...data.years.map((y) => y.coalMt + y.oilMt + y.cementMt + y.gasMt + y.flaringMt))
+    const maxTotal = Math.max(...data.years.map((y) => (y.coalMt ?? 0) + (y.oilMt ?? 0) + (y.cementMt ?? 0) + (y.gasMt ?? 0) + (y.flaringMt ?? 0)))
     // Max width is 130px (half-width 65px) so it stays beautifully inside the diamond
     const baseScale = 130 / (maxTotal || 1)
 
@@ -79,11 +79,11 @@ export function EmissionsRingsChart({ birthYear, data, globalContext }: Emission
       const taper = Math.min(1.0, (y_start - y) / 25)
       const scale = baseScale * Math.max(0.08, taper)
 
-      const w_coal = pt.coalMt * scale
-      const w_oil = pt.oilMt * scale
-      const w_cement = pt.cementMt * scale
-      const w_gas = pt.gasMt * scale
-      const w_flaring = pt.flaringMt * scale
+      const w_coal = (pt.coalMt ?? 0) * scale
+      const w_oil = (pt.oilMt ?? 0) * scale
+      const w_cement = (pt.cementMt ?? 0) * scale
+      const w_gas = (pt.gasMt ?? 0) * scale
+      const w_flaring = (pt.flaringMt ?? 0) * scale
       const W = w_coal + w_oil + w_cement + w_gas + w_flaring
 
       // Cumulative stacking positions
@@ -99,11 +99,11 @@ export function EmissionsRingsChart({ birthYear, data, globalContext }: Emission
         y,
         x: [x0, x1, x2, x3, x4, x5],
         values: {
-          coalMt: pt.coalMt,
-          oilMt: pt.oilMt,
-          cementMt: pt.cementMt,
-          gasMt: pt.gasMt,
-          flaringMt: pt.flaringMt,
+          coalMt: pt.coalMt ?? 0,
+          oilMt: pt.oilMt ?? 0,
+          cementMt: pt.cementMt ?? 0,
+          gasMt: pt.gasMt ?? 0,
+          flaringMt: pt.flaringMt ?? 0,
         },
         co2Mt: pt.co2Mt,
       }
@@ -295,7 +295,7 @@ export function EmissionsRingsChart({ birthYear, data, globalContext }: Emission
     let maxVal = -1
     let maxCat: typeof CATEGORIES[number] = CATEGORIES[0]
     for (const cat of CATEGORIES) {
-      const val = activeYearData[cat.key] as number
+      const val = (activeYearData[cat.key] as number) ?? 0
       if (val > maxVal) {
         maxVal = val
         maxCat = cat
@@ -542,7 +542,7 @@ export function EmissionsRingsChart({ birthYear, data, globalContext }: Emission
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {CATEGORIES.map((cat) => {
-                    const val = activeYearData ? (activeYearData[cat.key] as number) : 0
+                    const val = activeYearData && activeYearData[cat.key] !== undefined ? (activeYearData[cat.key] as number) : 0
                     const pct = activeCo2 > 0 ? (val / activeCo2) * 100 : 0
                     const isCatHovered = hoveredCategoryKey === cat.key
 
@@ -661,6 +661,7 @@ function getCo2Ppm(year: number): number {
   return Math.round(val)
 }
 
-function formatMt(value: number): string {
+function formatMt(value: number | undefined | null): string {
+  if (value == null || Number.isNaN(value)) return '0'
   return value.toLocaleString(undefined, { maximumFractionDigits: 1 })
 }
