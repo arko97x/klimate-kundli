@@ -32,7 +32,7 @@ Five shipped v0.3 iterations on `main` — four retired or superseded. Each sect
 | 0.3.5 | Superseded | `main` (life trails, public saves, frozen snapshots, Jun 2026) |
 | 0.3.6 | Superseded | `main` (hot air balloons, lungs diamond, Arctic ice lab, prewarm expansion, Jun 2026) |
 | 0.3.7 | Superseded | `main` (separate exhibition layout, kiosk mode isolation, public stub pages, Jun 2026) |
-| 0.3.8 | Current | `main` (minimal shader background, Alegreya header, dither grid overlay, Jun 2026) |
+| 0.3.8 | Current | `main` (minimal shader background, Alegreya header, solid layout grid, Jun 2026) |
 
 Archive rationale: `docs/RETIREMENT-v0.1-v0.2.md` on the `retired-0.1-0.2` branch.
 
@@ -664,22 +664,21 @@ As we prepare for the physical exhibition, we need to balance two distinct user 
 
 ### What changed in thinking
 
-To establish the astrological-meets-scientific curation immediately upon entry, the multi-step intake wizard forms were cleared away from the landing page. The landing page now serves as a purely ambient, cinematic canvas highlighting a fluid noise shader, wrapped under a custom dashed grid system to ground the cosmic theme in a technical drafting aesthetic.
+To establish the astrological-meets-scientific curation immediately upon entry, the multi-step intake wizard forms were cleared away from the landing page. The landing page now serves as a purely ambient, cinematic canvas highlighting a fluid noise shader, wrapped under a custom solid grid system to ground the cosmic theme in a technical drafting aesthetic.
 
 ### Product additions
 
-- **NeuroNoise Fluid Background**: Mounted a responsive, full-screen fluid line shader (`NeuroNoise`) configured in a dark fuchsia, deep violet, and indigo color scheme matching the curation reference.
-- **Dither Grid Overlay**: Custom dither texture layer using a repeating 3px radial dot matrix to apply a subtle, tactile halftone pattern across the viewport.
+- **NeuroNoise Fluid Background**: Mounted a responsive, full-screen fluid line shader (`NeuroNoise`) configured in a dark fuchsia, deep violet, and indigo color scheme matching the curation reference, with animation speed set to a slow and atmospheric `0.25`.
 - **Reconstructed Header Bar**: Designed a clean, rectangular header bar floating 24px from the top edge on desktop (`mt-6`), and 16px on mobile (`mt-4`) with 16px side margins (`mx-4`), displaying lowercase `klimate kundli` in Alegreya Variable.
-- **Layout Extensions**: Positioned absolute 1px dashed layout lines extending from all four header corners to the edges of the viewport with an 8px dash gap pattern.
+- **Layout Extensions**: Positioned absolute 1px solid layout lines extending from all four header corners (`bg-white/15`) to the edges of the viewport.
 
 ### Web
 
 | Component / File | Change |
 | --- | --- |
 | `package.json` | Installed `@paper-design/shaders-react` and `@fontsource-variable/alegreya` dependencies |
-| `index.css` | Imported Alegreya Variable, defined `--font-alegreya`, and added `.dashed-line-h`, `.dashed-line-v`, and `.dither-overlay` classes |
-| `KundliWizardLayout.tsx` | Redesigned to render only the `NeuroNoise` background, `.dither-overlay`, and the new floating dashed-grid header bar (removing form elements, card, stamps, and taglines) |
+| `index.css` | Imported Alegreya Variable, defined `--font-alegreya`, and removed background overrides |
+| `KundliWizardLayout.tsx` | Redesigned to render only the `NeuroNoise` background and the new floating solid-grid header bar (removing form elements, card, stamps, taglines, and dither) |
 | `KundliApp.tsx` | Stripped all geocoding, hooks, steps, and intake states, simplifying to only render the background/header layout |
 | `Header.tsx` / `Footer.tsx` | Made backgrounds transparent and styled borders to blend with layout |
 

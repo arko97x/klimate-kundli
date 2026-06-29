@@ -14,11 +14,9 @@ export function KundliWizardLayout() {
           scale={1.5}
           brightness={0.05}
           contrast={0.15}
-          speed={1}
+          speed={0.25}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
-        {/* Dither overlay layer */}
-        <div className="dither-overlay" />
       </div>
 
       {/* Header Bar */}
@@ -29,18 +27,18 @@ export function KundliWizardLayout() {
 
         {/* --- Grid Lines --- */}
         {/* Horizontal lines */}
-        <div className="absolute top-0 right-full w-screen dashed-line-h pointer-events-none" />
-        <div className="absolute top-0 left-full w-screen dashed-line-h pointer-events-none" />
-        <div className="absolute bottom-0 right-full w-screen dashed-line-h pointer-events-none" />
-        <div className="absolute bottom-0 left-full w-screen dashed-line-h pointer-events-none" />
+        <div className="absolute top-0 right-full w-screen h-px bg-white/15 pointer-events-none" />
+        <div className="absolute top-0 left-full w-screen h-px bg-white/15 pointer-events-none" />
+        <div className="absolute bottom-0 right-full w-screen h-px bg-white/15 pointer-events-none" />
+        <div className="absolute bottom-0 left-full w-screen h-px bg-white/15 pointer-events-none" />
 
         {/* Vertical lines extending up (height matches mt) */}
-        <div className="absolute bottom-full left-0 h-4 md:h-6 dashed-line-v pointer-events-none" />
-        <div className="absolute bottom-full right-0 h-4 md:h-6 dashed-line-v pointer-events-none" />
+        <div className="absolute bottom-full left-0 w-px h-4 md:h-6 bg-white/15 pointer-events-none" />
+        <div className="absolute bottom-full right-0 w-px h-4 md:h-6 bg-white/15 pointer-events-none" />
 
         {/* Vertical lines extending down */}
-        <div className="absolute top-full left-0 h-[200vh] dashed-line-v pointer-events-none" />
-        <div className="absolute top-full right-0 h-[200vh] dashed-line-v pointer-events-none" />
+        <div className="absolute top-full left-0 w-px h-[200vh] bg-white/15 pointer-events-none" />
+        <div className="absolute top-full right-0 w-px h-[200vh] bg-white/15 pointer-events-none" />
       </header>
     </div>
   )
