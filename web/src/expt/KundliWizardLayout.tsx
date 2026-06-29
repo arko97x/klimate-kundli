@@ -1,45 +1,47 @@
-import type { ReactNode } from 'react'
+import { NeuroNoise } from '@paper-design/shaders-react'
 
-import { CyclingTagline } from '@/expt/CyclingTagline'
-import { Header } from '@/expt/Header'
-import { KundliArtBackground } from '@/expt/KundliArtBackground'
-
-import './stamp.css'
-
-type KundliWizardLayoutProps = {
-  children: ReactNode
-  footer: ReactNode
-}
-
-export function KundliWizardLayout({ children, footer }: KundliWizardLayoutProps) {
+export function KundliWizardLayout() {
   return (
-    <div className="flex min-h-dvh flex-col bg-background text-foreground lg:h-dvh lg:max-h-dvh lg:overflow-hidden">
-      <div className="mx-auto flex w-full max-w-4xl min-h-0 flex-1 flex-col gap-4 p-4 sm:gap-6 sm:p-6">
-        <Header />
-
-        <div className="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[2fr_3fr] lg:overflow-hidden">
-          <div className="flex min-h-0 flex-1 flex-col lg:contents">
-            <aside className="kk-kundli-panel relative flex min-h-0 w-full flex-1 flex-col items-stretch justify-center overflow-hidden p-6 sm:p-8 lg:h-full lg:overflow-hidden">
-              <KundliArtBackground />
-              <div className="relative z-10 flex w-full flex-col items-stretch justify-center text-white">
-                <div className="kk-stamp">
-                  <img
-                    src="/kk-logo-beta.svg"
-                    alt="Klimate Kundli (Beta)"
-                    className="kk-stamp__art"
-                  />
-                </div>
-                <CyclingTagline />
-              </div>
-            </aside>
-          </div>
-
-          <main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background lg:h-full lg:min-h-0">
-            {children}
-            {footer}
-          </main>
-        </div>
+    <div className="dark relative flex min-h-dvh flex-col bg-black text-white overflow-hidden font-sans">
+      {/* Background Gradient */}
+      <div className="fixed inset-0 z-0 w-full h-full pointer-events-none">
+        <NeuroNoise
+          width={1280}
+          height={720}
+          colorFront="#bd0075"
+          colorMid="#51007a"
+          colorBack="#000000"
+          scale={1.5}
+          brightness={0.05}
+          contrast={0.15}
+          speed={1}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+        {/* Dither overlay layer */}
+        <div className="dither-overlay" />
       </div>
+
+      {/* Header Bar */}
+      <header className="relative z-10 mx-4 md:mx-auto mt-4 md:mt-6 flex w-auto md:w-full max-w-5xl items-center border border-white/40 bg-black/10 px-6 py-4 backdrop-blur-md">
+        <span className="font-alegreya text-xl font-regular tracking-wider text-white">
+          Klimate Kundli
+        </span>
+
+        {/* --- Grid Lines --- */}
+        {/* Horizontal lines */}
+        <div className="absolute top-0 right-full w-screen dashed-line-h pointer-events-none" />
+        <div className="absolute top-0 left-full w-screen dashed-line-h pointer-events-none" />
+        <div className="absolute bottom-0 right-full w-screen dashed-line-h pointer-events-none" />
+        <div className="absolute bottom-0 left-full w-screen dashed-line-h pointer-events-none" />
+
+        {/* Vertical lines extending up (height matches mt) */}
+        <div className="absolute bottom-full left-0 h-4 md:h-6 dashed-line-v pointer-events-none" />
+        <div className="absolute bottom-full right-0 h-4 md:h-6 dashed-line-v pointer-events-none" />
+
+        {/* Vertical lines extending down */}
+        <div className="absolute top-full left-0 h-[200vh] dashed-line-v pointer-events-none" />
+        <div className="absolute top-full right-0 h-[200vh] dashed-line-v pointer-events-none" />
+      </header>
     </div>
   )
 }

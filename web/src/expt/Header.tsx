@@ -76,7 +76,7 @@ export function Header() {
   return (
     <header
       ref={headerRef}
-      className="relative z-10 w-full shrink-0 overflow-visible bg-background"
+      className="relative z-10 w-full shrink-0 overflow-visible bg-transparent"
     >
       <div className="relative z-10 flex items-center px-4 py-4 sm:px-6 sm:py-6">
         <Link to={isExhibition ? '/exhibition' : '/'} className="shrink-0" aria-label="Klimate Kundli home">

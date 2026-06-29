@@ -31,7 +31,8 @@ Five shipped v0.3 iterations on `main` — four retired or superseded. Each sect
 | 0.3.4 | Superseded | `main` (fan, IMD, deploy, exhibit polish, Jun 2026) |
 | 0.3.5 | Superseded | `main` (life trails, public saves, frozen snapshots, Jun 2026) |
 | 0.3.6 | Superseded | `main` (hot air balloons, lungs diamond, Arctic ice lab, prewarm expansion, Jun 2026) |
-| 0.3.7 | Current | `main` (separate exhibition layout, kiosk mode isolation, public stub pages, Jun 2026) |
+| 0.3.7 | Superseded | `main` (separate exhibition layout, kiosk mode isolation, public stub pages, Jun 2026) |
+| 0.3.8 | Current | `main` (minimal shader background, Alegreya header, dither grid overlay, Jun 2026) |
 
 Archive rationale: `docs/RETIREMENT-v0.1-v0.2.md` on the `retired-0.1-0.2` branch.
 
@@ -657,6 +658,33 @@ As we prepare for the physical exhibition, we need to balance two distinct user 
 
 ---
 
+## v0.3.8 — landing page redesign & dithered background
+
+**June 2026** · Current work on `main`
+
+### What changed in thinking
+
+To establish the astrological-meets-scientific curation immediately upon entry, the multi-step intake wizard forms were cleared away from the landing page. The landing page now serves as a purely ambient, cinematic canvas highlighting a fluid noise shader, wrapped under a custom dashed grid system to ground the cosmic theme in a technical drafting aesthetic.
+
+### Product additions
+
+- **NeuroNoise Fluid Background**: Mounted a responsive, full-screen fluid line shader (`NeuroNoise`) configured in a dark fuchsia, deep violet, and indigo color scheme matching the curation reference.
+- **Dither Grid Overlay**: Custom dither texture layer using a repeating 3px radial dot matrix to apply a subtle, tactile halftone pattern across the viewport.
+- **Reconstructed Header Bar**: Designed a clean, rectangular header bar floating 24px from the top edge on desktop (`mt-6`), and 16px on mobile (`mt-4`) with 16px side margins (`mx-4`), displaying lowercase `klimate kundli` in Alegreya Variable.
+- **Layout Extensions**: Positioned absolute 1px dashed layout lines extending from all four header corners to the edges of the viewport with an 8px dash gap pattern.
+
+### Web
+
+| Component / File | Change |
+| --- | --- |
+| `package.json` | Installed `@paper-design/shaders-react` and `@fontsource-variable/alegreya` dependencies |
+| `index.css` | Imported Alegreya Variable, defined `--font-alegreya`, and added `.dashed-line-h`, `.dashed-line-v`, and `.dither-overlay` classes |
+| `KundliWizardLayout.tsx` | Redesigned to render only the `NeuroNoise` background, `.dither-overlay`, and the new floating dashed-grid header bar (removing form elements, card, stamps, and taglines) |
+| `KundliApp.tsx` | Stripped all geocoding, hooks, steps, and intake states, simplifying to only render the background/header layout |
+| `Header.tsx` / `Footer.tsx` | Made backgrounds transparent and styled borders to blend with layout |
+
+---
+
 ## Architecture comparison
 
 ```
@@ -672,6 +700,7 @@ v0.3.5 Vercel UI ──► droplet Hono ──► Supabase Postgres (saved kundl
                          GitHub Actions/Puppeteer ──► /capture/k/:slug ──► PUT snapshot manifest
 v0.3.7 iPad Kiosk ──► /exhibition ──► /exhibition/k/:slug (distraction-free kiosk flow)
        Personal ──► / ──► /k/:slug & public pages (gallery, twin, etc.)
+v0.3.8 Kiosk/Personal ──► / & /exhibition (ambient NeuroNoise, Alegreya header, dither grid)
 ```
 
 The through-line: **Open-Meteo keeps winning for city-scale exhibit queries.** v0.2's full Postgres ingest stayed retired; v0.3.4 adds a **minimal IMD sidecar** (station map JSON + peak cache + API on the droplet) for hotter, more credible Indian peak temperatures on the fan without reviving Python ingest at exhibit time. v0.3.5 uses Supabase narrowly: durable saved kundli JSON plus frozen snapshot assets, not climate computation.

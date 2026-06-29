@@ -34,8 +34,8 @@ export function Footer(props: FooterProps) {
     const generateTooltip = generating ? 'Generating…' : generateDisabledReason
 
     return (
-      <footer className="w-full shrink-0 bg-background px-6 pr-0">
-        <div className="border-t border-border">
+      <footer className="w-full shrink-0 bg-transparent">
+        <div className="border-t border-white/10">
           <div className="flex w-full items-center justify-between gap-4 py-4">
             <Button
               type="button"
@@ -65,8 +65,8 @@ export function Footer(props: FooterProps) {
   const { canContinue, onNext, continueLabel = 'Select your birth city' } = props
 
   return (
-    <footer className="w-full shrink-0 bg-background px-6 pr-0">
-      <div className="border-t border-border">
+    <footer className="w-full shrink-0 bg-transparent">
+      <div className="border-t border-white/10">
         <div className="flex w-full justify-end py-4">
           <DisabledTooltip disabled={!canContinue} content={continueLabel}>
             <Button
