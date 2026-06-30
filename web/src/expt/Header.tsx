@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/popover'
 import { buildWavyRectPath, WAVE_BORDER_PAD, wavyBorderViewBox } from '@/expt/wavy-border'
 import { useIsExhibition } from '@/lib/exhibition-context'
+import { cn } from '@/lib/utils'
 
 type FrameSize = { width: number; height: number }
 
@@ -20,11 +21,11 @@ const MENU_ITEMS = [
   { label: 'Climate Twin', path: '/klimate-twin' },
 ] as const
 
-export function HeaderMenu() {
+export function HeaderMenu({ className }: { className?: string }) {
   return (
     <Popover>
       <PopoverTrigger
-        className={buttonVariants({ variant: 'outline', size: 'icon' })}
+        className={cn(buttonVariants({ variant: 'outline', size: 'icon' }), className)}
         aria-label="Open menu"
       >
         <MenuIcon className="size-5" />

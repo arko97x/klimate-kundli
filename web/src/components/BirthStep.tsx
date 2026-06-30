@@ -1,5 +1,3 @@
-import { ChevronRightIcon } from 'lucide-react'
-
 import { BirthYearPicker } from '@/components/BirthYearPicker'
 import { DisabledTooltip } from '@/components/DisabledTooltip'
 import { CitySearchCombobox } from '@/components/CitySearchCombobox'
@@ -29,15 +27,19 @@ export function BirthStep({
   const canContinue = birthCity !== null
 
   return (
-    <div className="w-full max-w-3xl space-y-8 px-1.5 mx-auto md:pt-8">
-      <div className="grid grid-cols-1 md:grid-cols-[350px_1fr] items-start gap-4 md:gap-8">
-        <Label htmlFor="birth-city" className="font-alegreya-sans text-3xl md:text-5xl font-semibold tracking-tight text-purple-950 dark:text-white">
+    <div className="w-full flex flex-col items-center gap-6">
+      {/* City Section */}
+      <div className="w-full flex flex-col items-center gap-2">
+        <Label 
+          htmlFor="birth-city" 
+          className="font-alegreya text-2xl md:text-3xl font-medium tracking-wide text-white text-center"
+        >
           Where were you born?
         </Label>
-        <div className="w-full max-w-sm md:pt-4">
+        <div className="w-full">
           <CitySearchCombobox
             id="birth-city"
-            className="w-full"
+            className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/50 rounded-none h-10 px-3"
             value={birthCity}
             onValueChange={onBirthCityChange}
             placeholder="Search for your birth city"
@@ -45,11 +47,14 @@ export function BirthStep({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[350px_1fr] items-start gap-4 md:gap-8">
-        <Label className="font-alegreya-sans text-3xl md:text-5xl font-semibold tracking-tight text-purple-950 dark:text-white leading-normal">
+      {/* Year Section */}
+      <div className="w-full flex flex-col items-center gap-2">
+        <Label 
+          className="font-alegreya text-2xl md:text-3xl font-medium tracking-wide text-white text-center"
+        >
           And when?
         </Label>
-        <div className="w-full max-w-sm md:pt-4">
+        <div className="w-full">
           <BirthYearPicker
             value={birthYear}
             onValueChange={onBirthYearChange}
@@ -58,24 +63,24 @@ export function BirthStep({
         </div>
       </div>
 
-      {showContinue ? (
-        <div className="flex justify-end pt-2">
+      {/* Navigation Controls */}
+      {showContinue && onNext && (
+        <div className="w-full pt-4 flex justify-center">
           <DisabledTooltip
             disabled={!canContinue}
             content="Select your birth city"
           >
             <Button
               type="button"
-              size="icon"
               disabled={!canContinue}
               onClick={onNext}
-              aria-label="Continue"
+              className="w-full min-h-[44px] bg-white text-[#180033] hover:bg-white/90 rounded-none font-medium tracking-wide border border-transparent shadow-md transition-all active:scale-[0.98]"
             >
-              <ChevronRightIcon className="size-5" />
+              Continue
             </Button>
           </DisabledTooltip>
         </div>
-      ) : null}
+      )}
     </div>
   )
 }

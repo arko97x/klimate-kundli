@@ -1,27 +1,18 @@
-import { useState } from 'react'
-import type { SliderRoot } from '@base-ui/react/slider'
 import { ChevronLeftIcon, PlusIcon, XIcon } from 'lucide-react'
-
 import { CitySearchCombobox } from '@/components/CitySearchCombobox'
 import { DisabledTooltip } from '@/components/DisabledTooltip'
-import { TimelineYearAxis } from '@/components/TimelineYearAxis'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
-import { addResidenceRowDisabledReason, canAddResidenceRow, updateRowRange } from '@/lib/lived-cities'
-import { latestCompleteYearUtc, yearToTimelinePercent } from '@/lib/years'
+import {
+  addResidenceRowDisabledReason,
+  canAddResidenceRow,
+  updateRowRange,
+  isLivedFormValid,
+  generateKundliDisabledReason,
+} from '@/lib/lived-cities'
+import { latestCompleteYearUtc } from '@/lib/years'
 import type { ResidenceRow } from '@/types'
-
-const ACTIVE_SLIDER_REASONS = new Set<SliderRoot.ChangeEventReason>([
-  'drag',
-  'track-press',
-  'keyboard',
-])
-
-type DragPreview = {
-  year: number
-  percent: number
-}
 
 type LivedCitiesStepProps = {
   birthYear: number
@@ -29,10 +20,10 @@ type LivedCitiesStepProps = {
   onRowsChange: (rows: ResidenceRow[]) => void
   latestCompleteYear?: number
   error?: string | null
-  embedded?: boolean
+  onBack: () => void
+  onGenerate: () => void
+  generating?: boolean
 }
-
-const LIVED_CITIES_CONTENT = 'mx-auto w-full max-w-3xl md:pt-8'
 
 export function LivedCitiesStep({
   birthYear,
@@ -40,12 +31,17 @@ export function LivedCitiesStep({
   onRowsChange,
   latestCompleteYear = latestCompleteYearUtc(),
   error = null,
-  embedded = false,
+  onBack,
+  onGenerate,
+  generating = false,
 }: LivedCitiesStepProps) {
-  const sectionPadding = embedded ? 'px-1.5' : 'px-6 sm:px-10 lg:px-14'
-  const [dragPreview, setDragPreview] = useState<DragPreview | null>(null)
   const canAdd = canAddResidenceRow(rows, latestCompleteYear)
   const addDisabledReason = addResidenceRowDisabledReason(rows, latestCompleteYear)
+
+  const canGenerate = isLivedFormValid(rows, latestCompleteYear)
+  const generateDisabledReason = generateKundliDisabledReason(rows, latestCompleteYear)
+  const generateDisabled = !canGenerate || generating
+  const generateTooltip = generating ? 'Generating…' : generateDisabledReason
 
   const normalizeRange = (value: number | readonly number[]): [number, number] | null => {
     const arr = Array.isArray(value) ? [...value] : [value]
@@ -62,29 +58,13 @@ export function LivedCitiesStep({
 
   const handleSliderChange = (
     index: number,
-    value: number | readonly number[],
-    details: SliderRoot.ChangeEventDetails,
+    value: number | readonly number[]
   ) => {
-    const range = normalizeRange(value)
-    if (!range) {
-      return
-    }
-
     handleRangeChange(index, value)
-
-    if (ACTIVE_SLIDER_REASONS.has(details.reason)) {
-      const thumbIndex = Math.min(details.activeThumbIndex, range.length - 1)
-      const year = range[thumbIndex]!
-      setDragPreview({
-        year,
-        percent: yearToTimelinePercent(year, birthYear, latestCompleteYear),
-      })
-    }
   }
 
   const handleSliderCommit = (index: number, value: number | readonly number[]) => {
     handleRangeChange(index, value)
-    setDragPreview(null)
   }
 
   const handleAddRow = () => {
@@ -111,171 +91,134 @@ export function LivedCitiesStep({
   }
 
   return (
-    <div className="flex min-h-0 w-full flex-1 flex-col">
-      <div className={`shrink-0 bg-transparent pb-4 ${sectionPadding}`}>
-        <div className={LIVED_CITIES_CONTENT}>
-          <div className="space-y-2 pb-3 text-left">
-            <Label className="font-alegreya-sans text-3xl md:text-5xl font-semibold tracking-tight text-purple-950 dark:text-white leading-normal">
-              Where all have you lived / travelled to?
-            </Label>
-            <p className="text-sm text-muted-foreground">
-              Years are approximate. If you moved during a year, both places can include that year.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-[30%_1fr_36px] gap-x-4 gap-y-2 md:gap-8 items-start">
-            <div className="hidden md:block" aria-hidden />
-            <div className="w-full pt-4 md:pt-8">
-              <TimelineYearAxis
-                birthYear={birthYear}
-                latestCompleteYear={latestCompleteYear}
-                dragPreview={
-                  dragPreview
-                    ? { year: dragPreview.year, percent: dragPreview.percent }
-                    : null
-                }
-              />
-            </div>
-            <div className="hidden md:block size-9 shrink-0" aria-hidden />
-          </div>
-        </div>
+    <div className="w-full flex flex-col items-center gap-4">
+      {/* Title */}
+      <div className="w-full flex flex-col items-center gap-1">
+        <Label 
+          className="font-alegreya text-2xl md:text-3xl font-medium tracking-wide text-white text-center leading-tight"
+        >
+          Where else did you live?
+        </Label>
+        <p className="text-xs text-white/60 text-center leading-normal max-w-[280px]">
+          Approximate years lived/travelled (overlap is allowed).
+        </p>
       </div>
 
-      <div className={`min-h-0 w-full flex-1 overflow-y-auto overscroll-contain bg-transparent ${sectionPadding}`}>
-        <div className={LIVED_CITIES_CONTENT}>
-          <div className="flex flex-col gap-8 pt-8">
-            {rows.map((row, index) => {
-              const isBirthRow = index === 0
-              const [yearStart, yearEnd] = row.range
+      {/* Scrollable list of city rows */}
+      <div className="w-full max-h-[190px] md:max-h-[220px] overflow-y-auto pr-1 flex flex-col gap-4 scrollbar-thin scrollbar-thumb-white/20">
+        {rows.map((row, index) => {
+          const isBirthRow = index === 0
+          const [yearStart, yearEnd] = row.range
 
-              return (
-                <div
-                  key={row.id}
-                  className="grid grid-cols-[1fr_36px] md:grid-cols-[30%_1fr_36px] gap-x-4 gap-y-2 md:gap-8 items-center"
-                >
-                  <div className="col-span-1 w-full min-w-0 self-center order-1">
-                    {isBirthRow ? (
-                      <p className="truncate text-sm font-medium text-purple-950 dark:text-white px-1" title={row.city?.displayName}>
-                        {row.city?.displayName ?? '—'}
-                      </p>
-                    ) : (
-                      <CitySearchCombobox
-                        value={row.city}
-                        onValueChange={(city) => {
-                          onRowsChange(
-                            rows.map((r) => (r.id === row.id ? { ...r, city } : r)),
-                          )
-                        }}
-                        placeholder="Search city"
-                      />
-                    )}
-                    <p className="mt-1 text-sm text-muted-foreground tabular-nums px-1">
-                      ({yearStart}–{yearEnd})
-                    </p>
-                  </div>
-
-                  <div className="col-span-2 md:col-span-1 w-full py-2 order-3 md:order-2">
-                    <Slider
-                      min={birthYear}
-                      max={latestCompleteYear}
-                      step={1}
-                      minStepsBetweenValues={0}
-                      value={row.range}
-                      onValueChange={(value, details) =>
-                        handleSliderChange(index, value, details)
-                      }
-                      onValueCommitted={(value) => handleSliderCommit(index, value)}
-                      className="w-full self-center py-2"
-                      aria-label={`Years in ${row.city?.displayName ?? (isBirthRow ? 'birth city' : 'city')}, ${yearStart} to ${yearEnd}`}
+          return (
+            <div 
+              key={row.id} 
+              className="flex flex-col gap-2 pb-3 border-b border-white/10 last:border-b-0 last:pb-0"
+            >
+              <div className="flex items-center justify-between gap-2">
+                {isBirthRow ? (
+                  <span className="text-sm font-medium text-white truncate max-w-[180px]" title={row.city?.displayName}>
+                    {row.city?.displayName ?? '—'}
+                  </span>
+                ) : (
+                  <div className="flex-1 min-w-0">
+                    <CitySearchCombobox
+                      className="bg-white/10 border-white/20 text-white rounded-none h-8 px-2"
+                      value={row.city}
+                      onValueChange={(city) => {
+                        onRowsChange(
+                          rows.map((r) => (r.id === row.id ? { ...r, city } : r)),
+                        )
+                      }}
+                      placeholder="Search city"
                     />
                   </div>
-
-                  <div className="col-span-1 flex justify-end md:justify-center items-center h-9 order-2 md:order-3">
-                    {isBirthRow ? null : (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        className="size-9 shrink-0 rounded-md"
-                        onClick={() => handleDeleteRow(index)}
-                        aria-label="Remove city"
-                      >
-                        <XIcon className="size-4" />
-                      </Button>
-                    )}
-                  </div>
+                )}
+                
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-white/70 font-mono whitespace-nowrap">
+                    {yearStart}–{yearEnd}
+                  </span>
+                  {!isBirthRow && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 text-white/60 hover:text-white hover:bg-white/10 rounded-none shrink-0"
+                      onClick={() => handleDeleteRow(index)}
+                      aria-label="Remove city"
+                    >
+                      <XIcon className="size-4" />
+                    </Button>
+                  )}
                 </div>
-              )
-            })}
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-[30%_1fr_36px] gap-4 md:gap-8">
-              <div className="col-start-1 self-center">
-                <DisabledTooltip disabled={!canAdd} content={addDisabledReason}>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="size-9 rounded-md"
-                    disabled={!canAdd}
-                    onClick={handleAddRow}
-                    aria-label="Add another city"
-                  >
-                    <PlusIcon className="size-4" />
-                  </Button>
-                </DisabledTooltip>
+              <div className="px-1">
+                <Slider
+                  min={birthYear}
+                  max={latestCompleteYear}
+                  step={1}
+                  minStepsBetweenValues={0}
+                  value={row.range}
+                  onValueChange={(value) => handleSliderChange(index, value)}
+                  onValueCommitted={(value) => handleSliderCommit(index, value)}
+                  className="w-full py-1.5"
+                  aria-label={`Years in ${row.city?.displayName ?? (isBirthRow ? 'birth city' : 'city')}`}
+                />
               </div>
             </div>
-          </div>
+          )
+        })}
 
-          {error ? (
-            <p className="mt-8 text-center text-sm text-destructive sm:text-left" role="alert">
-              {error}
-            </p>
-          ) : null}
+        {/* Add City Button inside the scrollable container or below it */}
+        <div className="w-full pt-1 flex justify-start">
+          <DisabledTooltip disabled={!canAdd} content={addDisabledReason}>
+            <Button
+              type="button"
+              variant="outline"
+              className="text-xs text-white border-white/20 hover:bg-white/10 h-8 px-3 rounded-none flex items-center gap-1.5"
+              disabled={!canAdd}
+              onClick={handleAddRow}
+              aria-label="Add another city"
+            >
+              <PlusIcon className="size-3.5" />
+              Add city
+            </Button>
+          </DisabledTooltip>
         </div>
       </div>
-    </div>
-  )
-}
 
-export function LivedCitiesStepFooter({
-  onBack,
-  onGenerate,
-  generating = false,
-  canGenerate = false,
-  generateDisabledReason = null,
-}: {
-  onBack: () => void
-  onGenerate: () => void
-  generating?: boolean
-  canGenerate?: boolean
-  generateDisabledReason?: string | null
-}) {
-  const generateDisabled = !canGenerate || generating
-  const generateTooltip =
-    generating ? 'Generating…' : generateDisabledReason
+      {/* Error Message */}
+      {error && (
+        <p className="text-center text-xs text-red-300 font-medium bg-red-950/20 border border-red-500/30 px-2 py-1.5 w-full mt-1" role="alert">
+          {error}
+        </p>
+      )}
 
-  return (
-    <>
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        onClick={onBack}
-        aria-label="Back"
-      >
-        <ChevronLeftIcon className="size-5" />
-      </Button>
-      <DisabledTooltip disabled={generateDisabled} content={generateTooltip}>
+      {/* Action Buttons */}
+      <div className="w-full pt-4 flex items-center justify-between gap-3 border-t border-white/15">
         <Button
           type="button"
-          className="min-w-44 rounded-md px-8"
-          disabled={generateDisabled}
-          onClick={onGenerate}
+          variant="outline"
+          size="icon"
+          className="text-white border-white/20 hover:bg-white/10 rounded-none size-[44px] shrink-0"
+          onClick={onBack}
+          aria-label="Back"
         >
-          {generating ? 'Generating…' : 'Generate Kundli'}
+          <ChevronLeftIcon className="size-5" />
         </Button>
-      </DisabledTooltip>
-    </>
+        <DisabledTooltip disabled={generateDisabled} content={generateTooltip}>
+          <Button
+            type="button"
+            className="flex-1 bg-white text-[#180033] hover:bg-white/90 rounded-none font-medium h-[44px]"
+            disabled={generateDisabled}
+            onClick={onGenerate}
+          >
+            {generating ? 'Generating…' : 'Generate Kundli'}
+          </Button>
+        </DisabledTooltip>
+      </div>
+    </div>
   )
 }

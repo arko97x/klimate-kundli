@@ -4,12 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import { BirthStep } from '@/components/BirthStep'
 import { LivedCitiesStep } from '@/components/LivedCitiesStep'
 import { defaultBirthYear } from '@/components/BirthYearPicker'
-import { Footer } from '@/expt/Footer'
 import { KundliWizardLayout } from '@/expt/KundliWizardLayout'
 import { fetchMonthlyDelta, saveKundli } from '@/lib/api'
 import {
   createInitialRows,
-  generateKundliDisabledReason,
   isLivedFormValid,
   rowsToLivedCities,
 } from '@/lib/lived-cities'
@@ -18,7 +16,7 @@ import { latestCompleteYearUtc, MIN_BIRTH_YEAR } from '@/lib/years'
 import type { City, ResidenceRow } from '@/types'
 import { useIsExhibition } from '@/lib/exhibition-context'
 
-type Step = 'birth' | 'lived'
+type Step = 'landing' | 'birth' | 'lived'
 
 function initialBirthYear(): number {
   const param = new URLSearchParams(window.location.search).get('birthYear')
@@ -39,7 +37,7 @@ export default function KundliApp() {
   const navigate = useNavigate()
   const isExhibition = useIsExhibition()
   const latestCompleteYear = useMemo(() => latestCompleteYearUtc(), [])
-  const [step, setStep] = useState<Step>('birth')
+  const [step, setStep] = useState<Step>('landing')
   const [birthCity, setBirthCity] = useState<City | null>(null)
   const [birthYear, setBirthYear] = useState(initialBirthYear)
   const [rows, setRows] = useState<ResidenceRow[]>([])
@@ -86,56 +84,37 @@ export default function KundliApp() {
   }
 
   return (
-    <KundliWizardLayout>
-      <div className="flex flex-col flex-1 min-h-0">
-        <div className="flex-1 min-h-0">
-          {step === 'birth' ? (
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              <BirthStep
-                birthCity={birthCity}
-                onBirthCityChange={setBirthCity}
-                birthYear={birthYear}
-                onBirthYearChange={setBirthYear}
-                latestCompleteYear={latestCompleteYear}
-                showContinue={false}
-              />
-            </div>
-          ) : (
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-              <LivedCitiesStep
-                embedded
-                birthYear={birthYear}
-                rows={rows}
-                onRowsChange={(next) => {
-                  setRows(next)
-                  if (!isLivedFormValid(next, latestCompleteYear)) {
-                    setError(null)
-                  }
-                }}
-                latestCompleteYear={latestCompleteYear}
-                error={error}
-              />
-            </div>
-          )}
-        </div>
-
-        {step === 'birth' ? (
-          <Footer
-            mode="continue"
-            canContinue={birthCity !== null}
-            onNext={goToLived}
-          />
-        ) : (
-          <Footer
-            mode="generate"
-            onBack={() => setStep('birth')}
-            onGenerate={handleGenerate}
-            generating={generating}
-            canGenerate={isLivedFormValid(rows, latestCompleteYear)}
-            generateDisabledReason={generateKundliDisabledReason(rows, latestCompleteYear)}
-          />
-        )}
-      </div>
+    <KundliWizardLayout
+      showLanding={step === 'landing'}
+      onStart={() => setStep('birth')}
+    >
+      {step === 'birth' && (
+        <BirthStep
+          birthCity={birthCity}
+          onBirthCityChange={setBirthCity}
+          birthYear={birthYear}
+          onBirthYearChange={setBirthYear}
+          latestCompleteYear={latestCompleteYear}
+          onNext={goToLived}
+        />
+      )}
+      {step === 'lived' && (
+        <LivedCitiesStep
+          birthYear={birthYear}
+          rows={rows}
+          onRowsChange={(next) => {
+            setRows(next)
+            if (!isLivedFormValid(next, latestCompleteYear)) {
+              setError(null)
+            }
+          }}
+          latestCompleteYear={latestCompleteYear}
+          error={error}
+          onBack={() => setStep('birth')}
+          onGenerate={handleGenerate}
+          generating={generating}
+        />
+      )}
     </KundliWizardLayout>
   )
 }
