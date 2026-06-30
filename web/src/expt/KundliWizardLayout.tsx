@@ -195,7 +195,7 @@ export function KundliWizardLayout({
 
         {/* --- Parrot and Button overlays (Landing state only) --- */}
         {showLanding && (
-          <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none z-20 top-[122%] xl:top-[112%]">
+          <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none z-20 top-full mt-[-40px] sm:mt-[-50px] xl:mt-[-55px]">
             {/* White Parrot overlapping bottom vertex and perched on button */}
             <div 
               className="relative aspect-[215/257] z-10 pointer-events-none w-[115px] xl:w-[130px] translate-y-[32%] -translate-x-[80%] xl:-translate-x-[95%]"
