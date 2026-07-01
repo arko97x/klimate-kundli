@@ -1,5 +1,5 @@
 import { ChevronLeftIcon, PlusIcon, XIcon } from 'lucide-react'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { CitySearchCombobox } from '@/components/CitySearchCombobox'
 import { DisabledTooltip } from '@/components/DisabledTooltip'
 import { Button } from '@/components/ui/button'
@@ -54,6 +54,19 @@ export function LivedCitiesStep({
   const generateTooltip = generating ? 'Generating…' : generateDisabledReason
 
   const ticks = useMemo(() => yearTicks(birthYear, latestCompleteYear), [birthYear, latestCompleteYear])
+
+  const rowsScrollRef = useRef<HTMLDivElement>(null)
+  const prevRowCount = useRef(rows.length)
+
+  useEffect(() => {
+    if (rows.length > prevRowCount.current) {
+      const el = rowsScrollRef.current
+      if (el) {
+        el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+      }
+    }
+    prevRowCount.current = rows.length
+  }, [rows.length])
 
   const normalizeRange = (value: number | readonly number[]): [number, number] | null => {
     const arr = Array.isArray(value) ? [...value] : [value]
@@ -110,7 +123,7 @@ export function LivedCitiesStep({
   return (
   <>
     {/* ── Left-aligned form container ── */}
-    <div className="absolute left-[8%] top-[38%] flex flex-col items-start gap-4 w-[84%] sm:w-[84%] md:w-[80%] xl:w-[70%] pointer-events-auto">
+    <div className="absolute left-[8%] top-[30%] flex flex-col items-start gap-4 w-[84%] sm:w-[84%] md:w-[80%] xl:w-[70%] pointer-events-auto">
       {/* Question Label */}
       <Label
         className="font-sans text-xl sm:text-2xl md:text-3xl xl:text-4xl font-normal text-black text-left mb-2 select-none"
@@ -135,7 +148,7 @@ export function LivedCitiesStep({
         </div>
 
         {/* ── Scrollable list of rows ── */}
-        <div className="w-full max-h-[calc(44vh-70px)] overflow-y-auto flex flex-col gap-6 scrollbar-thin scrollbar-thumb-neutral-300 pr-1 relative">
+        <div ref={rowsScrollRef} className="w-full max-h-[calc(44vh-70px)] overflow-y-auto flex flex-col gap-6 scrollbar-thin scrollbar-thumb-neutral-300 pr-1 relative">
           {/* Vertical grid lines background guides */}
           <div className="absolute inset-y-0 left-0 right-0 pointer-events-none flex z-0 gap-8">
             <div className={LABEL_COL} />

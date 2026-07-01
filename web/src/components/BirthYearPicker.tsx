@@ -25,6 +25,8 @@ export function BirthYearPicker({ value, onValueChange, maxYear, className }: Bi
           options={options}
           value={value}
           onValueChange={onValueChange}
+          visibleCount={14}
+          optionItemHeight={26}
           scrollSensitivity={8}
           dragSensitivity={8}
         />

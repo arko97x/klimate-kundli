@@ -140,7 +140,7 @@ export function KundliWizardLayout({
           </div>
 
           {/* Pose-Specific Black Parrot (positioned relative to full screen bottom-right corner) */}
-          <div className="absolute right-[4%] bottom-[4%] w-[110px] sm:w-[140px] md:w-[170px] xl:w-[190px] aspect-[266/345] pointer-events-none z-10 flex items-end justify-end">
+          <div className="absolute right-[4%] bottom-[4%] w-[95px] sm:w-[120px] md:w-[145px] xl:w-[165px] aspect-[280/432] pointer-events-none z-30 flex items-end justify-end">
             <img 
               src={step === 'lived' ? parrotStep2Url : parrotStep1Url} 
               alt="Perched Parrot" 
@@ -271,29 +271,32 @@ export function KundliWizardLayout({
               style={{ left: '90%', top: '92%', width: '2.5%', aspectRatio: '105/116' }}
             />
 
-            {/* --- Parrot and Button overlays --- */}
-            <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none z-20 top-full mt-[-40px] sm:mt-[-50px] xl:mt-[-55px]">
-              {/* White Parrot overlapping bottom vertex and perched on button */}
-              <div 
-                className="relative aspect-[215/257] z-10 pointer-events-none w-[115px] xl:w-[130px] translate-y-[32%] -translate-x-[80%] xl:-translate-x-[95%]"
-              >
-                <img 
-                  src={parrotUrl} 
-                  alt="Parrot" 
-                  className="w-full h-full"
-                />
-              </div>
-
-              <Button
-                onClick={onStart}
-                className="bg-black text-white hover:bg-black/90 rounded-none font-semibold tracking-wider shadow-lg pointer-events-auto w-[180px] h-[44px] sm:w-[240px] sm:h-[52px] text-xs sm:text-sm xl:text-base uppercase transition-all hover:scale-[1.02] z-20"
-              >
-                Get Started
-              </Button>
-            </div>
           </div>
         )}
       </div>
+
+      {/* Landing Get Started button — pinned to screen bottom to match wizard-step buttons */}
+      {step === 'landing' && (
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-[6%] flex flex-col items-center pointer-events-none z-20">
+          {/* White Parrot perched on button */}
+          <div
+            className="relative aspect-[215/257] z-10 pointer-events-none w-[115px] xl:w-[130px] translate-y-[32%] -translate-x-[80%] xl:-translate-x-[95%]"
+          >
+            <img
+              src={parrotUrl}
+              alt="Parrot"
+              className="w-full h-full"
+            />
+          </div>
+
+          <Button
+            onClick={onStart}
+            className="bg-black text-white hover:bg-black/90 rounded-none font-semibold tracking-wider shadow-lg pointer-events-auto w-[180px] h-[44px] sm:w-[240px] sm:h-[52px] text-xs sm:text-sm xl:text-base uppercase transition-all hover:scale-[1.02] z-20"
+          >
+            Get Started
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

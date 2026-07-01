@@ -28,7 +28,7 @@ export function BirthStep({
 
   return (
   <>
-    <div className="absolute left-[8%] top-[38%] flex flex-col items-start gap-5 w-[320px] sm:w-[380px] md:w-[420px] xl:w-[450px] pointer-events-auto">
+    <div className="absolute left-[8%] top-[30%] flex flex-col items-start gap-5 w-[320px] sm:w-[380px] md:w-[420px] xl:w-[450px] pointer-events-auto">
       {/* Unified Question Label */}
       <Label 
         htmlFor="birth-city" 
@@ -64,7 +64,7 @@ export function BirthStep({
 
     {/* Navigation Next Button — horizontally centered on page */}
     {showContinue && onNext && (
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-[10%] pointer-events-auto">
+      <div className="absolute left-1/2 -translate-x-1/2 bottom-[6%] pointer-events-auto">
         <DisabledTooltip
           disabled={!canContinue}
           content="Select your birth city"
