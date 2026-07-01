@@ -80,7 +80,7 @@ export function createAnalogResolver(options: AnalogOptions) {
   const presentSpan = options.presentSpan ?? 10;
   const snapKm = options.snapKm ?? 100;
   const minMoveKm = options.minMoveKm ?? 50;
-  const childhoodSpan = options.childhoodSpan ?? 15;
+  const childhoodSpan = options.childhoodSpan ?? 7;
 
   // Precompute once: each city's present-day fingerprint + the z-score normalizer.
   const present = new Map<string, Fingerprint>();

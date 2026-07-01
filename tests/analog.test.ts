@@ -32,7 +32,7 @@ describe("createAnalogResolver", () => {
     const resolver = createAnalogResolver({ index });
     const { childhoodWindow, migrations } = resolver.resolve([home], 1990);
 
-    expect(childhoodWindow).toEqual([1990, 2005]);
+    expect(childhoodWindow).toEqual([1990, 1997]);
     expect(migrations).toHaveLength(1);
     expect(migrations[0].analog.name).toBe("North");
     expect(migrations[0].direction).toBe("north");

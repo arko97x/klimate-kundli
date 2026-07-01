@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import type { ClimateMigration, ClimateMoved } from "@/lib/api";
 
 // Past = cool blue, now = warm red — same semantics as the monthly-delta chart.
@@ -9,15 +11,19 @@ type ClimateMovedSectionProps = {
 };
 
 export function ClimateMovedSection({ data }: ClimateMovedSectionProps) {
-  const [lead, ...rest] = data.migrations;
-  if (!lead) return null;
+  const migrations = data.migrations;
+  const [activeIndex, setActiveIndex] = useState(0);
+  const active = migrations[activeIndex] ?? migrations[0];
+  if (!active) return null;
+
+  const hasTabs = migrations.length > 1;
 
   return (
     <section className="space-y-6 pb-4">
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">Your climate emigrated</p>
         <h2 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-          The {lead.home.name} you were born into moved {lead.distanceKm.toLocaleString()} km {lead.direction}.
+          The {active.home.name} you were born into moved {active.distanceKm.toLocaleString()} km {active.direction}.
         </h2>
         <p className="max-w-2xl text-pretty text-muted-foreground">
           The climate of your childhood didn&rsquo;t stay put. Today it lives somewhere else &mdash; and
@@ -25,12 +31,28 @@ export function ClimateMovedSection({ data }: ClimateMovedSectionProps) {
         </p>
       </div>
 
-      <div className="space-y-4">
-        <MigrationBlock migration={lead} lead />
-        {rest.map((migration) => (
-          <MigrationBlock key={migration.home.displayName} migration={migration} />
-        ))}
-      </div>
+      {hasTabs ? (
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Cities for climate migration">
+          {migrations.map((migration, index) => (
+            <button
+              key={migration.home.displayName}
+              type="button"
+              role="tab"
+              aria-selected={index === activeIndex}
+              className={
+                index === activeIndex
+                  ? "rounded-full border border-border bg-foreground px-3 py-1.5 text-sm font-medium text-background"
+                  : "rounded-full border border-border bg-muted/30 px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/50"
+              }
+              onClick={() => setActiveIndex(index)}
+            >
+              {migration.home.name}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      <MigrationBlock migration={active} lead />
 
       <p className="text-xs uppercase tracking-wider text-muted-foreground opacity-70">
         Climate analog · matched on hottest day, coldest night &amp; annual rain

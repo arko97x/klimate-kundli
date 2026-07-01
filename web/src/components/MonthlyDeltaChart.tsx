@@ -5,7 +5,7 @@ import { ArcticIcebergChart } from "@/components/ArcticIcebergChart";
 import { ClimateMovedSection } from "@/components/ClimateMovedSection";
 import { EmissionsRingsChart } from "@/components/EmissionsRingsChart";
 import { InsightsSection } from "@/components/InsightsSection";
-import { LifeOrbitChart } from "@/components/LifeOrbitChart";
+// import { LifeOrbitChart } from "@/components/LifeOrbitChart"; // TEMP: "Your orbit" card disabled — see below
 import { LifeTempChart } from "@/components/LifeTempChart";
 import { RemediesSection } from "@/components/RemediesSection";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { MonthlyRainSection } from "@/components/MonthlyRainSection";
 import { RainRingsChart } from "@/components/RainRingsChart";
 import type { ArcticIce, MonthlyDeltaResponse } from "@/lib/api";
 import { formatDataSource } from "@/lib/utils";
-import { latestCompleteYearUtc } from "@/lib/years";
+// import { latestCompleteYearUtc } from "@/lib/years"; // TEMP: only used by disabled "Your orbit" card
 import type { LivedCity } from "@/types";
 
 const MONTH_NAMES = [
@@ -60,7 +60,7 @@ type MonthlyDeltaChartProps = {
 
 export function MonthlyDeltaChart({
   data,
-  livedCities,
+  // livedCities, // TEMP: only consumed by the disabled "Your orbit" card
   onReset,
 }: MonthlyDeltaChartProps) {
   const geometry = useMemo(() => buildGeometry(data), [data]);
@@ -223,20 +223,24 @@ export function MonthlyDeltaChart({
     );
   }
 
-  if (livedCities && livedCities.length > 0) {
-    cards.push(
-      <LifeOrbitChart
-        birthYear={data.birthYear}
-        livedCities={livedCities}
-        rainRings={data.rainRings}
-        latestCompleteYear={
-          data.hottestYears?.latestCompleteYear ??
-          data.rainRings?.latestCompleteYear ??
-          latestCompleteYearUtc()
-        }
-      />,
-    );
-  }
+  // TEMP: "Your orbit" card ("One line, every home you have known") disabled.
+  // The chart is built entirely from existing data (rainRings, livedCities,
+  // birthYear, hottestYears) shared with other cards, so no backend change is
+  // needed to hide it — re-enable by uncommenting the import above and this block.
+  // if (livedCities && livedCities.length > 0) {
+  //   cards.push(
+  //     <LifeOrbitChart
+  //       birthYear={data.birthYear}
+  //       livedCities={livedCities}
+  //       rainRings={data.rainRings}
+  //       latestCompleteYear={
+  //         data.hottestYears?.latestCompleteYear ??
+  //         data.rainRings?.latestCompleteYear ??
+  //         latestCompleteYearUtc()
+  //       }
+  //     />,
+  //   );
+  // }
 
   if (data.rainfall) {
     cards.push(
@@ -361,7 +365,7 @@ function ArcticIceSection({ arctic }: { arctic: ArcticIce }) {
 
         <div className="rounded-xl border border-border bg-muted/20 p-5 space-y-3">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            Summer sea ice lost since you were born
+            Ice the size of
           </p>
 
           {hasBerg ? (
