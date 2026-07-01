@@ -1,66 +1,71 @@
-import { useMemo, type CSSProperties, type ReactNode } from 'react'
+import { useMemo, type CSSProperties, type ReactNode } from "react";
 
-import '@/expt/stacking-cards.css'
-import { EmissionsRingsChart } from '@/components/EmissionsRingsChart'
-import { InsightsSection } from '@/components/InsightsSection'
-import { LifeOrbitChart } from '@/components/LifeOrbitChart'
-import { LifeTempChart } from '@/components/LifeTempChart'
-import { RemediesSection } from '@/components/RemediesSection'
-import { Button } from '@/components/ui/button'
-import { HandFanChart } from '@/components/HandFanChart'
-import { MonthlyRainSection } from '@/components/MonthlyRainSection'
-import { RainRingsChart } from '@/components/RainRingsChart'
-import type { ArcticIce, MonthlyDeltaResponse } from '@/lib/api'
-import { formatDataSource } from '@/lib/utils'
-import { latestCompleteYearUtc } from '@/lib/years'
-import type { LivedCity } from '@/types'
+import "@/expt/stacking-cards.css";
+import { ArcticIcebergChart } from "@/components/ArcticIcebergChart";
+import { EmissionsRingsChart } from "@/components/EmissionsRingsChart";
+import { InsightsSection } from "@/components/InsightsSection";
+import { LifeOrbitChart } from "@/components/LifeOrbitChart";
+import { LifeTempChart } from "@/components/LifeTempChart";
+import { RemediesSection } from "@/components/RemediesSection";
+import { Button } from "@/components/ui/button";
+import { HandFanChart } from "@/components/HandFanChart";
+import { MonthlyRainSection } from "@/components/MonthlyRainSection";
+import { RainRingsChart } from "@/components/RainRingsChart";
+import type { ArcticIce, MonthlyDeltaResponse } from "@/lib/api";
+import { formatDataSource } from "@/lib/utils";
+import { latestCompleteYearUtc } from "@/lib/years";
+import type { LivedCity } from "@/types";
 
 const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-] as const
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+] as const;
 
 function monthName(index: number): string {
-  return MONTH_NAMES[index] ?? 'Unknown'
+  return MONTH_NAMES[index] ?? "Unknown";
 }
 
-const COLOR_BIRTH = '#6b8eb8'
-const COLOR_RECENT = '#d3674a'
-const COLOR_DELTA = '#e9a560'
-const COLOR_BIRTH_RANGE = '#6b8eb8'
-const COLOR_RECENT_RANGE = '#d3674a'
-const RANGE_BAR_WIDTH = 6
-const RANGE_BAR_OFFSET = 5
+const COLOR_BIRTH = "#6b8eb8";
+const COLOR_RECENT = "#d3674a";
+const COLOR_DELTA = "#e9a560";
+const COLOR_BIRTH_RANGE = "#6b8eb8";
+const COLOR_RECENT_RANGE = "#d3674a";
+const RANGE_BAR_WIDTH = 6;
+const RANGE_BAR_OFFSET = 5;
 
-const VIEWBOX_WIDTH = 840
-const VIEWBOX_HEIGHT = 420
-const MARGIN = { top: 32, right: 32, bottom: 56, left: 56 }
-const INNER_WIDTH = VIEWBOX_WIDTH - MARGIN.left - MARGIN.right
-const INNER_HEIGHT = VIEWBOX_HEIGHT - MARGIN.top - MARGIN.bottom
+const VIEWBOX_WIDTH = 840;
+const VIEWBOX_HEIGHT = 420;
+const MARGIN = { top: 32, right: 32, bottom: 56, left: 56 };
+const INNER_WIDTH = VIEWBOX_WIDTH - MARGIN.left - MARGIN.right;
+const INNER_HEIGHT = VIEWBOX_HEIGHT - MARGIN.top - MARGIN.bottom;
 
-type ChartPoint = { x: number; y: number; value: number; month: number }
+type ChartPoint = { x: number; y: number; value: number; month: number };
 
 type MonthlyDeltaChartProps = {
-  data: MonthlyDeltaResponse
-  livedCities?: LivedCity[]
-  onReset?: () => void
-}
+  data: MonthlyDeltaResponse;
+  livedCities?: LivedCity[];
+  onReset?: () => void;
+};
 
-export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaChartProps) {
-  const geometry = useMemo(() => buildGeometry(data), [data])
-  const headline = buildHeadline(data)
+export function MonthlyDeltaChart({
+  data,
+  livedCities,
+  onReset,
+}: MonthlyDeltaChartProps) {
+  const geometry = useMemo(() => buildGeometry(data), [data]);
+  const headline = buildHeadline(data);
 
-  const cards: ReactNode[] = []
+  const cards: ReactNode[] = [];
 
   cards.push(
     <>
@@ -161,10 +166,22 @@ export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaCh
             ))}
 
             {geometry.birthPoints.map((point) => (
-              <circle key={`bp-${point.month}`} cx={point.x} cy={point.y} r={3} fill={COLOR_BIRTH} />
+              <circle
+                key={`bp-${point.month}`}
+                cx={point.x}
+                cy={point.y}
+                r={3}
+                fill={COLOR_BIRTH}
+              />
             ))}
             {geometry.recentPoints.map((point) => (
-              <circle key={`rp-${point.month}`} cx={point.x} cy={point.y} r={3.2} fill={COLOR_RECENT} />
+              <circle
+                key={`rp-${point.month}`}
+                cx={point.x}
+                cy={point.y}
+                r={3.2}
+                fill={COLOR_RECENT}
+              />
             ))}
 
             <XAxis />
@@ -176,8 +193,14 @@ export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaCh
 
       <footer className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <dl className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
-          <LegendSwatch color={COLOR_BIRTH} label={`Then · ${data.birthWindow.startYear}–${data.birthWindow.endYear}`} />
-          <LegendSwatch color={COLOR_RECENT} label={`Now · ${data.recentWindow.startYear}–${data.recentWindow.endYear}`} />
+          <LegendSwatch
+            color={COLOR_BIRTH}
+            label={`Then · ${data.birthWindow.startYear}–${data.birthWindow.endYear}`}
+          />
+          <LegendSwatch
+            color={COLOR_RECENT}
+            label={`Now · ${data.recentWindow.startYear}–${data.recentWindow.endYear}`}
+          />
           <span className="text-xs text-muted-foreground">
             Bars = coolest–hottest month in each 5-yr window · line = average
           </span>
@@ -187,12 +210,16 @@ export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaCh
         </dl>
       </footer>
     </>,
-  )
+  );
 
   if (data.tempTimeline) {
     cards.push(
-      <LifeTempChart insight={data.tempTimeline} source={data.source} confidence={data.confidence} />,
-    )
+      <LifeTempChart
+        insight={data.tempTimeline}
+        source={data.source}
+        confidence={data.confidence}
+      />,
+    );
   }
 
   if (livedCities && livedCities.length > 0) {
@@ -207,7 +234,7 @@ export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaCh
           latestCompleteYearUtc()
         }
       />,
-    )
+    );
   }
 
   if (data.rainfall) {
@@ -218,15 +245,17 @@ export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaCh
         source={data.source}
         confidence={data.confidence}
       />,
-    )
+    );
   }
 
   if (data.rainRings && data.rainRings.byCity.length > 0) {
-    cards.push(<RainRingsChart insight={data.rainRings} source={data.source} />)
+    cards.push(
+      <RainRingsChart insight={data.rainRings} source={data.source} />,
+    );
   }
 
   if (data.hottestYears) {
-    cards.push(<HottestYearsSection insight={data.hottestYears} />)
+    cards.push(<HottestYearsSection insight={data.hottestYears} />);
   }
 
   if (data.indiaEmissions) {
@@ -237,27 +266,27 @@ export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaCh
         parentsData={data.parentsIndiaEmissions}
         globalContext={data.globalContext}
       />,
-    )
+    );
   }
 
   if (data.globalContext?.arcticIce) {
-    cards.push(<ArcticIceSection arctic={data.globalContext.arcticIce} />)
+    cards.push(<ArcticIceSection arctic={data.globalContext.arcticIce} />);
   }
 
-  cards.push(<InsightsSection data={data} />)
-  cards.push(<RemediesSection data={data} />)
+  cards.push(<InsightsSection data={data} />);
+  cards.push(<RemediesSection data={data} />);
 
   return (
     <div className="mx-auto w-full max-w-4xl">
       <ul
         className="stack-cards"
-        style={{ ['--numcards' as string]: cards.length } as CSSProperties}
+        style={{ ["--numcards" as string]: cards.length } as CSSProperties}
       >
         {cards.map((card, index) => (
           <li
             key={index}
             className="stack-card"
-            style={{ ['--index' as string]: index + 1 } as CSSProperties}
+            style={{ ["--index" as string]: index + 1 } as CSSProperties}
           >
             <div className="stack-card__inner rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
               {card}
@@ -274,12 +303,18 @@ export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaCh
         </div>
       ) : null}
     </div>
-  )
+  );
 }
 
 function ArcticIceSection({ arctic }: { arctic: ArcticIce }) {
-  const { birthWindow, recentWindow, lostMkm2, comparison } = arctic
-  const lostText = `${lostMkm2.toFixed(2)} million km²`
+  const { birthWindow, recentWindow, lostMkm2, comparison } = arctic;
+  const lostText = `${lostMkm2.toFixed(2)} million km²`;
+  const hasBerg = arctic.lostKm2 > 0;
+  const bigStat = comparison
+    ? comparison.multiple >= 1
+      ? `${comparison.multiple.toFixed(comparison.multiple >= 10 ? 0 : 1)}× ${comparison.name}`
+      : `${Math.round(comparison.multiple * 100)}% of ${comparison.name}`
+    : `${lostMkm2.toFixed(1)}M km²`;
 
   return (
     <section className="space-y-6 pb-4">
@@ -290,67 +325,93 @@ function ArcticIceSection({ arctic }: { arctic: ArcticIce }) {
         </h2>
       </div>
 
-      <div className="rounded-xl border border-border bg-muted/20 p-5 space-y-4">
-        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-          Summer sea ice lost since you were born
-        </p>
+      <div
+        className={
+          hasBerg
+            ? "grid gap-6 sm:grid-cols-[220px_1fr] sm:items-center"
+            : undefined
+        }
+      >
+        {hasBerg ? (
+          <div className="flex flex-col items-center gap-3">
+            <ArcticIcebergChart arctic={arctic} />
+            <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span
+                  className="size-2.5 rounded-sm"
+                  style={{ backgroundColor: "#dde1e5" }}
+                />
+                Melted since {birthWindow.startYear}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span
+                  className="size-2.5 rounded-sm"
+                  style={{ backgroundColor: "#89b4c6" }}
+                />
+                Ice today
+              </span>
+            </div>
+          </div>
+        ) : null}
 
-        {arctic.lostKm2 > 0 ? (
-          <p className="text-pretty text-lg">
-            Since you were born, Arctic summer sea ice covering{' '}
-            <span className="font-semibold">
-              {comparison ? comparisonPhrase(comparison) : `roughly ${lostText}`}
-            </span>{' '}
-            has melted away.
+        <div className="rounded-xl border border-border bg-muted/20 p-5 space-y-3">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+            Summer sea ice lost since you were born
           </p>
-        ) : (
-          <p className="text-pretty text-lg">
-            Arctic summer sea ice is roughly unchanged across your lifetime so far — the steep
-            decline came in the decades before you were born.
+
+          {hasBerg ? (
+            <div className="space-y-1">
+              <p className="font-heading text-4xl font-semibold leading-none tracking-tight sm:text-5xl">
+                {bigStat}
+              </p>
+              <p className="text-pretty text-base text-foreground">
+                gone in your lifetime.
+              </p>
+            </div>
+          ) : (
+            <p className="text-pretty text-lg">
+              Arctic summer sea ice is roughly unchanged across your lifetime —
+              the steep decline came before you were born.
+            </p>
+          )}
+
+          <p className="text-xs text-muted-foreground tabular-nums">
+            September ice {birthWindow.extentMkm2.toFixed(2)}→
+            {recentWindow.extentMkm2.toFixed(2)}M km² · a {lostText} loss ·
+            NSIDC Sea Ice Index, 5-yr means
           </p>
-        )}
-
-        <p className="text-sm text-muted-foreground">
-          The September minimum shrank from {birthWindow.extentMkm2.toFixed(2)} to{' '}
-          {recentWindow.extentMkm2.toFixed(2)} million km²
-          {' '}({birthWindow.startYear}–{birthWindow.endYear} → {recentWindow.startYear}–
-          {recentWindow.endYear}) — a loss of about {lostText}.
-        </p>
-
-        <p className="text-xs text-muted-foreground">
-          Source: NSIDC Sea Ice Index, Arctic September extent · 5-year means
-        </p>
+        </div>
       </div>
     </section>
-  )
+  );
 }
 
-// >=1 reads naturally as a multiplier; <1 reads better as a percentage of the country's area.
-function comparisonPhrase(c: NonNullable<ArcticIce['comparison']>): string {
-  if (c.multiple >= 1) {
-    return `${c.multiple.toFixed(c.multiple >= 10 ? 0 : 1)}× the size of ${c.name}`
-  }
-  return `an area ${Math.round(c.multiple * 100)}% the size of ${c.name}`
-}
-
-function PeakSourceFootnote({ blades }: { blades: NonNullable<MonthlyDeltaResponse['hottestYears']>['blades'] }) {
-  const imdCount = blades.filter((b) => b.peakSource === 'imd_station').length
-  const indiaEra5 = blades.some((b) => b.isIndiaHome && b.peakSource === 'era5_grid')
+function PeakSourceFootnote({
+  blades,
+}: {
+  blades: NonNullable<MonthlyDeltaResponse["hottestYears"]>["blades"];
+}) {
+  const imdCount = blades.filter((b) => b.peakSource === "imd_station").length;
+  const indiaEra5 = blades.some(
+    (b) => b.isIndiaHome && b.peakSource === "era5_grid",
+  );
 
   if (imdCount === 0 && !indiaEra5) {
-    return null
+    return null;
   }
 
   return (
     <p className="max-w-xl text-xs text-muted-foreground">
       {imdCount > 0 ? (
         <>
-          Peak °C for {imdCount} {imdCount === 1 ? 'year' : 'years'} from nearest IMD station.{' '}
+          Peak °C for {imdCount} {imdCount === 1 ? "year" : "years"} from
+          nearest IMD station.{" "}
         </>
       ) : null}
       {indiaEra5 ? (
         <>
-          Other India peaks use ERA5 grid cells (~25 km) until station history is loaded.{' '}
+          Other India peaks use ERA5 grid cells (~25 km) until station history
+          is loaded.{" "}
         </>
       ) : null}
       {imdCount > 0 ? (
@@ -364,32 +425,34 @@ function PeakSourceFootnote({ blades }: { blades: NonNullable<MonthlyDeltaRespon
         </a>
       ) : null}
     </p>
-  )
+  );
 }
 
 function HottestYearsSection({
   insight,
 }: {
-  insight: NonNullable<MonthlyDeltaResponse['hottestYears']>
+  insight: NonNullable<MonthlyDeltaResponse["hottestYears"]>;
 }) {
   return (
     <section className="space-y-5 pb-4">
       <div className="space-y-2">
         <p className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-          You&apos;ve lived through{' '}
-          <span className="text-[#d3674a]">{insight.count}</span> record-hot{' '}
-          {insight.count === 1 ? 'year' : 'years'}.
+          You&apos;ve lived through{" "}
+          <span className="text-[#d3674a]">{insight.count}</span> record-hot{" "}
+          {insight.count === 1 ? "year" : "years"}.
         </p>
         <p className="max-w-xl text-sm text-muted-foreground">
-          Top {insight.topK} at each home since {insight.recordStartYear} · taller shading = hotter
-          peak
+          Top {insight.topK} at each home since {insight.recordStartYear} ·
+          taller shading = hotter peak
         </p>
         <PeakSourceFootnote blades={insight.blades ?? []} />
       </div>
 
       {(insight.blades ?? []).length > 0 ? (
         <div className="mt-2">
-          <HandFanChart insight={{ ...insight, blades: insight.blades ?? [] }} />
+          <HandFanChart
+            insight={{ ...insight, blades: insight.blades ?? [] }}
+          />
         </div>
       ) : null}
 
@@ -402,7 +465,7 @@ function HottestYearsSection({
             >
               <span className="font-medium">{city.cityName}</span>
               <span className="text-muted-foreground">
-                {' '}
+                {" "}
                 — {city.hotYearsLived}/{city.yearsLived} in top {insight.topK}
               </span>
             </li>
@@ -412,20 +475,25 @@ function HottestYearsSection({
 
       {insight.years.length > 0 && !(insight.blades?.length > 0) ? (
         <p className="text-xs text-muted-foreground">
-          {insight.years.length} {insight.years.length === 1 ? 'year' : 'years'} across all homes
+          {insight.years.length} {insight.years.length === 1 ? "year" : "years"}{" "}
+          across all homes
         </p>
       ) : null}
     </section>
-  )
+  );
 }
 
 function LegendSwatch({ color, label }: { color: string; label: string }) {
   return (
     <span className="flex items-center gap-2">
-      <span className="block size-3 rounded-sm" style={{ backgroundColor: color }} aria-hidden />
+      <span
+        className="block size-3 rounded-sm"
+        style={{ backgroundColor: color }}
+        aria-hidden
+      />
       <span>{label}</span>
     </span>
-  )
+  );
 }
 
 function YAxis({ ticks }: { ticks: { value: number; y: number }[] }) {
@@ -433,21 +501,32 @@ function YAxis({ ticks }: { ticks: { value: number; y: number }[] }) {
     <g aria-hidden>
       {ticks.map((tick) => (
         <g key={tick.value} transform={`translate(0, ${tick.y})`}>
-          <line x1={0} x2={INNER_WIDTH} stroke="currentColor" strokeOpacity={0.08} />
-          <text x={-12} y={4} textAnchor="end" fontSize={11} className="fill-muted-foreground tabular-nums">
+          <line
+            x1={0}
+            x2={INNER_WIDTH}
+            stroke="currentColor"
+            strokeOpacity={0.08}
+          />
+          <text
+            x={-12}
+            y={4}
+            textAnchor="end"
+            fontSize={11}
+            className="fill-muted-foreground tabular-nums"
+          >
             {tick.value}°
           </text>
         </g>
       ))}
     </g>
-  )
+  );
 }
 
 function XAxis() {
   return (
     <g transform={`translate(0, ${INNER_HEIGHT})`} aria-hidden>
       {MONTH_NAMES.map((label, i) => {
-        const x = (i / 11) * INNER_WIDTH
+        const x = (i / 11) * INNER_WIDTH;
         return (
           <text
             key={label}
@@ -459,25 +538,25 @@ function XAxis() {
           >
             {label}
           </text>
-        )
+        );
       })}
     </g>
-  )
+  );
 }
 
 interface CalloutProps {
-  x: number
-  yTop: number
-  yBottom: number
-  label: string
-  sublabel: string
-  side: 'left' | 'right'
+  x: number;
+  yTop: number;
+  yBottom: number;
+  label: string;
+  sublabel: string;
+  side: "left" | "right";
 }
 
 function Callout({ x, yTop, yBottom, label, sublabel, side }: CalloutProps) {
-  const offset = 18
-  const textX = side === 'right' ? x + offset : x - offset
-  const anchor = side === 'right' ? 'start' : 'end'
+  const offset = 18;
+  const textX = side === "right" ? x + offset : x - offset;
+  const anchor = side === "right" ? "start" : "end";
 
   return (
     <g>
@@ -490,8 +569,22 @@ function Callout({ x, yTop, yBottom, label, sublabel, side }: CalloutProps) {
         strokeWidth={1.25}
         strokeDasharray="3 3"
       />
-      <circle cx={x} cy={yTop} r={4.5} fill="none" stroke={COLOR_RECENT} strokeWidth={1.6} />
-      <circle cx={x} cy={yBottom} r={4.5} fill="none" stroke={COLOR_BIRTH} strokeWidth={1.6} />
+      <circle
+        cx={x}
+        cy={yTop}
+        r={4.5}
+        fill="none"
+        stroke={COLOR_RECENT}
+        strokeWidth={1.6}
+      />
+      <circle
+        cx={x}
+        cy={yBottom}
+        r={4.5}
+        fill="none"
+        stroke={COLOR_BIRTH}
+        strokeWidth={1.6}
+      />
       <text
         x={textX}
         y={(yTop + yBottom) / 2 - 6}
@@ -512,32 +605,32 @@ function Callout({ x, yTop, yBottom, label, sublabel, side }: CalloutProps) {
         {sublabel}
       </text>
     </g>
-  )
+  );
 }
 
-type RangeBar = { month: number; x: number; yTop: number; height: number }
+type RangeBar = { month: number; x: number; yTop: number; height: number };
 
 interface Geometry {
-  yTicks: { value: number; y: number }[]
-  birthPoints: ChartPoint[]
-  recentPoints: ChartPoint[]
-  birthRangeBars: RangeBar[]
-  recentRangeBars: RangeBar[]
-  birthLineSegments: string[]
-  recentLineSegments: string[]
-  birthAreaSegments: string[]
-  recentAreaSegments: string[]
-  deltaSegments: string[]
-  callout: CalloutProps | null
+  yTicks: { value: number; y: number }[];
+  birthPoints: ChartPoint[];
+  recentPoints: ChartPoint[];
+  birthRangeBars: RangeBar[];
+  recentRangeBars: RangeBar[];
+  birthLineSegments: string[];
+  recentLineSegments: string[];
+  birthAreaSegments: string[];
+  recentAreaSegments: string[];
+  deltaSegments: string[];
+  callout: CalloutProps | null;
 }
 
 function buildGeometry(data: MonthlyDeltaResponse): Geometry {
-  const birth = data.birthWindow.monthly
-  const recent = data.recentWindow.monthly
-  const birthMin = data.birthWindow.monthlyMin ?? []
-  const birthMax = data.birthWindow.monthlyMax ?? []
-  const recentMin = data.recentWindow.monthlyMin ?? []
-  const recentMax = data.recentWindow.monthlyMax ?? []
+  const birth = data.birthWindow.monthly;
+  const recent = data.recentWindow.monthly;
+  const birthMin = data.birthWindow.monthlyMin ?? [];
+  const birthMax = data.birthWindow.monthlyMax ?? [];
+  const recentMin = data.recentWindow.monthlyMin ?? [];
+  const recentMax = data.recentWindow.monthlyMax ?? [];
 
   const allValues = [
     ...birth,
@@ -546,7 +639,7 @@ function buildGeometry(data: MonthlyDeltaResponse): Geometry {
     ...birthMax,
     ...recentMin,
     ...recentMax,
-  ].filter((v): v is number => v != null)
+  ].filter((v): v is number => v != null);
   if (allValues.length === 0) {
     return {
       yTicks: [],
@@ -560,149 +653,157 @@ function buildGeometry(data: MonthlyDeltaResponse): Geometry {
       recentAreaSegments: [],
       deltaSegments: [],
       callout: null,
-    }
+    };
   }
 
-  const dataMin = Math.min(...allValues)
-  const dataMax = Math.max(...allValues)
-  const yMin = Math.floor(dataMin - 1)
-  const yMax = Math.ceil(dataMax + 1)
+  const dataMin = Math.min(...allValues);
+  const dataMax = Math.max(...allValues);
+  const yMin = Math.floor(dataMin - 1);
+  const yMax = Math.ceil(dataMax + 1);
 
-  const yScale = (value: number) => INNER_HEIGHT - ((value - yMin) / (yMax - yMin)) * INNER_HEIGHT
-  const xScale = (monthIndex: number) => (monthIndex / 11) * INNER_WIDTH
+  const yScale = (value: number) =>
+    INNER_HEIGHT - ((value - yMin) / (yMax - yMin)) * INNER_HEIGHT;
+  const xScale = (monthIndex: number) => (monthIndex / 11) * INNER_WIDTH;
 
   const buildPoints = (monthly: (number | null)[]): ChartPoint[] => {
-    const points: ChartPoint[] = []
+    const points: ChartPoint[] = [];
     for (let m = 0; m < monthly.length; m += 1) {
-      const v = monthly[m]
-      if (v == null) continue
-      points.push({ x: xScale(m), y: yScale(v), value: v, month: m })
+      const v = monthly[m];
+      if (v == null) continue;
+      points.push({ x: xScale(m), y: yScale(v), value: v, month: m });
     }
-    return points
-  }
+    return points;
+  };
 
-  const birthPoints = buildPoints(birth)
-  const recentPoints = buildPoints(recent)
+  const birthPoints = buildPoints(birth);
+  const recentPoints = buildPoints(recent);
 
   const buildRangeBars = (
     mins: (number | null)[],
     maxs: (number | null)[],
     xOffset: number,
   ): RangeBar[] => {
-    const bars: RangeBar[] = []
+    const bars: RangeBar[] = [];
     for (let m = 0; m < 12; m += 1) {
-      const lo = mins[m]
-      const hi = maxs[m]
-      if (lo == null || hi == null) continue
-      const yTop = yScale(Math.max(lo, hi))
-      const yBottom = yScale(Math.min(lo, hi))
+      const lo = mins[m];
+      const hi = maxs[m];
+      if (lo == null || hi == null) continue;
+      const yTop = yScale(Math.max(lo, hi));
+      const yBottom = yScale(Math.min(lo, hi));
       bars.push({
         month: m,
         x: xScale(m) + xOffset - RANGE_BAR_WIDTH / 2,
         yTop,
         height: Math.max(2, yBottom - yTop),
-      })
+      });
     }
-    return bars
-  }
+    return bars;
+  };
 
-  const birthRangeBars = buildRangeBars(birthMin, birthMax, -RANGE_BAR_OFFSET)
-  const recentRangeBars = buildRangeBars(recentMin, recentMax, RANGE_BAR_OFFSET)
+  const birthRangeBars = buildRangeBars(birthMin, birthMax, -RANGE_BAR_OFFSET);
+  const recentRangeBars = buildRangeBars(
+    recentMin,
+    recentMax,
+    RANGE_BAR_OFFSET,
+  );
 
   const buildLineSegments = (monthly: (number | null)[]): string[] => {
-    const segments: string[] = []
-    let current = ''
+    const segments: string[] = [];
+    let current = "";
     for (let m = 0; m < monthly.length; m += 1) {
-      const v = monthly[m]
+      const v = monthly[m];
       if (v == null) {
-        if (current) segments.push(current)
-        current = ''
-        continue
+        if (current) segments.push(current);
+        current = "";
+        continue;
       }
-      const cmd = current ? 'L' : 'M'
-      current += `${cmd}${xScale(m)},${yScale(v)} `
+      const cmd = current ? "L" : "M";
+      current += `${cmd}${xScale(m)},${yScale(v)} `;
     }
-    if (current) segments.push(current)
-    return segments
-  }
+    if (current) segments.push(current);
+    return segments;
+  };
 
   const buildAreaSegments = (monthly: (number | null)[]): string[] => {
-    const segments: string[] = []
-    let current: ChartPoint[] = []
+    const segments: string[] = [];
+    let current: ChartPoint[] = [];
     const flush = () => {
       if (current.length < 2) {
-        current = []
-        return
+        current = [];
+        return;
       }
-      const first = current[0]!
-      const last = current[current.length - 1]!
-      let d = `M${first.x},${INNER_HEIGHT} `
+      const first = current[0]!;
+      const last = current[current.length - 1]!;
+      let d = `M${first.x},${INNER_HEIGHT} `;
       for (const p of current) {
-        d += `L${p.x},${p.y} `
+        d += `L${p.x},${p.y} `;
       }
-      d += `L${last.x},${INNER_HEIGHT} Z`
-      segments.push(d)
-      current = []
-    }
+      d += `L${last.x},${INNER_HEIGHT} Z`;
+      segments.push(d);
+      current = [];
+    };
     for (let m = 0; m < monthly.length; m += 1) {
-      const v = monthly[m]
+      const v = monthly[m];
       if (v == null) {
-        flush()
-        continue
+        flush();
+        continue;
       }
-      current.push({ x: xScale(m), y: yScale(v), value: v, month: m })
+      current.push({ x: xScale(m), y: yScale(v), value: v, month: m });
     }
-    flush()
-    return segments
-  }
+    flush();
+    return segments;
+  };
 
   const buildDeltaSegments = (): string[] => {
     // Polygon spanning month m → m+1 where both series have values.
-    const segments: string[] = []
-    let polygon: { x: number; yRecent: number; yBirth: number }[] = []
+    const segments: string[] = [];
+    let polygon: { x: number; yRecent: number; yBirth: number }[] = [];
     const flush = () => {
       if (polygon.length < 2) {
-        polygon = []
-        return
+        polygon = [];
+        return;
       }
-      let top = `M${polygon[0]!.x},${polygon[0]!.yRecent} `
+      let top = `M${polygon[0]!.x},${polygon[0]!.yRecent} `;
       for (let i = 1; i < polygon.length; i += 1) {
-        top += `L${polygon[i]!.x},${polygon[i]!.yRecent} `
+        top += `L${polygon[i]!.x},${polygon[i]!.yRecent} `;
       }
       for (let i = polygon.length - 1; i >= 0; i -= 1) {
-        top += `L${polygon[i]!.x},${polygon[i]!.yBirth} `
+        top += `L${polygon[i]!.x},${polygon[i]!.yBirth} `;
       }
-      top += 'Z'
-      segments.push(top)
-      polygon = []
-    }
+      top += "Z";
+      segments.push(top);
+      polygon = [];
+    };
     for (let m = 0; m < 12; m += 1) {
-      const b = birth[m]
-      const r = recent[m]
+      const b = birth[m];
+      const r = recent[m];
       if (b == null || r == null) {
-        flush()
-        continue
+        flush();
+        continue;
       }
-      polygon.push({ x: xScale(m), yRecent: yScale(r), yBirth: yScale(b) })
+      polygon.push({ x: xScale(m), yRecent: yScale(r), yBirth: yScale(b) });
     }
-    flush()
-    return segments
-  }
+    flush();
+    return segments;
+  };
 
-  const yTicks = computeYTicks(yMin, yMax).map((value) => ({ value, y: yScale(value) }))
+  const yTicks = computeYTicks(yMin, yMax).map((value) => ({
+    value,
+    y: yScale(value),
+  }));
 
   const callout: CalloutProps | null = data.largestDelta
     ? (() => {
-        const m = data.largestDelta.month
-        const b = birth[m]
-        const r = recent[m]
-        if (b == null || r == null) return null
-        const delta = data.largestDelta.delta
-        const sign = delta >= 0 ? '+' : ''
-        const direction = delta >= 0 ? 'warmer' : 'cooler'
-        const yRecent = yScale(r)
-        const yBirth = yScale(b)
-        const side: 'left' | 'right' = m >= 8 ? 'left' : 'right'
+        const m = data.largestDelta.month;
+        const b = birth[m];
+        const r = recent[m];
+        if (b == null || r == null) return null;
+        const delta = data.largestDelta.delta;
+        const sign = delta >= 0 ? "+" : "";
+        const direction = delta >= 0 ? "warmer" : "cooler";
+        const yRecent = yScale(r);
+        const yBirth = yScale(b);
+        const side: "left" | "right" = m >= 8 ? "left" : "right";
         return {
           x: xScale(m),
           yTop: Math.min(yRecent, yBirth),
@@ -710,9 +811,9 @@ function buildGeometry(data: MonthlyDeltaResponse): Geometry {
           label: `${sign}${delta.toFixed(1)}°C`,
           sublabel: `${monthName(m)} is now ${direction}`,
           side,
-        }
+        };
       })()
-    : null
+    : null;
 
   return {
     yTicks,
@@ -726,60 +827,63 @@ function buildGeometry(data: MonthlyDeltaResponse): Geometry {
     recentAreaSegments: buildAreaSegments(recent),
     deltaSegments: buildDeltaSegments(),
     callout,
-  }
+  };
 }
 
 function computeYTicks(yMin: number, yMax: number): number[] {
-  const range = yMax - yMin
-  if (range <= 0) return [yMin]
-  const step = niceStep(range / 5)
-  const start = Math.ceil(yMin / step) * step
-  const ticks: number[] = []
+  const range = yMax - yMin;
+  if (range <= 0) return [yMin];
+  const step = niceStep(range / 5);
+  const start = Math.ceil(yMin / step) * step;
+  const ticks: number[] = [];
   for (let v = start; v <= yMax; v += step) {
-    ticks.push(Math.round(v))
+    ticks.push(Math.round(v));
   }
-  return ticks
+  return ticks;
 }
 
 function niceStep(rough: number): number {
-  if (rough <= 1) return 1
-  if (rough <= 2) return 2
-  if (rough <= 2.5) return 2
-  if (rough <= 5) return 5
-  return 10
+  if (rough <= 1) return 1;
+  if (rough <= 2) return 2;
+  if (rough <= 2.5) return 2;
+  if (rough <= 5) return 5;
+  return 10;
 }
 
-function buildHeadline(data: MonthlyDeltaResponse): { main: string; sub: string } {
-  const cityName = data.city.name
-  const birthRange = `${data.birthWindow.startYear}–${data.birthWindow.endYear}`
+function buildHeadline(data: MonthlyDeltaResponse): {
+  main: string;
+  sub: string;
+} {
+  const cityName = data.city.name;
+  const birthRange = `${data.birthWindow.startYear}–${data.birthWindow.endYear}`;
 
   if (!data.largestDelta) {
     return {
       main: `${cityName}, then and now.`,
-      sub: 'Five-year monthly averages around your birth year compared with the last five years.',
-    }
+      sub: "Five-year monthly averages around your birth year compared with the last five years.",
+    };
   }
 
-  const { month, delta } = data.largestDelta
-  const monthLabel = monthName(month)
-  const abs = Math.abs(delta).toFixed(1)
+  const { month, delta } = data.largestDelta;
+  const monthLabel = monthName(month);
+  const abs = Math.abs(delta).toFixed(1);
 
   if (delta >= 0.3) {
     return {
       main: `${cityName} got hotter while you grew up.`,
       sub: `An average ${monthLabel} is now ${abs}°C warmer than during ${birthRange}.`,
-    }
+    };
   }
 
   if (delta <= -0.3) {
     return {
       main: `${cityName} bucked the trend.`,
       sub: `An average ${monthLabel} now runs ${abs}°C cooler than during ${birthRange}.`,
-    }
+    };
   }
 
   return {
     main: `${cityName}, then and now.`,
-    sub: `Largest shift is in ${monthLabel} — ${abs}°C ${delta >= 0 ? 'warmer' : 'cooler'} than during ${birthRange}.`,
-  }
+    sub: `Largest shift is in ${monthLabel} — ${abs}°C ${delta >= 0 ? "warmer" : "cooler"} than during ${birthRange}.`,
+  };
 }
