@@ -43,7 +43,7 @@ export function BirthStep({
         <div className="w-full">
           <CitySearchCombobox
             id="birth-city"
-            className="w-full bg-white border border-neutral-300 text-black placeholder:text-neutral-400 rounded-none h-14 px-4 shadow-none focus-visible:border-neutral-400 focus-visible:ring-0 text-base md:text-lg"
+            className="w-full bg-white border border-neutral-300 text-black placeholder:text-neutral-400 rounded-none h-10 px-3 shadow-none focus-visible:border-neutral-400 focus-visible:ring-0 text-base md:text-lg"
             value={birthCity}
             onValueChange={onBirthCityChange}
             placeholder="Search for your birth city"
