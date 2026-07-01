@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import parrotUrl from '@/assets/parrot-white.svg'
 import parrotStep1Url from '@/assets/parrot-step1.svg'
@@ -24,21 +23,6 @@ export function KundliWizardLayout({
   step?: 'landing' | 'birth' | 'lived'
   onStart?: () => void
 }) {
-  const [theme] = useState<'light' | 'dark'>(() => {
-    const saved = localStorage.getItem('kk-theme')
-    if (saved === 'light' || saved === 'dark') return saved
-    return 'dark'
-  })
-
-  useEffect(() => {
-    const root = window.document.documentElement
-    if (theme === 'dark') {
-      root.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
-    }
-  }, [theme])
-
   return (
     <div className="relative w-screen h-screen min-h-screen bg-white text-black overflow-hidden font-sans select-none flex flex-col items-center justify-start">
       <style>{`

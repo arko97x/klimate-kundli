@@ -1,8 +1,8 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MenuIcon, SunIcon, MoonIcon } from 'lucide-react'
+import { MenuIcon } from 'lucide-react'
 
-import { Button, buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import {
   Popover,
   PopoverContent,
@@ -56,27 +56,6 @@ export function Header() {
     height: 80,
   }))
 
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const saved = localStorage.getItem('kk-theme')
-    if (saved === 'light' || saved === 'dark') return saved
-    return 'dark'
-  })
-
-  useEffect(() => {
-    const root = window.document.documentElement
-    if (theme === 'dark') {
-      root.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
-    }
-  }, [theme])
-
-  const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark'
-    setTheme(next)
-    localStorage.setItem('kk-theme', next)
-  }
-
   useLayoutEffect(() => {
     const header = headerRef.current
     if (!header) return
@@ -121,16 +100,6 @@ export function Header() {
             <Link to="/" className={buttonVariants()}>
               New Kundli
             </Link>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-              className="size-9 text-foreground transition-colors hover:text-foreground/70"
-            >
-              {theme === 'dark' ? <SunIcon className="size-5" /> : <MoonIcon className="size-5" />}
-            </Button>
             <HeaderMenu />
           </nav>
         )}
