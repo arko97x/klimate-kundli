@@ -11,6 +11,7 @@
     "test": "vitest run tests",
     "fetch:static": "tsx src/scripts/fetch_static_data.ts",
     "prewarm": "tsx src/scripts/prewarm.ts",
+    "build:analog-index": "tsx src/scripts/build-analog-index.ts",
     "prewarm:generate-batch": "tsx src/scripts/generate-prewarm-batch.ts",
     "imd:spike": "tsx src/scripts/imd-spike.ts",
     "imd:diagnose": "tsx src/scripts/imd-diagnose.ts",

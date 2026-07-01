@@ -6,11 +6,13 @@ import { fileURLToPath } from "node:url";
 import { createCache, type Cache } from "./cache/store.js";
 import { loadEnvFile } from "./lib/load-env-file.js";
 import { Telemetry } from "./lib/telemetry.js";
+import { createAnalogResolver, loadAnalogIndex } from "./resolvers/analog.js";
 import { createGeocoder, type Geocoder } from "./resolvers/geocoding.js";
 import { createHistoricalResolver } from "./resolvers/historical.js";
 import { createImdService } from "./resolvers/imd/resolver.js";
 import { createProjectionResolver } from "./resolvers/projection.js";
 import { loadStaticData, type StaticData } from "./resolvers/statics.js";
+import type { AnalogIndex } from "./resolvers/analog.js";
 import { createGeocodeRoute } from "./routes/geocode.js";
 import { createHealthRoute } from "./routes/health.js";
 import { createKundliRoute } from "./routes/kundli.js";
@@ -25,6 +27,7 @@ interface AppOptions {
   statics?: StaticData;
   telemetry?: Telemetry;
   kundliStore?: KundliStore;
+  analogIndex?: AnalogIndex;
 }
 
 export function createApp(options: AppOptions = {}): Hono {
@@ -36,6 +39,7 @@ export function createApp(options: AppOptions = {}): Hono {
   const historical = createHistoricalResolver({ cache });
   const imd = createImdService({ cache });
   const projection = createProjectionResolver({ cache });
+  const analog = createAnalogResolver({ index: options.analogIndex ?? loadAnalogIndex() });
   const kundliStore = options.kundliStore ?? createKundliStore();
 
   app.use(
@@ -45,7 +49,7 @@ export function createApp(options: AppOptions = {}): Hono {
     }),
   );
 
-  app.route("/kundli", createKundliRoute({ cache, statics, telemetry, historical, projection }));
+  app.route("/kundli", createKundliRoute({ cache, statics, telemetry, historical, projection, analog }));
   app.route(
     "/kundlis",
     createKundlisRoute(kundliStore, {
@@ -56,7 +60,7 @@ export function createApp(options: AppOptions = {}): Hono {
       snapshotGithubToken: process.env.KUNDLI_SNAPSHOT_GITHUB_TOKEN,
     }),
   );
-  app.route("/monthly-delta", createMonthlyDeltaRoute({ historical, statics, imd }));
+  app.route("/monthly-delta", createMonthlyDeltaRoute({ historical, statics, imd, analog }));
   app.route("/geocode", createGeocodeRoute(geocoder));
   app.route("/stats", createStatsRoute(cache, telemetry));
   app.route("/health", createHealthRoute(true));

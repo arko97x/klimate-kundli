@@ -6,6 +6,7 @@ import { gridKey } from "../lib/grid.js";
 import { buildRainRingsInsight } from "../lib/rain-rings.js";
 import { buildRainfallInsight } from "../lib/rain-stats.js";
 import { buildTempTimelineInsight } from "../lib/temp-timeline.js";
+import type { AnalogHome, AnalogResolution } from "../resolvers/analog.js";
 import type { HistoricalWeatherResult, WeatherDaily } from "../resolvers/historical.js";
 import type { ImdService } from "../resolvers/imd/resolver.js";
 import type { StaticData } from "../resolvers/statics.js";
@@ -19,6 +20,9 @@ interface MonthlyDeltaRouteDeps {
   };
   statics: StaticData;
   imd?: ImdService;
+  analog: {
+    resolve(homes: AnalogHome[], birthYear: number): AnalogResolution;
+  };
   today?: Date;
 }
 
@@ -135,6 +139,12 @@ export function createMonthlyDeltaRoute(deps: MonthlyDeltaRouteDeps): Hono {
       );
       const rainRings = buildRainRingsInsight(stints, weatherByKey, birthYear, latestCompleteYear);
       const tempTimeline = buildTempTimelineInsight(stints, weatherByKey, birthYear, latestCompleteYear);
+      // Pure in-memory match over the shipped analog index — never fetches, cannot rate-limit.
+      const analogHomes: AnalogHome[] =
+        parsed.data.livedCities && parsed.data.livedCities.length > 0
+          ? parsed.data.livedCities
+          : [parsed.data.birthCity];
+      const climateMoved = deps.analog.resolve(analogHomes, birthYear);
 
       return c.json({
         city: parsed.data.birthCity,
@@ -162,6 +172,7 @@ export function createMonthlyDeltaRoute(deps: MonthlyDeltaRouteDeps): Hono {
         rainfall,
         rainRings,
         tempTimeline,
+        climateMoved: climateMoved.migrations.length > 0 ? climateMoved : null,
         source: birthWeather.source,
         confidence: birthWeather.confidence,
       });

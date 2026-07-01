@@ -2,6 +2,7 @@ import { useMemo, type CSSProperties, type ReactNode } from "react";
 
 import "@/expt/stacking-cards.css";
 import { ArcticIcebergChart } from "@/components/ArcticIcebergChart";
+import { ClimateMovedSection } from "@/components/ClimateMovedSection";
 import { EmissionsRingsChart } from "@/components/EmissionsRingsChart";
 import { InsightsSection } from "@/components/InsightsSection";
 import { LifeOrbitChart } from "@/components/LifeOrbitChart";
@@ -271,6 +272,10 @@ export function MonthlyDeltaChart({
 
   if (data.globalContext?.arcticIce) {
     cards.push(<ArcticIceSection arctic={data.globalContext.arcticIce} />);
+  }
+
+  if (data.climateMoved && data.climateMoved.migrations.length > 0) {
+    cards.push(<ClimateMovedSection data={data.climateMoved} />);
   }
 
   cards.push(<InsightsSection data={data} />);

@@ -179,6 +179,23 @@ export interface RainfallInsight {
   monsoonPctChange: number | null
 }
 
+export interface ClimateMigration {
+  home: { name: string; displayName: string; lat: number; lon: number }
+  analog: { name: string; displayName: string; lat: number; lon: number; country: string; admin1?: string }
+  distanceKm: number
+  bearingDeg: number
+  direction: string
+  childhood: { startYear: number; endYear: number; heatCeiling: number; coldFloor: number; wetness: number; yearsUsed: number }
+  homeNow: { heatCeiling: number; coldFloor: number; wetness: number } | null
+  matchZ: number
+  confidence: string
+}
+
+export interface ClimateMoved {
+  childhoodWindow: [number, number]
+  migrations: ClimateMigration[]
+}
+
 export interface MonthlyDeltaResponse {
   city: City
   birthYear: number
@@ -193,6 +210,8 @@ export interface MonthlyDeltaResponse {
   rainfall: RainfallInsight | null
   rainRings: RainRingsInsight | null
   tempTimeline: TempTimelineInsight | null
+  /** Absent on kundlis saved before this feature shipped. */
+  climateMoved: ClimateMoved | null
   source: string
   confidence: string
 }

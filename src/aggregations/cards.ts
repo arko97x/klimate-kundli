@@ -1,6 +1,7 @@
 import type { StaticData, StaticLookup } from "../resolvers/statics.js";
 import type { HistoricalWeatherResult, WeatherDaily } from "../resolvers/historical.js";
 import type { ProjectionResult } from "../resolvers/projection.js";
+import type { AnalogResolution } from "../resolvers/analog.js";
 import type { City, Confidence, KundliCard, LivedCity, Source } from "../types.js";
 
 export function buildYouCard(birthCity: City, birthDate: string): KundliCard {
@@ -235,6 +236,32 @@ export function buildCo2PpmChangeCard(statics: StaticData, birthYear: number): K
     confidence: combineConfidence(from, to),
     reason: combineReason(from, to),
   };
+}
+
+export function buildClimateMovedCard(resolution: AnalogResolution | null): KundliCard {
+  if (!resolution || resolution.migrations.length === 0) {
+    return unavailableCard(13, "climate_moved", {}, "no-analog", "climate_analog");
+  }
+
+  return {
+    id: 13,
+    type: "climate_moved",
+    data: {
+      childhoodWindow: resolution.childhoodWindow,
+      migrations: resolution.migrations,
+    },
+    source: "climate_analog",
+    confidence: lowestConfidence(resolution.migrations.map((m) => m.confidence)),
+  };
+}
+
+const CONFIDENCE_RANK: Confidence[] = ["exact", "high", "medium", "low", "unavailable"];
+
+function lowestConfidence(confidences: Confidence[]): Confidence {
+  return confidences.reduce<Confidence>(
+    (worst, current) => (CONFIDENCE_RANK.indexOf(current) > CONFIDENCE_RANK.indexOf(worst) ? current : worst),
+    "high",
+  );
 }
 
 function unavailableCard(

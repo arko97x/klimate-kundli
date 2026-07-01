@@ -9,7 +9,8 @@ export type Source =
   | "cmip6"
   | "extrapolated"
   | "input"
-  | "static_csv";
+  | "static_csv"
+  | "climate_analog";
 
 export interface City {
   name: string;

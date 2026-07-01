@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { SqliteCache } from "../src/cache/store.js";
 import { Telemetry } from "../src/lib/telemetry.js";
+import type { AnalogResolution } from "../src/resolvers/analog.js";
 import type { HistoricalWeatherResult } from "../src/resolvers/historical.js";
 import { loadStaticData } from "../src/resolvers/statics.js";
 import { createKundliRoute } from "../src/routes/kundli.js";
@@ -55,6 +56,25 @@ const london = {
   end: "2015-01-01",
 };
 
+function fixtureAnalog(): AnalogResolution {
+  return {
+    childhoodWindow: [1993, 2008],
+    migrations: [
+      {
+        home: { name: delhi.name, displayName: delhi.displayName, lat: delhi.lat, lon: delhi.lon },
+        analog: { name: "Jaipur", displayName: "Jaipur, Rajasthan, India", lat: 26.9, lon: 75.8, country: "IND" },
+        distanceKm: 235,
+        bearingDeg: 225,
+        direction: "southwest",
+        childhood: { startYear: 1993, endYear: 2008, heatCeiling: 44.7, coldFloor: 4, wetness: 676, yearsUsed: 16 },
+        homeNow: { heatCeiling: 44, coldFloor: 4.2, wetness: 752 },
+        matchZ: 0.08,
+        confidence: "high",
+      },
+    ],
+  };
+}
+
 function birthWeather(): HistoricalWeatherResult {
   return {
     source: "era5",
@@ -79,7 +99,7 @@ function birthWeather(): HistoricalWeatherResult {
 }
 
 describe("POST /kundli", () => {
-  it("returns all 12 cards with telemetry", async () => {
+  it("returns all 13 cards with telemetry", async () => {
     const cache = tempCache();
     const route = createKundliRoute({
       cache,
@@ -127,6 +147,7 @@ describe("POST /kundli", () => {
           confidence: "high",
         }),
       },
+      analog: { resolve: () => fixtureAnalog() },
     });
 
     const res = await route.request("/", {
@@ -145,8 +166,8 @@ describe("POST /kundli", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(body.kundli.cards).toHaveLength(12);
-    expect(body.kundli.cards.map((card: { id: number }) => card.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    expect(body.kundli.cards).toHaveLength(13);
+    expect(body.kundli.cards.map((card: { id: number }) => card.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
     expect(body.telemetry.partial).toBe(false);
 
     cache.close();
@@ -160,6 +181,7 @@ describe("POST /kundli", () => {
       telemetry: new Telemetry(),
       historical: { resolve: async () => null },
       projection: { resolve: async () => null },
+      analog: { resolve: () => ({ childhoodWindow: [0, 0], migrations: [] }) },
     });
 
     const res = await route.request("/", {

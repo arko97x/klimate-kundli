@@ -4,6 +4,7 @@ import type { Cache } from "../cache/store.js";
 import {
   buildBirthYearHighCard,
   buildBirthYearLowCard,
+  buildClimateMovedCard,
   buildCo2PpmChangeCard,
   buildEmissionsChangeCard,
   buildLatestBirthdayHighCard,
@@ -17,6 +18,7 @@ import {
 } from "../aggregations/cards.js";
 import { Budget } from "../lib/budget.js";
 import type { Telemetry } from "../lib/telemetry.js";
+import type { AnalogHome, AnalogResolution } from "../resolvers/analog.js";
 import type { HistoricalWeatherResult } from "../resolvers/historical.js";
 import type { ProjectionResult } from "../resolvers/projection.js";
 import type { StaticData } from "../resolvers/statics.js";
@@ -36,6 +38,9 @@ interface KundliRouteDeps {
       historical: HistoricalWeatherResult | null,
       budget?: Budget,
     ): Promise<ProjectionResult | null>;
+  };
+  analog: {
+    resolve(homes: AnalogHome[], birthYear: number): AnalogResolution;
   };
   today?: Date;
 }
@@ -113,6 +118,9 @@ export function createKundliRoute(deps: KundliRouteDeps): Hono {
       const projection = await deps.projection.resolve(currentCity, input.birthDate, currentBirthdayWeather ?? birthWeather, budget);
       const weatherByCity = new Map<string, HistoricalWeatherResult | null>(livedWeatherEntries);
 
+      // Pure in-memory analog match over the shipped index — never fetches.
+      const climateMoved = deps.analog.resolve(input.livedCities, birthYear);
+
       const cards: KundliCard[] = [
         buildYouCard(input.birthCity, input.birthDate),
         buildBirthYearHighCard(input.birthCity, birthYear, birthWeather),
@@ -126,6 +134,7 @@ export function createKundliRoute(deps: KundliRouteDeps): Hono {
         buildSeaLevelRiseCard(deps.statics, birthYear),
         buildCo2PpmChangeCard(deps.statics, birthYear),
         buildProjectedBirthdayCard(projection),
+        buildClimateMovedCard(climateMoved),
       ];
 
       const afterStats = deps.cache.stats();
