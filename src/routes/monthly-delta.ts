@@ -463,6 +463,14 @@ function buildHottestYearsInsight(
 
   const matchingYears = new Set<number>();
   const bladeByYear = new Map<number, HottestYearBladeRow>();
+  // A single calendar year may be shared by two stints (e.g. one home ends in
+  // 2012 and the next begins in 2012). Each lived year must be counted exactly
+  // once, so per-city yearsLived sums to the person's age. Process stints in
+  // chronological order and let the earlier stint claim any shared year.
+  const claimedYears = new Set<number>();
+  const orderedStints = [...stints].sort(
+    (a, b) => a.startYear - b.startYear || a.endYear - b.endYear,
+  );
   const byCity: {
     cityName: string;
     displayName: string;
@@ -471,7 +479,7 @@ function buildHottestYearsInsight(
     matchingYears: number[];
   }[] = [];
 
-  for (const stint of stints) {
+  for (const stint of orderedStints) {
     const key = gridKey(stint.city.lat, stint.city.lon);
     const topHot = topHotByCityKey.get(key);
     const annual = annualByCityKey.get(key);
@@ -487,6 +495,10 @@ function buildHottestYearsInsight(
       if (year < birthYear || year > latestCompleteYear) {
         continue;
       }
+      if (claimedYears.has(year)) {
+        continue;
+      }
+      claimedYears.add(year);
       yearsLived += 1;
       if (!topHot.has(year)) {
         continue;

@@ -85,7 +85,7 @@ export default function KundliApp() {
 
   return (
     <KundliWizardLayout
-      showLanding={step === 'landing'}
+      step={step}
       onStart={() => setStep('birth')}
     >
       {step === 'birth' && (
@@ -96,6 +96,7 @@ export default function KundliApp() {
           onBirthYearChange={setBirthYear}
           latestCompleteYear={latestCompleteYear}
           onNext={goToLived}
+          showContinue={true}
         />
       )}
       {step === 'lived' && (

@@ -12,14 +12,15 @@ type BirthYearPickerProps = {
   value: number
   onValueChange: (year: number) => void
   maxYear: number
+  className?: string
 }
 
-export function BirthYearPicker({ value, onValueChange, maxYear }: BirthYearPickerProps) {
+export function BirthYearPicker({ value, onValueChange, maxYear, className }: BirthYearPickerProps) {
   const options = toOptions(birthYearOptions(MIN_BIRTH_YEAR, maxYear))
 
   return (
     <div className="w-full">
-      <WheelPickerWrapper className="w-full">
+      <WheelPickerWrapper className={className}>
         <WheelPicker
           options={options}
           value={value}

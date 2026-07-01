@@ -346,7 +346,9 @@ function buildRadialGeometry(
   const legendYears = new Map<string, { displayName: string; color: string; years: number }>()
   const rawPoints: Omit<YearPoint, 'angle' | 'radius' | 'x' | 'y'>[] = []
 
-  for (const stint of livedCities) {
+  for (let i = 0; i < livedCities.length; i += 1) {
+    const stint = livedCities[i]!;
+    const isLast = i === livedCities.length - 1;
     const startYear = Number(stint.start.slice(0, 4))
     const endYear = stint.end ? Number(stint.end.slice(0, 4)) : latestCompleteYear
     const precipMap = precipByCity.get(stint.displayName)
@@ -357,8 +359,11 @@ function buildRadialGeometry(
       colorByCity.set(stint.displayName, color)
     }
 
-    for (let year = startYear; year <= endYear; year += 1) {
-      if (year < birthYear || year > latestCompleteYear) continue
+    const start = Math.max(startYear, birthYear);
+    const end = Math.min(endYear, latestCompleteYear);
+    const adjustedEnd = isLast ? end : end - 1;
+
+    for (let year = start; year <= adjustedEnd; year += 1) {
       const precipMm = precipMap?.get(year)
       if (precipMm == null) continue
 

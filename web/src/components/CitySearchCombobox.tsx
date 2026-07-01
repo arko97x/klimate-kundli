@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { CheckIcon } from 'lucide-react'
 
 import { geocodeCities } from '@/lib/api'
@@ -45,6 +46,32 @@ export function CitySearchCombobox({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [activeIndex, setActiveIndex] = useState(-1)
+  const [coords, setCoords] = useState<{ top: number; left: number; width: number } | null>(null)
+
+  useEffect(() => {
+    if (!open || !inputRef.current) {
+      setCoords(null)
+      return
+    }
+
+    const updateCoords = () => {
+      const rect = inputRef.current!.getBoundingClientRect()
+      setCoords({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      })
+    }
+
+    updateCoords()
+    window.addEventListener('resize', updateCoords)
+    window.addEventListener('scroll', updateCoords, true)
+
+    return () => {
+      window.removeEventListener('resize', updateCoords)
+      window.removeEventListener('scroll', updateCoords, true)
+    }
+  }, [open])
 
   const inputValue = open ? query : (value?.displayName ?? query)
   const queryTrimmed = query.trim()
@@ -83,7 +110,10 @@ export function CitySearchCombobox({
     }
 
     const onPointerDown = (event: PointerEvent) => {
-      if (rootRef.current?.contains(event.target as Node)) {
+      if (
+        rootRef.current?.contains(event.target as Node) ||
+        listRef.current?.contains(event.target as Node)
+      ) {
         return
       }
       close()
@@ -184,7 +214,7 @@ export function CitySearchCombobox({
   }
 
   return (
-    <div ref={rootRef} className={cn('relative w-full', className)}>
+    <div ref={rootRef} className="relative w-full">
       <form
         autoComplete="off"
         className="relative -m-1 p-1"
@@ -192,6 +222,7 @@ export function CitySearchCombobox({
       >
         <Input
           ref={inputRef}
+          className={className}
           id={id}
           type="search"
           role="combobox"
@@ -231,12 +262,18 @@ export function CitySearchCombobox({
         />
       </form>
 
-      {showList ? (
+      {showList && coords ? createPortal(
         <div
           id={`${id}-listbox`}
           role="listbox"
           ref={listRef}
-          className="absolute top-full right-0 left-0 z-50 mt-1 overflow-hidden rounded-none border border-input bg-[#faf9ff] text-purple-950 dark:bg-[#1a0c2e] dark:text-popover-foreground shadow-md ring-1 ring-foreground/10"
+          style={{
+            position: 'absolute',
+            top: `${coords.top}px`,
+            left: `${coords.left}px`,
+            width: `${coords.width}px`,
+          }}
+          className="z-50 mt-1 overflow-hidden rounded-none border border-neutral-300 bg-white text-black shadow-md"
         >
           <Command
             shouldFilter={false}
@@ -270,6 +307,7 @@ export function CitySearchCombobox({
                     onMouseDown={(event) => event.preventDefault()}
                     onSelect={() => selectCity(city)}
                     onMouseEnter={() => setActiveIndex(index)}
+                    className="text-base md:text-lg py-2.5"
                   >
                     <CheckIcon
                       className={cn(
@@ -283,7 +321,8 @@ export function CitySearchCombobox({
               </CommandGroup>
             </CommandList>
           </Command>
-        </div>
+        </div>,
+        document.body
       ) : null}
     </div>
   )

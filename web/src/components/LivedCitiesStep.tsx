@@ -1,4 +1,5 @@
 import { ChevronLeftIcon, PlusIcon, XIcon } from 'lucide-react'
+import { useMemo } from 'react'
 import { CitySearchCombobox } from '@/components/CitySearchCombobox'
 import { DisabledTooltip } from '@/components/DisabledTooltip'
 import { Button } from '@/components/ui/button'
@@ -25,6 +26,15 @@ type LivedCitiesStepProps = {
   generating?: boolean
 }
 
+/** Generate ~6 evenly spaced year ticks for the timeline header. */
+function yearTicks(min: number, max: number, count = 6): number[] {
+  if (max <= min) return [min]
+  const step = (max - min) / (count - 1)
+  return Array.from({ length: count }, (_, i) =>
+    i === count - 1 ? max : Math.round(min + i * step),
+  )
+}
+
 export function LivedCitiesStep({
   birthYear,
   rows,
@@ -42,6 +52,8 @@ export function LivedCitiesStep({
   const generateDisabledReason = generateKundliDisabledReason(rows, latestCompleteYear)
   const generateDisabled = !canGenerate || generating
   const generateTooltip = generating ? 'Generating…' : generateDisabledReason
+
+  const ticks = useMemo(() => yearTicks(birthYear, latestCompleteYear), [birthYear, latestCompleteYear])
 
   const normalizeRange = (value: number | readonly number[]): [number, number] | null => {
     const arr = Array.isArray(value) ? [...value] : [value]
@@ -90,135 +102,176 @@ export function LivedCitiesStep({
     onRowsChange(rows.filter((_, i) => i !== index))
   }
 
+  /* Layout constants — city label takes ~35%, slider takes rest */
+  const LABEL_COL = 'w-[35%] shrink-0'
+  const SLIDER_COL = 'flex-1 min-w-0'
+  const DELETE_COL = 'w-10 shrink-0'
+
   return (
-    <div className="w-full flex flex-col items-center gap-4">
-      {/* Title */}
-      <div className="w-full flex flex-col items-center gap-1">
-        <Label 
-          className="font-alegreya text-2xl md:text-3xl font-medium tracking-wide text-white text-center leading-tight"
-        >
-          Where else did you live?
-        </Label>
-        <p className="text-xs text-white/60 text-center leading-normal max-w-[280px]">
-          Approximate years lived/travelled (overlap is allowed).
-        </p>
-      </div>
+  <>
+    {/* ── Left-aligned form container ── */}
+    <div className="absolute left-[8%] top-[38%] flex flex-col items-start gap-4 w-[84%] sm:w-[84%] md:w-[80%] xl:w-[70%] pointer-events-auto">
+      {/* Question Label */}
+      <Label
+        className="font-sans text-xl sm:text-2xl md:text-3xl xl:text-4xl font-normal text-black text-left mb-2 select-none"
+      >
+        What places have you lived?
+      </Label>
 
-      {/* Scrollable list of city rows */}
-      <div className="w-full max-h-[190px] md:max-h-[220px] overflow-y-auto pr-1 flex flex-col gap-4 scrollbar-thin scrollbar-thumb-white/20">
-        {rows.map((row, index) => {
-          const isBirthRow = index === 0
-          const [yearStart, yearEnd] = row.range
+      {/* ── City rows container (bordered, static) ── */}
+      <div className="w-full flex flex-col gap-4 border border-neutral-300 bg-white p-5 rounded-none">
+        {/* ── Timeline year markers (aligned with slider column) ── */}
+        <div className="w-full flex items-end gap-8">
+          <div className={LABEL_COL} />
+          <div className={`${SLIDER_COL} flex justify-between`}>
+            {ticks.map((year, i) => (
+              <span key={year} className="text-[10px] sm:text-xs text-neutral-400 font-mono select-none">
+                {year}{i === ticks.length - 1 ? <sup>*</sup> : ''}
+              </span>
+            ))}
+          </div>
+          {/* spacer for delete column */}
+          <div className={DELETE_COL} />
+        </div>
 
-          return (
-            <div 
-              key={row.id} 
-              className="flex flex-col gap-2 pb-3 border-b border-white/10 last:border-b-0 last:pb-0"
-            >
-              <div className="flex items-center justify-between gap-2">
-                {isBirthRow ? (
-                  <span className="text-sm font-medium text-white truncate max-w-[180px]" title={row.city?.displayName}>
-                    {row.city?.displayName ?? '—'}
-                  </span>
-                ) : (
-                  <div className="flex-1 min-w-0">
-                    <CitySearchCombobox
-                      className="bg-white/10 border-white/20 text-white rounded-none h-8 px-2"
-                      value={row.city}
-                      onValueChange={(city) => {
-                        onRowsChange(
-                          rows.map((r) => (r.id === row.id ? { ...r, city } : r)),
-                        )
-                      }}
-                      placeholder="Search city"
+        {/* ── Scrollable list of rows ── */}
+        <div className="w-full max-h-[calc(44vh-70px)] overflow-y-auto flex flex-col gap-6 scrollbar-thin scrollbar-thumb-neutral-300 pr-1 relative">
+          {/* Vertical grid lines background guides */}
+          <div className="absolute inset-y-0 left-0 right-0 pointer-events-none flex z-0 gap-8">
+            <div className={LABEL_COL} />
+            <div className={`${SLIDER_COL} h-full flex justify-between`}>
+              {ticks.map((year) => (
+                <div key={year} className="w-[1px] h-full border-l border-neutral-300" />
+              ))}
+            </div>
+            <div className={DELETE_COL} />
+          </div>
+
+          {rows.map((row, index) => {
+            const isBirthRow = index === 0
+            const [yearStart, yearEnd] = row.range
+
+            return (
+              <div key={row.id} className="w-full flex flex-col gap-1 relative z-10">
+                {/* Row content containing inputs, slider, and delete button centered vertically */}
+                <div className="w-full flex items-center gap-8">
+                  {/* ── City label / input ── */}
+                  <div className={LABEL_COL}>
+                    {isBirthRow ? (
+                      <span
+                        className="text-sm sm:text-base font-semibold text-black truncate block pl-1"
+                        title={row.city?.displayName}
+                      >
+                        {row.city?.displayName ?? '—'}
+                      </span>
+                    ) : (
+                      <CitySearchCombobox
+                        className="w-full bg-white border border-neutral-300 text-black placeholder:text-neutral-400 rounded-none h-10 px-3 shadow-none focus-visible:border-neutral-400 focus-visible:ring-0 text-base md:text-lg"
+                        value={row.city}
+                        onValueChange={(city) => {
+                          onRowsChange(
+                            rows.map((r) => (r.id === row.id ? { ...r, city } : r)),
+                          )
+                        }}
+                        placeholder="Search city"
+                      />
+                    )}
+                  </div>
+
+                  {/* ── Slider ── */}
+                  <div className={SLIDER_COL}>
+                    <Slider
+                      min={birthYear}
+                      max={latestCompleteYear}
+                      step={1}
+                      minStepsBetweenValues={0}
+                      value={row.range}
+                      onValueChange={(value) => handleSliderChange(index, value)}
+                      onValueCommitted={(value) => handleSliderCommit(index, value)}
+                      className="w-full py-2"
+                      aria-label={`Years in ${row.city?.displayName ?? (isBirthRow ? 'birth city' : 'city')}`}
                     />
                   </div>
-                )}
-                
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-white/70 font-mono whitespace-nowrap">
-                    {yearStart}–{yearEnd}
-                  </span>
-                  {!isBirthRow && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="size-7 text-white/60 hover:text-white hover:bg-white/10 rounded-none shrink-0"
-                      onClick={() => handleDeleteRow(index)}
-                      aria-label="Remove city"
-                    >
-                      <XIcon className="size-4" />
-                    </Button>
-                  )}
+
+                  {/* ── Delete button (or spacer for birth row) ── */}
+                  <div className={DELETE_COL}>
+                    {!isBirthRow && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="size-10 text-neutral-700 hover:text-black hover:border-black hover:bg-neutral-50 border-neutral-300 rounded-none shadow-none transition-colors"
+                        onClick={() => handleDeleteRow(index)}
+                        aria-label="Remove city"
+                      >
+                        <XIcon className="size-5" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Year range subtext, aligned under the input column */}
+                <div className="w-full flex">
+                  <div className={`${LABEL_COL} pl-1`}>
+                    <span className="text-xs text-neutral-400 font-mono">
+                      ({yearStart}–{yearEnd})
+                    </span>
+                  </div>
                 </div>
               </div>
-
-              <div className="px-1">
-                <Slider
-                  min={birthYear}
-                  max={latestCompleteYear}
-                  step={1}
-                  minStepsBetweenValues={0}
-                  value={row.range}
-                  onValueChange={(value) => handleSliderChange(index, value)}
-                  onValueCommitted={(value) => handleSliderCommit(index, value)}
-                  className="w-full py-1.5"
-                  aria-label={`Years in ${row.city?.displayName ?? (isBirthRow ? 'birth city' : 'city')}`}
-                />
-              </div>
-            </div>
-          )
-        })}
-
-        {/* Add City Button inside the scrollable container or below it */}
-        <div className="w-full pt-1 flex justify-start">
-          <DisabledTooltip disabled={!canAdd} content={addDisabledReason}>
-            <Button
-              type="button"
-              variant="outline"
-              className="text-xs text-white border-white/20 hover:bg-white/10 h-8 px-3 rounded-none flex items-center gap-1.5"
-              disabled={!canAdd}
-              onClick={handleAddRow}
-              aria-label="Add another city"
-            >
-              <PlusIcon className="size-3.5" />
-              Add city
-            </Button>
-          </DisabledTooltip>
+            )
+          })}
         </div>
+      </div>
+
+      {/* Add City Button */}
+      <div className="w-full flex justify-start">
+        <DisabledTooltip disabled={!canAdd} content={addDisabledReason}>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="text-neutral-700 border-neutral-300 hover:border-black hover:bg-neutral-50 hover:text-black size-10 rounded-none transition-colors"
+            disabled={!canAdd}
+            onClick={handleAddRow}
+            aria-label="Add another city"
+          >
+            <PlusIcon className="size-5" />
+          </Button>
+        </DisabledTooltip>
       </div>
 
       {/* Error Message */}
       {error && (
-        <p className="text-center text-xs text-red-300 font-medium bg-red-950/20 border border-red-500/30 px-2 py-1.5 w-full mt-1" role="alert">
+        <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 px-3 py-2 w-full" role="alert">
           {error}
         </p>
       )}
+    </div>
 
-      {/* Action Buttons */}
-      <div className="w-full pt-4 flex items-center justify-between gap-3 border-t border-white/15">
+    {/* ── Bottom action buttons — horizontally centered on page ── */}
+    <div className="absolute left-1/2 -translate-x-1/2 bottom-[6%] pointer-events-auto flex items-center gap-4">
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        className="text-black border-neutral-300 hover:bg-neutral-50 rounded-none size-[44px] sm:size-[52px] shrink-0"
+        onClick={onBack}
+        aria-label="Back"
+      >
+        <ChevronLeftIcon className="size-5 sm:size-6" />
+      </Button>
+      <DisabledTooltip disabled={generateDisabled} content={generateTooltip}>
         <Button
           type="button"
-          variant="outline"
-          size="icon"
-          className="text-white border-white/20 hover:bg-white/10 rounded-none size-[44px] shrink-0"
-          onClick={onBack}
-          aria-label="Back"
+          className="bg-black text-white hover:bg-black/90 disabled:bg-neutral-300 disabled:text-neutral-500 rounded-none font-semibold tracking-wider shadow-lg w-[180px] h-[44px] sm:w-[240px] sm:h-[52px] text-xs sm:text-sm xl:text-base uppercase transition-all hover:scale-[1.02]"
+          disabled={generateDisabled}
+          onClick={onGenerate}
         >
-          <ChevronLeftIcon className="size-5" />
+          {generating ? 'Generating…' : 'Generate Kundli'}
         </Button>
-        <DisabledTooltip disabled={generateDisabled} content={generateTooltip}>
-          <Button
-            type="button"
-            className="flex-1 bg-white text-[#180033] hover:bg-white/90 rounded-none font-medium h-[44px]"
-            disabled={generateDisabled}
-            onClick={onGenerate}
-          >
-            {generating ? 'Generating…' : 'Generate Kundli'}
-          </Button>
-        </DisabledTooltip>
-      </div>
+      </DisabledTooltip>
     </div>
+  </>
   )
 }
