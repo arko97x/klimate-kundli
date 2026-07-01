@@ -116,7 +116,7 @@ export function LivedCitiesStep({
   }
 
   /* Layout constants — city label takes ~35%, slider takes rest */
-  const LABEL_COL = 'w-[35%] shrink-0'
+  const LABEL_COL = 'w-[30%] shrink-0'
   const SLIDER_COL = 'flex-1 min-w-0'
   const DELETE_COL = 'w-10 shrink-0'
 
