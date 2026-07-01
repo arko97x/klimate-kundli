@@ -51,7 +51,7 @@ export function KundliViewPage() {
 
   return (
     <KundliResultLayout>
-      <div className="p-6 pt-0">
+      <div>
         {loading ? (
           <p className="text-sm text-muted-foreground">Loading kundli...</p>
         ) : null}

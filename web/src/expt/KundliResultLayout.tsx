@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { Header } from '@/expt/Header'
+import { KundliCreaseBackground } from '@/expt/KundliCreaseBackground'
 
 type KundliResultLayoutProps = {
   children: ReactNode
@@ -8,9 +8,9 @@ type KundliResultLayoutProps = {
 
 export function KundliResultLayout({ children }: KundliResultLayoutProps) {
   return (
-    <div className="min-h-dvh bg-background text-foreground">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-4 sm:gap-6 sm:p-6">
-        <Header />
+    <div className="relative min-h-dvh bg-white text-black">
+      <KundliCreaseBackground />
+      <div className="relative z-10 mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
         <main>{children}</main>
       </div>
     </div>

@@ -1,5 +1,6 @@
-import { useMemo } from 'react'
+import { useMemo, type CSSProperties, type ReactNode } from 'react'
 
+import '@/expt/stacking-cards.css'
 import { EmissionsRingsChart } from '@/components/EmissionsRingsChart'
 import { InsightsSection } from '@/components/InsightsSection'
 import { LifeOrbitChart } from '@/components/LifeOrbitChart'
@@ -59,8 +60,10 @@ export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaCh
   const geometry = useMemo(() => buildGeometry(data), [data])
   const headline = buildHeadline(data)
 
-  return (
-    <div className="mx-auto w-full max-w-4xl space-y-8 sm:space-y-10">
+  const cards: ReactNode[] = []
+
+  cards.push(
+    <>
       <header className="space-y-3 text-center sm:text-left">
         <p className="text-sm text-muted-foreground">
           How does your childhood compare to the climate of today?
@@ -73,7 +76,7 @@ export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaCh
         </p>
       </header>
 
-      <div className="relative">
+      <div className="relative mt-6">
         <svg
           viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
           className="block h-auto w-full"
@@ -183,87 +186,88 @@ export function MonthlyDeltaChart({ data, livedCities, onReset }: MonthlyDeltaCh
           </span>
         </dl>
       </footer>
+    </>,
+  )
 
-      {data.tempTimeline ? (
-        <>
-          <hr className="border-border" />
-          <LifeTempChart
-            insight={data.tempTimeline}
-            source={data.source}
-            confidence={data.confidence}
-          />
-        </>
-      ) : null}
+  if (data.tempTimeline) {
+    cards.push(
+      <LifeTempChart insight={data.tempTimeline} source={data.source} confidence={data.confidence} />,
+    )
+  }
 
-      {livedCities && livedCities.length > 0 ? (
-        <>
-          <hr className="border-border" />
-          <LifeOrbitChart
-            birthYear={data.birthYear}
-            livedCities={livedCities}
-            rainRings={data.rainRings}
-            latestCompleteYear={
-              data.hottestYears?.latestCompleteYear ??
-              data.rainRings?.latestCompleteYear ??
-              latestCompleteYearUtc()
-            }
-          />
-        </>
-      ) : null}
+  if (livedCities && livedCities.length > 0) {
+    cards.push(
+      <LifeOrbitChart
+        birthYear={data.birthYear}
+        livedCities={livedCities}
+        rainRings={data.rainRings}
+        latestCompleteYear={
+          data.hottestYears?.latestCompleteYear ??
+          data.rainRings?.latestCompleteYear ??
+          latestCompleteYearUtc()
+        }
+      />,
+    )
+  }
 
-      {data.rainfall ? (
-        <>
-          <hr className="border-border" />
-          <MonthlyRainSection
-            cityName={data.city.name}
-            rainfall={data.rainfall}
-            source={data.source}
-            confidence={data.confidence}
-          />
-        </>
-      ) : null}
+  if (data.rainfall) {
+    cards.push(
+      <MonthlyRainSection
+        cityName={data.city.name}
+        rainfall={data.rainfall}
+        source={data.source}
+        confidence={data.confidence}
+      />,
+    )
+  }
 
-      {data.rainRings && data.rainRings.byCity.length > 0 ? (
-        <>
-          <hr className="border-border" />
-          <RainRingsChart insight={data.rainRings} source={data.source} />
-        </>
-      ) : null}
+  if (data.rainRings && data.rainRings.byCity.length > 0) {
+    cards.push(<RainRingsChart insight={data.rainRings} source={data.source} />)
+  }
 
-      {data.hottestYears ? (
-        <>
-          <hr className="border-border" />
-          <HottestYearsSection insight={data.hottestYears} />
-        </>
-      ) : null}
+  if (data.hottestYears) {
+    cards.push(<HottestYearsSection insight={data.hottestYears} />)
+  }
 
-      {data.indiaEmissions ? (
-        <>
-          <hr className="border-border" />
-          <EmissionsRingsChart
-            birthYear={data.birthYear}
-            data={data.indiaEmissions}
-            parentsData={data.parentsIndiaEmissions}
-            globalContext={data.globalContext}
-          />
-        </>
-      ) : null}
+  if (data.indiaEmissions) {
+    cards.push(
+      <EmissionsRingsChart
+        birthYear={data.birthYear}
+        data={data.indiaEmissions}
+        parentsData={data.parentsIndiaEmissions}
+        globalContext={data.globalContext}
+      />,
+    )
+  }
 
-      {data.globalContext?.arcticIce ? (
-        <>
-          <hr className="border-border" />
-          <ArcticIceSection arctic={data.globalContext.arcticIce} />
-        </>
-      ) : null}
+  if (data.globalContext?.arcticIce) {
+    cards.push(<ArcticIceSection arctic={data.globalContext.arcticIce} />)
+  }
 
-      <hr className="border-border" />
-      <InsightsSection data={data} />
+  cards.push(<InsightsSection data={data} />)
+  cards.push(<RemediesSection data={data} />)
 
-      <hr className="border-border" />
-      <RemediesSection data={data} />
+  return (
+    <div className="mx-auto w-full max-w-4xl">
+      <ul
+        className="stack-cards"
+        style={{ ['--numcards' as string]: cards.length } as CSSProperties}
+      >
+        {cards.map((card, index) => (
+          <li
+            key={index}
+            className="stack-card"
+            style={{ ['--index' as string]: index + 1 } as CSSProperties}
+          >
+            <div className="stack-card__inner rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
+              {card}
+            </div>
+          </li>
+        ))}
+      </ul>
 
       {onReset ? (
-        <div className="flex justify-start pt-2 pb-4">
+        <div className="flex justify-start pt-8 pb-4">
           <Button type="button" variant="outline" size="sm" onClick={onReset}>
             Try another city
           </Button>

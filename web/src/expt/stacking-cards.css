@@ -1,0 +1,66 @@
+/*
+ * Scroll-driven stacking cards, after
+ * https://scroll-driven-animations.style/demos/stacking-cards/css/
+ *
+ * Each `.stack-card` is sticky-pinned to the top with an incrementing offset,
+ * so cards pile into a staircase. Where the browser supports scroll-driven
+ * animations, cards scale down as they get buried, adding depth. Everywhere
+ * else the sticky stack still works — the scale is pure enhancement.
+ */
+
+.stack-cards {
+  --stack-top: 1.5rem; /* how far below the viewport top the pile pins */
+  --stack-offset: 0.75rem; /* per-card staircase peek */
+  --stack-gap: 2rem; /* scroll distance between cards */
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 100%;
+  gap: var(--stack-gap);
+  /* leave room for the fully stacked staircase at the end */
+  padding-bottom: calc(var(--numcards) * var(--stack-offset));
+}
+
+.stack-card {
+  position: sticky;
+  top: var(--stack-top);
+  /* later cards pin slightly lower, revealing the edge of the ones beneath */
+  padding-top: calc(var(--index) * var(--stack-offset));
+}
+
+.stack-card__inner {
+  transform-origin: 50% 0%;
+}
+
+@supports (animation-timeline: view()) {
+  .stack-cards {
+    view-timeline-name: --stack-cards-timeline;
+    view-timeline-axis: block;
+  }
+
+  .stack-card__inner {
+    --index0: calc(var(--index) - 1);
+
+    will-change: transform;
+    animation: linear stack-card-scale forwards;
+    animation-timeline: --stack-cards-timeline;
+    animation-range: exit-crossing calc(var(--index0) / var(--numcards) * 100%)
+      exit-crossing calc(var(--index) / var(--numcards) * 100%);
+  }
+
+  /* A whisper of shrink as a card gets buried — just enough for depth. */
+  @keyframes stack-card-scale {
+    to {
+      transform: scale(0.97);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stack-card__inner {
+    animation: none;
+    transform: none;
+  }
+}

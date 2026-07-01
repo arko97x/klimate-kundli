@@ -13,7 +13,7 @@ function avg(values: (number | null)[]): number | null {
 
 interface Remedy {
   upay: number
-  deity: string
+  title: string
   problem: string
   remedy: string
   confidence: string
@@ -32,9 +32,9 @@ function buildRemedies(data: MonthlyDeltaResponse): Remedy[] {
     const prescribedTemp = normalChaiTemp - chaiTempReduction
     remedies.push({
       upay: 1,
-      deity: 'Agni Dev',
+      title: 'Overheating',
       problem: `${monthLabel} is now ${delta.toFixed(1)}°C hotter than when you were born.`,
-      remedy: `Drink your chai at ${prescribedTemp}°C — exactly ${chaiTempReduction}°C cooler than a proper cup. Every day. For life. It will taste wrong. That is the point. Agni Dev has determined that a ${delta.toFixed(1)}°C warmer world earns a ${chaiTempReduction}°C cooler cup. A thermometer will be required. Guessing is not permitted.`,
+      remedy: `Drink your chai at ${prescribedTemp}°C — exactly ${chaiTempReduction}°C cooler than a proper cup. Every day. For life. It will taste wrong. That is the point. A ${delta.toFixed(1)}°C warmer world earns a ${chaiTempReduction}°C cooler cup. A thermometer will be required. Guessing is not permitted.`,
       confidence: '96.4%',
     })
   }
@@ -56,9 +56,9 @@ function buildRemedies(data: MonthlyDeltaResponse): Remedy[] {
 
     remedies.push({
       upay: 2,
-      deity: 'Vishwakarma',
+      title: 'Carbon Debt',
       problem: `Your per-capita share of India's CO₂ since you were born: ~${perCapitaTonnes} tonnes.`,
-      remedy: `To offset this, you would need to forgo ${queriesReadable} AI queries — or stop using AI entirely for ${yearsOffAI.toLocaleString()} years. This prescription is self-aware. We recommend beginning immediately. The deity of technology has already noted the irony.`,
+      remedy: `To offset this, you would need to forgo ${queriesReadable} AI queries — or stop using AI entirely for ${yearsOffAI.toLocaleString()} years. This prescription is self-aware. We recommend beginning immediately. The irony has already been noted.`,
       confidence: '∞%',
     })
   }
@@ -70,23 +70,23 @@ function buildRemedies(data: MonthlyDeltaResponse): Remedy[] {
     const glacierIdols = Math.max(1, Math.round(mm / 80))
     remedies.push({
       upay: 3,
-      deity: 'Varuna Dev',
+      title: 'Rising Seas',
       problem: `Sea levels rose ${mm}mm since you were born.`,
-      remedy: `Drink ${glassesLess} fewer glass${glassesLess !== 1 ? 'es' : ''} of water per week. It will not help, but the gesture is spiritually significant. Additionally, place ${glacierIdols} ice cube${glacierIdols !== 1 ? 's' : ''} in the ocean annually. Do this at dawn. Do not explain yourself to bystanders.`,
+      remedy: `Drink ${glassesLess} fewer glass${glassesLess !== 1 ? 'es' : ''} of water per week. It will not help, but the gesture is symbolically significant. Additionally, place ${glacierIdols} ice cube${glacierIdols !== 1 ? 's' : ''} in the ocean annually. Do this at dawn. Do not explain yourself to bystanders.`,
       confidence: '108%',
     })
   }
 
-  // Remedy 4: Hottest years — Vriksha Vivah
+  // Remedy 4: Hottest years — adopt trees
   if (hottestYears && hottestYears.count > 0) {
     const n = hottestYears.count
     const trees = Math.ceil(n / 3)
-    const weddingBudget = trees * 4200
+    const adoptionBudget = trees * 4200
     remedies.push({
       upay: 4,
-      deity: 'Aranyani',
+      title: 'Record Heat',
       problem: `You have survived ${n} of the hottest years on record since ${hottestYears.recordStartYear}.`,
-      remedy: `Perform Vriksha Vivah with ${trees} tree${trees !== 1 ? 's' : ''}. This classical practice—adapted here for climate dosh—requires formal betrothal to ${trees} living tree${trees !== 1 ? 's' : ''}. Budget approximately ₹${weddingBudget.toLocaleString()} for the ceremony${trees > 1 ? 'ies' : 'y'}. The trees cannot object. They also cannot water themselves. This is now your responsibility.`,
+      remedy: `Adopt ${trees} tree${trees !== 1 ? 's' : ''} and take full responsibility for ${trees !== 1 ? 'them' : 'it'}. Budget approximately ₹${adoptionBudget.toLocaleString()} for the paperwork. The trees cannot object. They also cannot water themselves. This is now your responsibility.`,
       confidence: 'Ask your elders',
     })
   }
@@ -101,9 +101,9 @@ function buildRemedies(data: MonthlyDeltaResponse): Remedy[] {
         const fanMinutes = Math.max(15, Math.round(genDelta * 40))
         remedies.push({
           upay: 5,
-          deity: 'Pitru Dev',
+          title: 'Generational Debt',
           problem: `Temperatures rose ${genDelta.toFixed(1)}°C from your parents' childhood to today.`,
-          remedy: `Fan your parents for ${fanMinutes} minutes daily as generational reparation. Hand-held palm-leaf fan only — electricity would defeat the purpose and insult Pitru Dev. Your parents may protest. This is between you and the ancestors now.`,
+          remedy: `Fan your parents for ${fanMinutes} minutes daily as generational reparation. Hand-held palm-leaf fan only — electricity would defeat the purpose. Your parents may protest. This is between you and the thermometer now.`,
           confidence: 'Generationally certified',
         })
       }
@@ -125,7 +125,7 @@ export function RemediesSection({ data }: RemediesSectionProps) {
   return (
     <section className="space-y-6 pb-8">
       <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">As prescribed by your climate pandit</p>
+        <p className="text-sm text-muted-foreground">As prescribed by your climate astrologer</p>
         <h2 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
           Your{' '}
           <span
@@ -137,7 +137,7 @@ export function RemediesSection({ data }: RemediesSectionProps) {
           .
         </h2>
         <p className="max-w-2xl text-pretty text-muted-foreground">
-          Every kundli comes with remedies. These have been computed from your personal climate data and endorsed by the relevant deities.
+          Every kundli comes with remedies. These have been computed from your personal climate data and issued with total, unearned confidence.
         </p>
       </div>
 
@@ -170,7 +170,7 @@ function RemedyCard({ remedy }: { remedy: Remedy }) {
             {remedy.upay}
           </span>
           <span className="text-xs text-muted-foreground/70 font-medium uppercase tracking-wider">
-            {remedy.deity}
+            {remedy.title}
           </span>
         </div>
         <span
