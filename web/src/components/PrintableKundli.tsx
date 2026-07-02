@@ -1,6 +1,7 @@
 import type { MonthlyDeltaResponse } from "@/lib/api";
 import { EmissionsPlume } from "@/components/EmissionsPlume";
 import { IcebergContent } from "@/components/ArcticIcebergChart";
+import { parallelAnnulusPath, permutationForSeed } from "@/lib/organicTreeRing";
 
 import fireCorner from "../assets/fire-corner.png";
 import airCorner from "../assets/air-corner.png";
@@ -109,6 +110,7 @@ const FLAP_SHAPES = [
 ];
 const RIGHT_FLAP = "450,150 600,300 450,450 300,300";
 const LEFT_FLAP = "150,150 300,300 150,450 0,300";
+const BOTTOM_FLAP = "300,300 450,450 300,600 150,450";
 
 // Maps the emissions plume's 400x400 diamond (centre 200,200; vertex radius 188)
 // exactly onto the right flap's diamond (centre 450,300; radius 150).
@@ -122,6 +124,90 @@ const BERG_CX = 150;
 const BERG_CY = 286.2;
 const BERG_TX = BERG_CX - 90 * BERG_SCALE;
 const BERG_TY = BERG_CY - 92 * BERG_SCALE;
+
+const RING_CENTER = 200;
+const RING_MIN_RADIUS = 28;
+const RING_MAX_RADIUS = 172;
+const RING_WIDTH_EXPONENT = 1.15;
+
+function hashLabel(label: string): number {
+  let hash = 0;
+  for (let i = 0; i < label.length; i += 1) {
+    hash = (hash * 31 + label.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+function mixHex(a: string, b: string, t: number): string {
+  const clamp = Math.max(0, Math.min(1, t));
+  const ar = parseInt(a.slice(1, 3), 16);
+  const ag = parseInt(a.slice(3, 5), 16);
+  const ab = parseInt(a.slice(5, 7), 16);
+  const br = parseInt(b.slice(1, 3), 16);
+  const bg = parseInt(b.slice(3, 5), 16);
+  const bb = parseInt(b.slice(5, 7), 16);
+  const r = Math.round(ar + (br - ar) * clamp);
+  const g = Math.round(ag + (bg - ag) * clamp);
+  const bl = Math.round(ab + (bb - ab) * clamp);
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${bl.toString(16).padStart(2, "0")}`;
+}
+
+function ringWoodColor(norm: number): string {
+  if (norm < 0.35) return mixHex("#c9b896", "#a8c4b0", norm / 0.35);
+  if (norm < 0.7) return mixHex("#a8c4b0", "#6a9eb5", (norm - 0.35) / 0.35);
+  return mixHex("#6a9eb5", "#3d6f8c", (norm - 0.7) / 0.3);
+}
+
+interface YearPoint {
+  year: number;
+  precipMm: number;
+}
+
+interface PrintableRing {
+  year: number;
+  precipMm: number;
+  d: string;
+  color: string;
+}
+
+function buildPrintableRings(
+  years: YearPoint[],
+  wigglePerm: number[],
+): PrintableRing[] {
+  if (years.length === 0) return [];
+  const precipValues = years.map((y) => y.precipMm);
+  const colorMin = Math.min(...precipValues);
+  const colorMax = Math.max(...precipValues);
+  const colorSpan = colorMax - colorMin;
+
+  const availableSpan = RING_MAX_RADIUS - RING_MIN_RADIUS;
+  const weights = years.map((p) => Math.pow(p.precipMm, RING_WIDTH_EXPONENT));
+  const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+
+  let radius = RING_MIN_RADIUS;
+  const rings: PrintableRing[] = [];
+
+  for (let index = 0; index < years.length; index += 1) {
+    const point = years[index]!;
+    const width =
+      totalWeight > 0
+        ? Math.max(1.25, (weights[index]! / totalWeight) * availableSpan)
+        : availableSpan / years.length;
+    const inner = radius;
+    const outer = inner + width;
+    const norm = colorSpan > 0 ? (point.precipMm - colorMin) / colorSpan : 0.5;
+
+    rings.push({
+      year: point.year,
+      precipMm: point.precipMm,
+      d: parallelAnnulusPath(RING_CENTER, RING_CENTER, inner, outer, wigglePerm),
+      color: ringWoodColor(norm),
+    });
+    radius = outer;
+  }
+
+  return rings;
+}
 
 // Centered (upright) flap headings.
 const FLAP_HEADINGS = [
@@ -251,6 +337,9 @@ export function PrintableKundli({ data, birthPlace, className }: PrintableKundli
             <clipPath id="flap-clip-left">
               <polygon points={insetPolygon(LEFT_FLAP, GUTTER + 2)} />
             </clipPath>
+            <clipPath id="flap-clip-bottom">
+              <polygon points={insetPolygon(BOTTOM_FLAP, GUTTER + 2)} />
+            </clipPath>
           </defs>
 
           {/* Black star-arms */}
@@ -320,6 +409,75 @@ export function PrintableKundli({ data, birthPlace, className }: PrintableKundli
                       </text>
                     </g>
                   ) : null}
+                </g>
+              </g>
+            );
+          })() : null}
+
+          {/* Monsoons Experienced (bottom flap), combined from all cities, scaled + clipped to fit. */}
+          {data.rainRings?.byCity?.length ? (() => {
+            const cities = data.rainRings.byCity;
+            const combinedYearsMap = new Map<number, number>();
+            for (const city of cities) {
+              for (const y of city.years) {
+                const existing = combinedYearsMap.get(y.year);
+                if (existing === undefined || y.precipMm > existing) {
+                  combinedYearsMap.set(y.year, y.precipMm);
+                }
+              }
+            }
+            const combinedYears = Array.from(combinedYearsMap.entries())
+              .map(([year, precipMm]) => ({ year, precipMm }))
+              .sort((a, b) => a.year - b.year);
+
+            if (combinedYears.length === 0) return null;
+
+            const seedString = cities.map((c) => c.displayName).join(",");
+            const wigglePerm = permutationForSeed(hashLabel(seedString));
+            const rings = buildPrintableRings(combinedYears, wigglePerm);
+            const first = combinedYears[0];
+
+            const scale = 0.48;
+            const tx = 300 - RING_CENTER * scale;
+            const ty = 434 - RING_CENTER * scale;
+
+            return (
+              <g clipPath="url(#flap-clip-bottom)">
+                <g transform={`translate(${tx} ${ty}) scale(${scale})`}>
+                  {rings.map((ring) => (
+                    <path
+                      key={ring.year}
+                      d={ring.d}
+                      fill={ring.color}
+                      stroke="#2a2418"
+                      strokeWidth={0.35}
+                      strokeLinejoin="round"
+                    />
+                  ))}
+
+                  {/* Center label inside the rings */}
+                  <text
+                    x={RING_CENTER}
+                    y={RING_CENTER - 3}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="#3d3020"
+                    fontSize={10}
+                    fontWeight={600}
+                  >
+                    {first?.year}
+                  </text>
+                  <text
+                    x={RING_CENTER}
+                    y={RING_CENTER + 11}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="#3d302099"
+                    fontSize={8}
+                    className="tabular-nums"
+                  >
+                    {first ? `${first.precipMm} mm` : ""}
+                  </text>
                 </g>
               </g>
             );

@@ -39,7 +39,24 @@ const SAMPLE = {
   },
   rainRings: {
     byCity: [
-      { displayName: "Kanpur (Cawnpore), Uttar Pradesh, India", years: [{ year: 2008, precipMm: 1501 }] },
+      {
+        displayName: "Kanpur (Cawnpore), Uttar Pradesh, India",
+        startYear: 1990,
+        endYear: 2009,
+        years: Array.from({ length: 20 }, (_, i) => ({
+          year: 1990 + i,
+          precipMm: Math.round(600 + Math.sin(i) * 200 + (i % 3 === 0 ? 300 : 0)),
+        })),
+      },
+      {
+        displayName: "Bengaluru, Karnataka, India",
+        startYear: 2010,
+        endYear: 2024,
+        years: Array.from({ length: 15 }, (_, i) => ({
+          year: 2010 + i,
+          precipMm: Math.round(800 + Math.cos(i) * 150 + (i % 2 === 0 ? 100 : 0)),
+        })),
+      },
     ],
   },
 } as unknown as MonthlyDeltaResponse;
