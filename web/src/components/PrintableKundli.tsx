@@ -577,8 +577,8 @@ export function PrintableKundli({ data, birthPlace, className }: PrintableKundli
                   {comparison ? (
                     <g>
                       <text
-                        x={90}
-                        y={meltLine - 18}
+                        x={77}
+                        y={(meltLine / 2) - 1.5}
                         textAnchor="middle"
                         dominantBaseline="middle"
                         fontFamily={ARM_FONT}
@@ -589,8 +589,8 @@ export function PrintableKundli({ data, birthPlace, className }: PrintableKundli
                         ~{Math.round(comparison.multiple * 100)}%
                       </text>
                       <text
-                        x={90}
-                        y={meltLine - 8}
+                        x={77}
+                        y={(meltLine / 2) + 9.5}
                         textAnchor="middle"
                         dominantBaseline="middle"
                         fontFamily={VALUE_FONT}
