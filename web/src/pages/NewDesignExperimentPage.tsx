@@ -35,7 +35,16 @@ const SAMPLE = {
     years: [{ year: 2022, displayName: "Bengaluru, Karnataka, India" }],
   },
   hottestYears: {
-    blades: [{ year: 2010, peakTempC: 45, displayName: "Muradnagar, Uttar Pradesh, India" }],
+    blades: [
+      { year: 2004, peakTempC: 41.2, cityName: "Kanpur", displayName: "Kanpur, Uttar Pradesh, India" },
+      { year: 2007, peakTempC: 43.5, cityName: "Kanpur", displayName: "Kanpur, Uttar Pradesh, India" },
+      { year: 2008, peakTempC: 39.8, cityName: "Kanpur", displayName: "Kanpur, Uttar Pradesh, India" },
+      { year: 2010, peakTempC: 45.0, cityName: "Muradnagar", displayName: "Muradnagar, Uttar Pradesh, India" },
+      { year: 2021, peakTempC: 38.2, cityName: "Bengaluru", displayName: "Bengaluru, Karnataka, India" },
+      { year: 2022, peakTempC: 39.0, cityName: "Bengaluru", displayName: "Bengaluru, Karnataka, India" },
+      { year: 2023, peakTempC: 40.1, cityName: "Bengaluru", displayName: "Bengaluru, Karnataka, India" },
+      { year: 2024, peakTempC: 41.5, cityName: "Bengaluru", displayName: "Bengaluru, Karnataka, India" },
+    ],
   },
   rainRings: {
     byCity: [

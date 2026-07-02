@@ -1,4 +1,4 @@
-import type { MonthlyDeltaResponse } from "@/lib/api";
+import type { MonthlyDeltaResponse, HottestYearBlade } from "@/lib/api";
 import { EmissionsPlume } from "@/components/EmissionsPlume";
 import { IcebergContent } from "@/components/ArcticIcebergChart";
 import { parallelAnnulusPath, permutationForSeed } from "@/lib/organicTreeRing";
@@ -108,6 +108,7 @@ const FLAP_SHAPES = [
   "300,300 450,450 300,600 150,450", // bottom
   "150,150 300,300 150,450 0,300", // left
 ];
+const TOP_FLAP = "300,0 450,150 300,300 150,150";
 const RIGHT_FLAP = "450,150 600,300 450,450 300,300";
 const LEFT_FLAP = "150,150 300,300 150,450 0,300";
 const BOTTOM_FLAP = "300,300 450,450 300,600 150,450";
@@ -209,9 +210,124 @@ function buildPrintableRings(
   return rings;
 }
 
+function ringSlatPath(
+  cx: number,
+  cy: number,
+  a0: number,
+  a1: number,
+  rInner: number,
+  rOuter: number,
+): string {
+  const xi0 = cx + Math.cos(a0) * rInner;
+  const yi0 = cy + Math.sin(a0) * rInner;
+  const xo0 = cx + Math.cos(a0) * rOuter;
+  const yo0 = cy + Math.sin(a0) * rOuter;
+  const xo1 = cx + Math.cos(a1) * rOuter;
+  const yo1 = cy + Math.sin(a1) * rOuter;
+  const xi1 = cx + Math.cos(a1) * rInner;
+  const yi1 = cy + Math.sin(a1) * rInner;
+  const largeOuter = a1 - a0 > Math.PI ? 1 : 0;
+  const largeInner = a1 - a0 > Math.PI ? 1 : 0;
+
+  return [
+    `M ${xi0} ${yi0}`,
+    `L ${xo0} ${yo0}`,
+    `A ${rOuter} ${rOuter} 0 ${largeOuter} 1 ${xo1} ${yo1}`,
+    `L ${xi1} ${yi1}`,
+    `A ${rInner} ${rInner} 0 ${largeInner} 0 ${xi0} ${yi0}`,
+    "Z",
+  ].join(" ");
+}
+
+interface PrintableFanBlade {
+  year: number;
+  dOutline: string;
+  dHeat: string;
+  color: string;
+  textX: number;
+  textY: number;
+  tempX: number;
+  tempY: number;
+  rotDeg: number;
+  midAngle: number;
+  peakTemp: number;
+}
+
+function buildPrintableFanBlades(
+  blades: HottestYearBlade[],
+): PrintableFanBlade[] {
+  if (blades.length === 0) return [];
+
+  const temps = blades.map((b) => b.peakTempC);
+  const minTemp = Math.min(...temps);
+  const maxTemp = Math.max(...temps);
+  const tempSpan = maxTemp - minTemp;
+
+  const capacity = 18;
+  const slatGapRatio = 0.14;
+  const stepOverlapRatio = 0.22;
+  const fanArcSpan = (150 * Math.PI) / 180;
+  const fanArcCenter = -Math.PI / 2;
+
+  const slatWidth = fanArcSpan / (capacity + (capacity - 1) * slatGapRatio);
+  const gap = slatWidth * slatGapRatio;
+  const pitch = slatWidth + gap;
+  const step = pitch - pitch * stepOverlapRatio;
+  const n = blades.length;
+  const groupSpan = n === 1 ? slatWidth : (n - 1) * step + slatWidth;
+  const arcStart = fanArcCenter - groupSpan / 2;
+
+  const cx = 300;
+  const cy = 272;
+  const rOuter = 175;
+  const rInner = 44;
+
+  const uniqueCities = Array.from(new Set(blades.map((b) => b.cityName ?? b.displayName)));
+  const CITY_COLORS = ["#c45a3a", "#3d6b7a", "#7a5c2e", "#5c4a6b", "#2d5c45"];
+
+  return blades.map((blade, idx) => {
+    const a0 = arcStart + idx * step;
+    const a1 = a0 + slatWidth;
+    const midAngle = (a0 + a1) / 2;
+
+    const heat = tempSpan > 0 ? (blade.peakTempC - minTemp) / tempSpan : 0.5;
+    const heatFillR = Math.max(rInner + 10, rInner + heat * (rOuter - rInner));
+
+    const cityName = blade.cityName ?? blade.displayName;
+    const cityIdx = uniqueCities.indexOf(cityName);
+    const color = CITY_COLORS[cityIdx % CITY_COLORS.length] ?? CITY_COLORS[0];
+
+    const dOutline = ringSlatPath(cx, cy, a0, a1, rInner, rOuter);
+    const dHeat = ringSlatPath(cx, cy, a0, a1, rInner, heatFillR);
+
+    const rText = rInner + 0.50 * (rOuter - rInner);
+    const textX = cx + rText * Math.cos(midAngle);
+    const textY = cy + rText * Math.sin(midAngle);
+
+    const rTempText = rInner + 0.85 * (rOuter - rInner);
+    const tempX = cx + rTempText * Math.cos(midAngle);
+    const tempY = cy + rTempText * Math.sin(midAngle);
+
+    const rotDeg = (midAngle * 180) / Math.PI;
+
+    return {
+      year: blade.year,
+      dOutline,
+      dHeat,
+      color,
+      textX,
+      textY,
+      tempX,
+      tempY,
+      rotDeg,
+      midAngle,
+      peakTemp: blade.peakTempC,
+    };
+  });
+}
+
 // Centered (upright) flap headings.
 const FLAP_HEADINGS = [
-  { cx: 300, cy: 62, lines: ["RECORD HOT YEARS", "EXPERIENCED"] },
   { cx: 300, cy: 540, lines: ["MONSOONS", "EXPERIENCED"] },
 ];
 
@@ -340,6 +456,9 @@ export function PrintableKundli({ data, birthPlace, className }: PrintableKundli
             <clipPath id="flap-clip-bottom">
               <polygon points={insetPolygon(BOTTOM_FLAP, GUTTER + 2)} />
             </clipPath>
+            <clipPath id="flap-clip-top">
+              <polygon points={insetPolygon(TOP_FLAP, GUTTER + 2)} />
+            </clipPath>
           </defs>
 
           {/* Black star-arms */}
@@ -358,6 +477,79 @@ export function PrintableKundli({ data, birthPlace, className }: PrintableKundli
               strokeLinejoin="round"
             />
           ))}
+
+          {/* Record Hot Years Experienced (top flap), scaled + clipped to fit. */}
+          {data.hottestYears?.blades?.length ? (() => {
+            const fanBlades = buildPrintableFanBlades(data.hottestYears.blades);
+
+            return (
+              <g clipPath="url(#flap-clip-top)">
+                {/* Ribs (connector lines) between pivot and blades */}
+                {fanBlades.map((blade) => (
+                  <line
+                    key={`rib-${blade.year}`}
+                    x1={300}
+                    y1={272}
+                    x2={300 + Math.cos(blade.midAngle) * 175}
+                    y2={272 + Math.sin(blade.midAngle) * 175}
+                    stroke="#2a2418"
+                    strokeWidth={1.25}
+                    strokeLinecap="round"
+                  />
+                ))}
+
+                {fanBlades.map((blade) => (
+                  <g key={blade.year}>
+                    {/* Outline / base slat */}
+                    <path
+                      d={blade.dOutline}
+                      fill="#faf7f2"
+                      stroke="#2a2418"
+                      strokeWidth={1.05}
+                      strokeLinejoin="round"
+                    />
+                    {/* Heat filled region */}
+                    <path
+                      d={blade.dHeat}
+                      fill={blade.color}
+                      fillOpacity={0.65}
+                      stroke="none"
+                    />
+                    {/* Year label written inside the blade */}
+                    <text
+                      x={blade.textX}
+                      y={blade.textY}
+                      transform={`rotate(${blade.rotDeg} ${blade.textX} ${blade.textY})`}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#334155"
+                      fontFamily={VALUE_FONT}
+                      fontSize={9}
+                      fontWeight={600}
+                    >
+                      {blade.year}
+                    </text>
+                    {/* Temperature label written near the outer edge */}
+                    <text
+                      x={blade.tempX}
+                      y={blade.tempY}
+                      transform={`rotate(${blade.rotDeg} ${blade.tempX} ${blade.tempY})`}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#1e293b"
+                      fontFamily={VALUE_FONT}
+                      fontSize={8}
+                      fontWeight={600}
+                    >
+                      {blade.peakTemp.toFixed(1)}°
+                    </text>
+                  </g>
+                ))}
+                {/* Pivot Pin */}
+                <circle cx={300} cy={272} r={4.5} fill="#2a2418" />
+              </g>
+            );
+          })() : null}
 
           {/* Annual carbon emissions plume (right flap), scaled + clipped to fit. */}
           {data.indiaEmissions?.years?.length ? (
@@ -535,6 +727,57 @@ export function PrintableKundli({ data, birthPlace, className }: PrintableKundli
               </g>
             );
           })}
+
+          {/* Top flap centered heading (dynamic with count N) */}
+          {(() => {
+            const N = data.hottestYears?.blades?.length ?? 0;
+            return (
+              <g>
+                {/* Large bold number N */}
+                <text
+                  x={300}
+                  y={58}
+                  fill="black"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontFamily={VALUE_FONT}
+                  fontWeight={700}
+                  fontSize={15}
+                >
+                  {N}
+                </text>
+                {/* Heading label lines */}
+                <text
+                  x={300}
+                  y={74}
+                  fill="black"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontFamily={FLAP_FONT}
+                  fontWeight={400}
+                  fontSize={9}
+                  letterSpacing="0.1em"
+                  style={{ textTransform: "uppercase" }}
+                >
+                  RECORD HOT YEARS
+                </text>
+                <text
+                  x={300}
+                  y={85}
+                  fill="black"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontFamily={FLAP_FONT}
+                  fontWeight={400}
+                  fontSize={9}
+                  letterSpacing="0.1em"
+                  style={{ textTransform: "uppercase" }}
+                >
+                  EXPERIENCED
+                </text>
+              </g>
+            );
+          })()}
 
           {/* Centered flap headings */}
           {FLAP_HEADINGS.map((h) => {
