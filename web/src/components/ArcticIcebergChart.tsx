@@ -13,36 +13,42 @@ const VB_H = 184
 const TOP = 1
 const BOTTOM = 183
 
-export function ArcticIcebergChart({ arctic }: { arctic: ArcticIce }) {
+// Inner iceberg elements in the 180x184 viewBox (no <svg> wrapper), so they can be
+// dropped into any parent SVG. `idPrefix` keeps the clip/gradient ids unique when
+// more than one iceberg is on the page (e.g. live chart + printable copy).
+export function IcebergContent({
+  arctic,
+  idPrefix = 'kk',
+}: {
+  arctic: ArcticIce
+  idPrefix?: string
+}) {
   const birthExtent = arctic.birthWindow.extentMkm2
   // Fraction of the birth-year berg that has melted away → height of the ghosted cap.
   const meltFrac =
     birthExtent > 0 ? Math.min(0.85, Math.max(0.06, arctic.lostMkm2 / birthExtent)) : 0
   const meltLine = TOP + meltFrac * (BOTTOM - TOP)
+  const clipId = `${idPrefix}BergClip`
+  const fillId = `${idPrefix}BergFill`
 
   return (
-    <svg
-      viewBox={`0 0 ${VB_W} ${VB_H}`}
-      className="h-auto w-full max-w-[220px]"
-      role="img"
-      aria-label={`Iceberg: the ghosted cap is Arctic sea ice melted since ${arctic.birthWindow.startYear}; the solid berg is what remains today.`}
-    >
+    <>
       <defs>
-        <clipPath id="kkBergClip">
+        <clipPath id={clipId}>
           <path d={BERG} />
         </clipPath>
-        <linearGradient id="kkBergFill" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#bfe3f0" />
           <stop offset="60%" stopColor="#89b4c6" />
           <stop offset="100%" stopColor="#5f93a8" />
         </linearGradient>
       </defs>
 
-      <g clipPath="url(#kkBergClip)">
+      <g clipPath={`url(#${clipId})`}>
         {/* melted since birth = ghosted cap */}
         <rect x="0" y="0" width={VB_W} height={meltLine} fill="#dde1e5" />
         {/* today = solid berg below the melt line */}
-        <rect x="0" y={meltLine} width={VB_W} height={VB_H - meltLine} fill="url(#kkBergFill)" />
+        <rect x="0" y={meltLine} width={VB_W} height={VB_H - meltLine} fill={`url(#${fillId})`} />
         {/* melt boundary, drawn only across the ice */}
         <line
           x1="0"
@@ -57,6 +63,19 @@ export function ArcticIcebergChart({ arctic }: { arctic: ArcticIce }) {
 
       {/* berg outline */}
       <path d={BERG} fill="none" stroke="#334155" strokeWidth="1.6" strokeLinejoin="round" />
+    </>
+  )
+}
+
+export function ArcticIcebergChart({ arctic }: { arctic: ArcticIce }) {
+  return (
+    <svg
+      viewBox={`0 0 ${VB_W} ${VB_H}`}
+      className="h-auto w-full max-w-[220px]"
+      role="img"
+      aria-label={`Iceberg: the ghosted cap is Arctic sea ice melted since ${arctic.birthWindow.startYear}; the solid berg is what remains today.`}
+    >
+      <IcebergContent arctic={arctic} />
     </svg>
   )
 }

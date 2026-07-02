@@ -1,4 +1,6 @@
 import type { MonthlyDeltaResponse } from "@/lib/api";
+import { EmissionsPlume } from "@/components/EmissionsPlume";
+import { IcebergContent } from "@/components/ArcticIcebergChart";
 
 import fireCorner from "../assets/fire-corner.png";
 import airCorner from "../assets/air-corner.png";
@@ -105,6 +107,21 @@ const FLAP_SHAPES = [
   "300,300 450,450 300,600 150,450", // bottom
   "150,150 300,300 150,450 0,300", // left
 ];
+const RIGHT_FLAP = "450,150 600,300 450,450 300,300";
+const LEFT_FLAP = "150,150 300,300 150,450 0,300";
+
+// Maps the emissions plume's 400x400 diamond (centre 200,200; vertex radius 188)
+// exactly onto the right flap's diamond (centre 450,300; radius 150).
+const PLUME_SCALE = 150 / 188;
+const PLUME_TX = 450 - 200 * PLUME_SCALE;
+const PLUME_TY = 300 - 200 * PLUME_SCALE;
+
+// Iceberg (180x184 viewBox, centre 90,92) scaled to sit centred in the left flap.
+const BERG_SCALE = 0.92;
+const BERG_CX = 150;
+const BERG_CY = 286.2;
+const BERG_TX = BERG_CX - 90 * BERG_SCALE;
+const BERG_TY = BERG_CY - 92 * BERG_SCALE;
 
 // Centered (upright) flap headings.
 const FLAP_HEADINGS = [
@@ -220,13 +237,20 @@ export function PrintableKundli({ data, birthPlace, className }: PrintableKundli
     >
       <div className="w-full aspect-square relative bg-white">
         <svg viewBox="0 0 600 600" className="w-full h-full" style={{ display: "block" }}>
-          {/* Clip each arm's value to its triangle so text can never spill out. */}
+          {/* Clip each arm's value to its triangle so text can never spill out;
+              clip the emissions plume to the right flap (just inside its outline). */}
           <defs>
             {ARMS.map((arm) => (
               <clipPath key={arm.label} id={`arm-clip-${arm.label.replace(/\s+/g, "-")}`}>
                 <polygon points={insetPolygon(arm.pts, GUTTER)} />
               </clipPath>
             ))}
+            <clipPath id="flap-clip-right">
+              <polygon points={insetPolygon(RIGHT_FLAP, GUTTER + 2)} />
+            </clipPath>
+            <clipPath id="flap-clip-left">
+              <polygon points={insetPolygon(LEFT_FLAP, GUTTER + 2)} />
+            </clipPath>
           </defs>
 
           {/* Black star-arms */}
@@ -245,6 +269,61 @@ export function PrintableKundli({ data, birthPlace, className }: PrintableKundli
               strokeLinejoin="round"
             />
           ))}
+
+          {/* Annual carbon emissions plume (right flap), scaled + clipped to fit. */}
+          {data.indiaEmissions?.years?.length ? (
+            <g clipPath="url(#flap-clip-right)">
+              <g transform={`translate(${PLUME_TX} ${PLUME_TY}) scale(${PLUME_SCALE})`}>
+                <EmissionsPlume data={data.indiaEmissions} />
+              </g>
+            </g>
+          ) : null}
+
+          {/* Arctic ice summer minimum iceberg (left flap), scaled + clipped to fit. */}
+          {data.globalContext?.arcticIce ? (() => {
+            const arctic = data.globalContext.arcticIce;
+            const comparison = arctic.comparison;
+            const birthExtent = arctic.birthWindow.extentMkm2;
+            const meltFrac = birthExtent > 0 ? Math.min(0.85, Math.max(0.06, arctic.lostMkm2 / birthExtent)) : 0;
+            const TOP = 1;
+            const BOTTOM = 183;
+            const meltLine = TOP + meltFrac * (BOTTOM - TOP);
+
+            return (
+              <g clipPath="url(#flap-clip-left)">
+                <g transform={`translate(${BERG_TX} ${BERG_TY}) scale(${BERG_SCALE})`}>
+                  <IcebergContent arctic={arctic} idPrefix="print-berg" />
+                  {comparison ? (
+                    <g>
+                      <text
+                        x={90}
+                        y={meltLine - 18}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontFamily={ARM_FONT}
+                        fontWeight="bold"
+                        fontSize={9 / BERG_SCALE}
+                        fill="#0f172a"
+                      >
+                        ~{Math.round(comparison.multiple * 100)}%
+                      </text>
+                      <text
+                        x={90}
+                        y={meltLine - 8}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontFamily={VALUE_FONT}
+                        fontSize={9 / BERG_SCALE}
+                        fill="#334155"
+                      >
+                        size of {comparison.name}
+                      </text>
+                    </g>
+                  ) : null}
+                </g>
+              </g>
+            );
+          })() : null}
 
           {/* Corner element tiles */}
           {CORNERS.map((c) => (

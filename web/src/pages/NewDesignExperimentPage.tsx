@@ -5,8 +5,31 @@ import type { MonthlyDeltaResponse } from "@/lib/api";
 const SAMPLE = {
   city: { displayName: "Kanpur (Cawnpore), Uttar Pradesh, India", name: "Kanpur", country: "India" },
   birthYear: 1990,
-  indiaEmissions: { firstCo2Mt: 578 },
-  globalContext: { seaLevelRiseMm: 21 },
+  indiaEmissions: {
+    firstCo2Mt: 578,
+    years: Array.from({ length: 34 }, (_, i) => {
+      const total = 578 + ((2955 - 578) * i) / 33;
+      return {
+        year: 1990 + i,
+        co2Mt: Math.round(total),
+        coalMt: total * 0.7,
+        oilMt: total * 0.15,
+        cementMt: total * 0.07,
+        gasMt: total * 0.05,
+        flaringMt: total * 0.03,
+      };
+    }),
+  },
+  globalContext: {
+    seaLevelRiseMm: 21,
+    arcticIce: {
+      birthWindow: { startYear: 1990, endYear: 1995, extentMkm2: 6.5 },
+      recentWindow: { startYear: 2019, endYear: 2024, extentMkm2: 4.2 },
+      lostKm2: 2_300_000,
+      lostMkm2: 2.3,
+      comparison: { unit: "country", name: "India", code: "IN", areaKm2: 3_287_000, multiple: 0.7 },
+    },
+  },
   tempTimeline: {
     coolestYear: 2022,
     years: [{ year: 2022, displayName: "Bengaluru, Karnataka, India" }],

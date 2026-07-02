@@ -3,35 +3,10 @@ import { TrendingUp } from 'lucide-react'
 import matchstickImg from '@/assets/matchstick.png'
 
 import type { IndiaEmissionsRings, GlobalContext } from '@/lib/api'
+import { EMISSIONS_CATEGORIES, EMISSIONS_SIZE, buildEmissionsPlume } from '@/lib/emissions-plume'
 
-const SIZE = 400
-
-function getForwardCurveSegments(points: { x: number; y: number }[]): string {
-  const N = points.length
-  if (N < 2) return ''
-  let d = ''
-  const tension = 0.25
-  for (let i = 0; i < N - 1; i++) {
-    const p0 = points[Math.max(0, i - 1)]!
-    const p1 = points[i]!
-    const p2 = points[i + 1]!
-    const p3 = points[Math.min(N - 1, i + 2)]!
-
-    const cp1x = p1.x + (p2.x - p0.x) * tension
-    const cp1y = p1.y + (p2.y - p0.y) * tension
-    const cp2x = p2.x - (p3.x - p1.x) * tension
-    const cp2y = p2.y - (p3.y - p1.y) * tension
-
-    d += ` C ${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p2.x.toFixed(2)},${p2.y.toFixed(2)}`
-  }
-  return d
-}
-
-function getBackwardCurveSegments(points: { x: number; y: number }[]): string {
-  const pointsRev = [...points].reverse()
-  return getForwardCurveSegments(pointsRev)
-}
-
+const SIZE = EMISSIONS_SIZE
+const CATEGORIES = EMISSIONS_CATEGORIES
 
 type EmissionsRingsChartProps = {
   birthYear: number
@@ -39,14 +14,6 @@ type EmissionsRingsChartProps = {
   parentsData?: IndiaEmissionsRings | null
   globalContext?: GlobalContext | null
 }
-
-const CATEGORIES = [
-  { key: 'coalMt', label: 'Coal', color: '#5c0606' },
-  { key: 'oilMt', label: 'Oil', color: '#cc1111' },
-  { key: 'cementMt', label: 'Cement', color: '#e65100' },
-  { key: 'gasMt', label: 'Gas', color: '#ff9800' },
-  { key: 'flaringMt', label: 'Flaring', color: '#ffe082' },
-] as const
 
 export function EmissionsRingsChart({ birthYear, data }: EmissionsRingsChartProps) {
   const [hoveredYear, setHoveredYear] = useState<number | null>(null)
@@ -57,90 +24,8 @@ export function EmissionsRingsChart({ birthYear, data }: EmissionsRingsChartProp
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
   const svgRef = useRef<SVGSVGElement>(null)
 
-  // 1. Process data coordinates
-  const coords = useMemo(() => {
-    const N = data.years.length
-    if (N === 0) return []
-
-    // Smoke starts at y=310 (match head) and ends at y=12 (top vertex of the diamond)
-    const y_start = 310
-    const y_end = 12
-    const maxTotal = Math.max(...data.years.map((y) => (y.coalMt ?? 0) + (y.oilMt ?? 0) + (y.cementMt ?? 0) + (y.gasMt ?? 0) + (y.flaringMt ?? 0)))
-    // Max width is 130px (half-width 65px) so it stays beautifully inside the diamond
-    const baseScale = 130 / (maxTotal || 1)
-
-    return data.years.map((pt, i) => {
-      const y = N > 1 ? y_start - (i / (N - 1)) * (y_start - y_end) : y_start
-      
-      // Perfectly centered along the vertical axis of the diamond for symmetry
-      const cx = 200
-
-      // Pinch the smoke narrow at the match tip
-      const taper = Math.min(1.0, (y_start - y) / 25)
-      const scale = baseScale * Math.max(0.08, taper)
-
-      const w_coal = (pt.coalMt ?? 0) * scale
-      const w_oil = (pt.oilMt ?? 0) * scale
-      const w_cement = (pt.cementMt ?? 0) * scale
-      const w_gas = (pt.gasMt ?? 0) * scale
-      const w_flaring = (pt.flaringMt ?? 0) * scale
-      const W = w_coal + w_oil + w_cement + w_gas + w_flaring
-
-      // Cumulative stacking positions
-      const x0 = cx - W / 2
-      const x1 = x0 + w_coal
-      const x2 = x1 + w_oil
-      const x3 = x2 + w_cement
-      const x4 = x3 + w_gas
-      const x5 = x4 + w_flaring
-
-      return {
-        year: pt.year,
-        y,
-        x: [x0, x1, x2, x3, x4, x5],
-        values: {
-          coalMt: pt.coalMt ?? 0,
-          oilMt: pt.oilMt ?? 0,
-          cementMt: pt.cementMt ?? 0,
-          gasMt: pt.gasMt ?? 0,
-          flaringMt: pt.flaringMt ?? 0,
-        },
-        co2Mt: pt.co2Mt,
-      }
-    })
-  }, [data])
-
-  // 2. Build the continuous smooth SVG paths for each category ribbon
-  const paths = useMemo(() => {
-    return CATEGORIES.map((cat, j) => {
-      const leftPoints = coords.map((c) => ({ x: c.x[j]!, y: c.y }))
-      const rightPoints = coords.map((c) => ({ x: c.x[j + 1]!, y: c.y }))
-
-      if (leftPoints.length === 0) {
-        return {
-          key: cat.key,
-          label: cat.label,
-          color: cat.color,
-          d: '',
-        }
-      }
-
-      const p0 = leftPoints[0]!
-      const forward = getForwardCurveSegments(leftPoints)
-      const pTop = rightPoints[rightPoints.length - 1]!
-      const backward = getBackwardCurveSegments(rightPoints)
-
-      // Start at bottom-left, curve up, line to top-right, curve down, close to bottom-left
-      const d = `M ${p0.x.toFixed(2)},${p0.y.toFixed(2)} ${forward} L ${pTop.x.toFixed(2)},${pTop.y.toFixed(2)} ${backward} Z`
-
-      return {
-        key: cat.key,
-        label: cat.label,
-        color: cat.color,
-        d,
-      }
-    })
-  }, [coords])
+  // Streamgraph geometry (coords for hover detection + smooth ribbon paths).
+  const { coords, paths } = useMemo(() => buildEmissionsPlume(data), [data])
 
   const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
     const svg = svgRef.current
