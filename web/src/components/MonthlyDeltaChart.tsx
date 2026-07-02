@@ -8,6 +8,7 @@ import { InsightsSection } from "@/components/InsightsSection";
 // import { LifeOrbitChart } from "@/components/LifeOrbitChart"; // TEMP: "Your orbit" card disabled — see below
 import { LifeTempChart } from "@/components/LifeTempChart";
 import { RemediesSection } from "@/components/RemediesSection";
+import { ShareQrCode } from "@/components/ShareQrCode";
 import { Button } from "@/components/ui/button";
 import { HandFanChart } from "@/components/HandFanChart";
 import { MonthlyRainSection } from "@/components/MonthlyRainSection";
@@ -56,12 +57,15 @@ type MonthlyDeltaChartProps = {
   data: MonthlyDeltaResponse;
   livedCities?: LivedCity[];
   onReset?: () => void;
+  /** Absolute URL to this kundli; when set, a QR code is shown after the cards. */
+  shareUrl?: string;
 };
 
 export function MonthlyDeltaChart({
   data,
   // livedCities, // TEMP: only consumed by the disabled "Your orbit" card
   onReset,
+  shareUrl,
 }: MonthlyDeltaChartProps) {
   const geometry = useMemo(() => buildGeometry(data), [data]);
   const headline = buildHeadline(data);
@@ -303,6 +307,12 @@ export function MonthlyDeltaChart({
           </li>
         ))}
       </ul>
+
+      {shareUrl ? (
+        <div className="flex justify-center pt-10">
+          <ShareQrCode url={shareUrl} />
+        </div>
+      ) : null}
 
       {onReset ? (
         <div className="flex justify-start pt-8 pb-4">

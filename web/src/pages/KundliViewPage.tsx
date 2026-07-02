@@ -71,6 +71,7 @@ export function KundliViewPage() {
           <MonthlyDeltaChart
             data={record.result}
             livedCities={record.livedCities}
+            shareUrl={`${window.location.origin}/k/${slug}`}
             onReset={() => navigate(isExhibition ? '/exhibition' : '/')}
           />
         ) : null}
