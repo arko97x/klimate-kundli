@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Printer } from 'lucide-react'
 
 import { MonthlyDeltaChart } from '@/components/MonthlyDeltaChart'
+import { PrintableKundli } from '@/components/PrintableKundli'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { KundliResultLayout } from '@/expt/KundliResultLayout'
 import { fetchKundliBySlug, type SavedKundliRecord } from '@/lib/api'
 import { useIsExhibition } from '@/lib/exhibition-context'
@@ -68,12 +71,31 @@ export function KundliViewPage() {
         ) : null}
 
         {!loading && record ? (
-          <MonthlyDeltaChart
-            data={record.result}
-            livedCities={record.livedCities}
-            shareUrl={`${window.location.origin}/k/${slug}`}
-            onReset={() => navigate(isExhibition ? '/exhibition' : '/')}
-          />
+          <>
+            <div className="mb-6 flex justify-end">
+              <Dialog>
+                <DialogTrigger render={<Button type="button" size="sm" className="gap-2" />}>
+                  <Printer className="size-4" />
+                  Print Kundli
+                </DialogTrigger>
+                <DialogContent className="max-w-[min(92vw,560px)] p-4">
+                  <DialogTitle className="sr-only">Printable kundli preview</DialogTitle>
+                  <PrintableKundli
+                    data={record.result}
+                    birthPlace={record.birthCityDisplay}
+                    className="w-full aspect-[210/297] border border-border shadow-sm"
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <MonthlyDeltaChart
+              data={record.result}
+              livedCities={record.livedCities}
+              shareUrl={`${window.location.origin}/k/${slug}`}
+              onReset={() => navigate(isExhibition ? '/exhibition' : '/')}
+            />
+          </>
         ) : null}
       </div>
     </KundliResultLayout>

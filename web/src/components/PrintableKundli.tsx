@@ -1,0 +1,355 @@
+import type { MonthlyDeltaResponse } from "@/lib/api";
+
+import fireCorner from "../assets/fire-corner.png";
+import airCorner from "../assets/air-corner.png";
+import earthCorner from "../assets/earth-corner.png";
+import waterCorner from "../assets/water-corner.png";
+
+// The printable kundli is a fortune-teller (cootie-catcher) crease map drawn on a
+// 600x600 square (viewBox units): four corner element tiles, eight black star-arms
+// carrying the data-field labels + per-kundli values, and four white center flaps
+// (headings only for now — the graphics land later). Every piece is inset by GUTTER
+// so uniform white gutters show through the white background.
+const GUTTER = 4;
+const TILE = 150 - GUTTER * 2;
+
+const CORNERS = [
+  { href: fireCorner, x: GUTTER, y: GUTTER },
+  { href: airCorner, x: 450 + GUTTER, y: GUTTER },
+  { href: earthCorner, x: GUTTER, y: 450 + GUTTER },
+  { href: waterCorner, x: 450 + GUTTER, y: 450 + GUTTER },
+];
+
+const ARM_FONT = "var(--font-sans)";
+const FLAP_FONT = "var(--font-alegreya-sans)";
+const VALUE_FONT = "var(--font-alegreya)";
+
+type Pt = [number, number];
+
+function toPts(s: string): Pt[] {
+  return s
+    .trim()
+    .split(/\s+/)
+    .map((p) => {
+      const [x, y] = p.split(",").map(Number);
+      return [x, y] as Pt;
+    });
+}
+
+// Inward offset of a convex polygon by distance d (toward its centroid).
+function insetPts(pts: Pt[], d: number): Pt[] {
+  const n = pts.length;
+  const cx = pts.reduce((s, p) => s + p[0], 0) / n;
+  const cy = pts.reduce((s, p) => s + p[1], 0) / n;
+  const lines = pts.map((a, i) => {
+    const b = pts[(i + 1) % n];
+    let ux = b[0] - a[0];
+    let uy = b[1] - a[1];
+    const len = Math.hypot(ux, uy);
+    ux /= len;
+    uy /= len;
+    let nx = -uy;
+    let ny = ux;
+    const mx = (a[0] + b[0]) / 2;
+    const my = (a[1] + b[1]) / 2;
+    if ((cx - mx) * nx + (cy - my) * ny < 0) {
+      nx = -nx;
+      ny = -ny;
+    }
+    return { qx: a[0] + nx * d, qy: a[1] + ny * d, ux, uy };
+  });
+  const out: Pt[] = [];
+  for (let i = 0; i < n; i++) {
+    const l1 = lines[(i - 1 + n) % n];
+    const l2 = lines[i];
+    const denom = l1.ux * l2.uy - l1.uy * l2.ux;
+    const t = ((l2.qx - l1.qx) * l2.uy - (l2.qy - l1.qy) * l2.ux) / denom;
+    out.push([l1.qx + l1.ux * t, l1.qy + l1.uy * t]);
+  }
+  return out;
+}
+
+function insetPolygon(points: string, d: number): string {
+  return insetPts(toPts(points), d)
+    .map((p) => `${p[0].toFixed(2)},${p[1].toFixed(2)}`)
+    .join(" ");
+}
+
+type ArmKey =
+  | "BIRTH PLACE"
+  | "BIRTH YEAR"
+  | "BIRTH YEAR EMISSIONS"
+  | "OCEAN-TEMPERATURE CHANGE"
+  | "WETTEST YEAR"
+  | "LOWEST TEMPERATURE EXPERIENCED"
+  | "CHANGE IN SEA-LEVEL"
+  | "HIGHEST TEMPERATURE EXPERIENCED";
+
+// Eight black arm-triangles. `cx/cy` anchors the small uppercase label along the
+// diamond edge; `rot` aligns text with that edge (kept within [-45,45] so it reads
+// upright). The per-kundli value is drawn further out toward the corner tile.
+const ARMS: { pts: string; cx: number; cy: number; rot: number; label: ArmKey }[] = [
+  { pts: "150,0 300,0 150,150", cx: 215, cy: 65, rot: -45, label: "BIRTH PLACE" },
+  { pts: "300,0 450,0 450,150", cx: 385, cy: 65, rot: 45, label: "BIRTH YEAR" },
+  { pts: "600,150 600,300 450,150", cx: 535, cy: 215, rot: 45, label: "BIRTH YEAR EMISSIONS" },
+  { pts: "600,300 600,450 450,450", cx: 535, cy: 385, rot: -45, label: "OCEAN-TEMPERATURE CHANGE" },
+  { pts: "450,600 300,600 450,450", cx: 385, cy: 535, rot: -45, label: "WETTEST YEAR" },
+  { pts: "300,600 150,600 150,450", cx: 215, cy: 535, rot: 45, label: "LOWEST TEMPERATURE EXPERIENCED" },
+  { pts: "0,450 0,300 150,450", cx: 65, cy: 385, rot: 45, label: "CHANGE IN SEA-LEVEL" },
+  { pts: "0,300 0,150 150,150", cx: 65, cy: 215, rot: -45, label: "HIGHEST TEMPERATURE EXPERIENCED" },
+];
+
+const FLAP_SHAPES = [
+  "300,0 450,150 300,300 150,150", // top
+  "450,150 600,300 450,450 300,300", // right
+  "300,300 450,450 300,600 150,450", // bottom
+  "150,150 300,300 150,450 0,300", // left
+];
+
+// Centered (upright) flap headings.
+const FLAP_HEADINGS = [
+  { cx: 300, cy: 62, lines: ["RECORD HOT YEARS", "EXPERIENCED"] },
+  { cx: 300, cy: 540, lines: ["MONSOONS", "EXPERIENCED"] },
+];
+
+// Flap headings that run along the flap's outer diamond edge.
+const EDGE_LABELS = [
+  { cx: 84, cy: 367, rot: 45, label: "ARCTIC ICE SUMMER MINIMUM" },
+  { cx: 516, cy: 367, rot: -45, label: "ANNUAL CARBON EMISSIONS" },
+];
+
+// A value sits perpendicular to its label, offset toward the outer corner tile
+// (away from the sheet centre), so label and value never overlap.
+function valueAnchor(cx: number, cy: number, rot: number, d = 32): Pt {
+  const rad = (rot * Math.PI) / 180;
+  let px = -Math.sin(rad);
+  let py = Math.cos(rad);
+  if ((cx - 300) * px + (cy - 300) * py < 0) {
+    px = -px;
+    py = -py;
+  }
+  return [cx + px * d, cy + py * d];
+}
+
+// "Bengaluru, Karnataka, India" -> "Bengaluru, India"; drops the state and any
+// parenthetical, keeping just city + country so the value fits the arm.
+function shortPlace(dn?: string | null): string {
+  const parts = (dn ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!parts.length) return "";
+  const city = parts[0].replace(/\s*\([^)]*\)/g, "").trim();
+  const country = parts[parts.length - 1];
+  return country && country !== city ? `${city}, ${country}` : city;
+}
+
+// Just the city, no state/country/parenthetical (e.g. for "City, Year" lines).
+function cityName(dn?: string | null): string {
+  return (dn ?? "").split(",")[0].replace(/\s*\([^)]*\)/g, "").trim();
+}
+
+// Hard safety cap so an unusually long value can never run past the arm.
+const VALUE_MAX_CHARS = 20;
+function truncate(s: string): string {
+  return s.length > VALUE_MAX_CHARS ? `${s.slice(0, VALUE_MAX_CHARS - 1).trimEnd()}…` : s;
+}
+
+// Map an arm to its per-kundli value lines. Ocean-temperature change has no data
+// source yet, so it stays blank. `birthPlace` overrides the city display if given.
+function armValue(
+  label: ArmKey,
+  data: MonthlyDeltaResponse,
+  birthPlace?: string,
+): string[] {
+  switch (label) {
+    case "BIRTH PLACE":
+      return [shortPlace(birthPlace || data.city?.displayName || data.city?.name)].filter(Boolean);
+    case "BIRTH YEAR":
+      return data.birthYear ? [String(data.birthYear)] : [];
+    case "BIRTH YEAR EMISSIONS":
+      return data.indiaEmissions ? [`${Math.round(data.indiaEmissions.firstCo2Mt)} Mt`] : [];
+    case "OCEAN-TEMPERATURE CHANGE":
+      return [];
+    case "WETTEST YEAR": {
+      let best: { displayName: string; year: number; precip: number } | null = null;
+      for (const c of data.rainRings?.byCity ?? []) {
+        for (const y of c.years) {
+          if (!best || y.precipMm > best.precip) {
+            best = { displayName: c.displayName, year: y.year, precip: y.precipMm };
+          }
+        }
+      }
+      if (!best) return [];
+      return [`${cityName(best.displayName)}, ${best.year}`, `${Math.round(best.precip)} mm`];
+    }
+    case "LOWEST TEMPERATURE EXPERIENCED": {
+      const tt = data.tempTimeline;
+      if (!tt?.coolestYear) return [];
+      const entry = tt.years?.find((y) => y.year === tt.coolestYear);
+      return [shortPlace(entry?.displayName), String(tt.coolestYear)].filter(Boolean);
+    }
+    case "CHANGE IN SEA-LEVEL": {
+      const mm = data.globalContext?.seaLevelRiseMm;
+      return mm != null ? [`+${Math.round(mm)} mm`] : [];
+    }
+    case "HIGHEST TEMPERATURE EXPERIENCED": {
+      const blades = data.hottestYears?.blades ?? [];
+      if (!blades.length) return [];
+      const b = blades.reduce((m, x) => (x.peakTempC > m.peakTempC ? x : m));
+      return [`${Math.round(b.peakTempC)}°C`, shortPlace(b.displayName), String(b.year)];
+    }
+    default:
+      return [];
+  }
+}
+
+type PrintableKundliProps = {
+  data: MonthlyDeltaResponse;
+  /** Overrides the birth-place display (e.g. record.birthCityDisplay). */
+  birthPlace?: string;
+  /** Extra classes for the A4 sheet (sizing / positioning). */
+  className?: string;
+};
+
+export function PrintableKundli({ data, birthPlace, className }: PrintableKundliProps) {
+  return (
+    <div
+      id="kundli-sheet"
+      className={`bg-white flex flex-col relative select-none ${className ?? ""}`}
+    >
+      <div className="w-full aspect-square relative bg-white">
+        <svg viewBox="0 0 600 600" className="w-full h-full" style={{ display: "block" }}>
+          {/* Clip each arm's value to its triangle so text can never spill out. */}
+          <defs>
+            {ARMS.map((arm) => (
+              <clipPath key={arm.label} id={`arm-clip-${arm.label.replace(/\s+/g, "-")}`}>
+                <polygon points={insetPolygon(arm.pts, GUTTER)} />
+              </clipPath>
+            ))}
+          </defs>
+
+          {/* Black star-arms */}
+          {ARMS.map((arm) => (
+            <polygon key={arm.label} points={insetPolygon(arm.pts, GUTTER)} fill="black" />
+          ))}
+
+          {/* White center flaps */}
+          {FLAP_SHAPES.map((shape) => (
+            <polygon
+              key={shape}
+              points={insetPolygon(shape, GUTTER)}
+              fill="white"
+              stroke="black"
+              strokeWidth={2}
+              strokeLinejoin="round"
+            />
+          ))}
+
+          {/* Corner element tiles */}
+          {CORNERS.map((c) => (
+            <image key={c.href} href={c.href} x={c.x} y={c.y} width={TILE} height={TILE} />
+          ))}
+
+          {/* Arm labels (along the diamond edge) + per-kundli values (toward the tile) */}
+          {ARMS.map((arm) => {
+            const value = armValue(arm.label, data, birthPlace);
+            const [vx, vy] = valueAnchor(arm.cx, arm.cy, arm.rot);
+            const vlh = 13;
+            const vStart = -((value.length - 1) * vlh) / 2;
+            return (
+              <g key={`arm-${arm.label}`}>
+                <text
+                  x={arm.cx}
+                  y={arm.cy}
+                  transform={`rotate(${arm.rot} ${arm.cx} ${arm.cy})`}
+                  fill="white"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontFamily={ARM_FONT}
+                  fontWeight={400}
+                  fontSize={8}
+                  letterSpacing="0.05em"
+                  style={{ textTransform: "uppercase" }}
+                >
+                  {arm.label}
+                </text>
+                {value.length ? (
+                  <g clipPath={`url(#arm-clip-${arm.label.replace(/\s+/g, "-")})`}>
+                    <text
+                      x={vx}
+                      y={vy}
+                      transform={`rotate(${arm.rot} ${vx} ${vy})`}
+                      fill="white"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fontFamily={VALUE_FONT}
+                      fontWeight={500}
+                      fontSize={11}
+                    >
+                      {value.map((line, i) => (
+                        <tspan key={line} x={vx} dy={i === 0 ? vStart : vlh}>
+                          {truncate(line)}
+                        </tspan>
+                      ))}
+                    </text>
+                  </g>
+                ) : null}
+              </g>
+            );
+          })}
+
+          {/* Centered flap headings */}
+          {FLAP_HEADINGS.map((h) => {
+            const lh = 11;
+            const startY = h.cy - ((h.lines.length - 1) * lh) / 2;
+            return (
+              <text
+                key={h.lines.join("-")}
+                x={h.cx}
+                y={startY}
+                fill="black"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontFamily={FLAP_FONT}
+                fontWeight={400}
+                fontSize={9}
+                letterSpacing="0.1em"
+                style={{ textTransform: "uppercase" }}
+              >
+                {h.lines.map((line, i) => (
+                  <tspan key={line} x={h.cx} dy={i === 0 ? 0 : lh}>
+                    {line}
+                  </tspan>
+                ))}
+              </text>
+            );
+          })}
+
+          {/* Edge-aligned flap headings */}
+          {EDGE_LABELS.map((el) => (
+            <text
+              key={el.label}
+              x={el.cx}
+              y={el.cy}
+              transform={`rotate(${el.rot} ${el.cx} ${el.cy})`}
+              fill="black"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fontFamily={FLAP_FONT}
+              fontWeight={400}
+              fontSize={9}
+              letterSpacing="0.1em"
+              style={{ textTransform: "uppercase" }}
+            >
+              {el.label}
+            </text>
+          ))}
+        </svg>
+      </div>
+
+      {/* Empty bottom strip (QR + upaay land here later). */}
+      <div className="w-full flex-1 bg-white" />
+    </div>
+  );
+}
