@@ -15,9 +15,11 @@ interface Remedy {
   title: string
   problem: string
   remedy: string
+  /** One-line imperative for tight spaces (e.g. the printable kundli). */
+  short: string
 }
 
-function buildRemedies(data: MonthlyDeltaResponse): Remedy[] {
+export function buildRemedies(data: MonthlyDeltaResponse): Remedy[] {
   const remedies: Remedy[] = []
   const { largestDelta, hottestYears, indiaEmissions, parentsBirthWindow, recentWindow } = data
 
@@ -32,6 +34,7 @@ function buildRemedies(data: MonthlyDeltaResponse): Remedy[] {
       title: 'Overheating',
       problem: `${monthLabel} is now ${delta.toFixed(1)}°C hotter than when you were born.`,
       remedy: `Drink your chai at ${prescribedTemp}°C — exactly ${chaiTempReduction}°C cooler than a proper cup. Every day. For life. It will taste wrong. That is the point. A ${delta.toFixed(1)}°C warmer world earns a ${chaiTempReduction}°C cooler cup. A thermometer will be required. Guessing is not permitted.`,
+      short: `Drink your chai ${chaiTempReduction}°C cooler. Every day. For life.`,
     })
   }
 
@@ -54,6 +57,7 @@ function buildRemedies(data: MonthlyDeltaResponse): Remedy[] {
       title: 'Carbon Debt',
       problem: `Your per-capita share of India's CO₂ since you were born: ~${perCapitaTonnes} tonnes.`,
       remedy: `To offset this, you would need to forgo ${queriesReadable} AI queries — or stop using AI entirely for ${yearsOffAI.toLocaleString()} years. This prescription is self-aware. We recommend beginning immediately. The irony has already been noted.`,
+      short: `Forgo ${queriesReadable} AI queries to offset your ~${perCapitaTonnes}t carbon share.`,
     })
   }
 
@@ -66,6 +70,7 @@ function buildRemedies(data: MonthlyDeltaResponse): Remedy[] {
       title: 'Rising Seas',
       problem: `Sea levels rose ${mm}mm since you were born.`,
       remedy: `Drink ${glassesLess} fewer glass${glassesLess !== 1 ? 'es' : ''} of water per week. It will not help, but the gesture is symbolically significant. Additionally, place ${glacierIdols} ice cube${glacierIdols !== 1 ? 's' : ''} in the ocean annually. Do this at dawn. Do not explain yourself to bystanders.`,
+      short: `Drink ${glassesLess} fewer glass${glassesLess !== 1 ? 'es' : ''} of water a week. Symbolically.`,
     })
   }
 
@@ -78,6 +83,7 @@ function buildRemedies(data: MonthlyDeltaResponse): Remedy[] {
       title: 'Record Heat',
       problem: `You have survived ${n} of the hottest years on record since ${hottestYears.recordStartYear}.`,
       remedy: `Adopt ${trees} tree${trees !== 1 ? 's' : ''} and take full responsibility for ${trees !== 1 ? 'them' : 'it'}. Budget approximately ₹${adoptionBudget.toLocaleString()} for the paperwork. The trees cannot object. They also cannot water themselves. This is now your responsibility.`,
+      short: `Adopt ${trees} tree${trees !== 1 ? 's' : ''}. They cannot water themselves.`,
     })
   }
 
@@ -93,6 +99,7 @@ function buildRemedies(data: MonthlyDeltaResponse): Remedy[] {
           title: 'Generational Debt',
           problem: `Temperatures rose ${genDelta.toFixed(1)}°C from your parents' childhood to today.`,
           remedy: `Fan your parents for ${fanMinutes} minutes daily as generational reparation. Hand-held palm-leaf fan only — electricity would defeat the purpose. Your parents may protest. This is between you and the thermometer now.`,
+          short: `Fan your parents ${fanMinutes} min daily. By hand only.`,
         })
       }
     }

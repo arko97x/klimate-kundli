@@ -1,5 +1,9 @@
+import { useEffect, useState } from "react";
+import QRCode from "qrcode";
+
 import type { MonthlyDeltaResponse, HottestYearBlade } from "@/lib/api";
 import { EmissionsPlume } from "@/components/EmissionsPlume";
+import { buildRemedies } from "@/components/RemediesSection";
 import { IcebergContent } from "@/components/ArcticIcebergChart";
 import { parallelAnnulusPath, permutationForSeed } from "@/lib/organicTreeRing";
 
@@ -91,15 +95,63 @@ type ArmKey =
 // Eight black arm-triangles. `cx/cy` anchors the small uppercase label along the
 // diamond edge; `rot` aligns text with that edge (kept within [-45,45] so it reads
 // upright). The per-kundli value is drawn further out toward the corner tile.
-const ARMS: { pts: string; cx: number; cy: number; rot: number; label: ArmKey }[] = [
-  { pts: "150,0 300,0 150,150", cx: 215, cy: 65, rot: -45, label: "BIRTH PLACE" },
+const ARMS: {
+  pts: string;
+  cx: number;
+  cy: number;
+  rot: number;
+  label: ArmKey;
+}[] = [
+  {
+    pts: "150,0 300,0 150,150",
+    cx: 215,
+    cy: 65,
+    rot: -45,
+    label: "BIRTH PLACE",
+  },
   { pts: "300,0 450,0 450,150", cx: 385, cy: 65, rot: 45, label: "BIRTH YEAR" },
-  { pts: "600,150 600,300 450,150", cx: 535, cy: 215, rot: 45, label: "BIRTH YEAR EMISSIONS" },
-  { pts: "600,300 600,450 450,450", cx: 535, cy: 385, rot: -45, label: "OCEAN-TEMPERATURE CHANGE" },
-  { pts: "450,600 300,600 450,450", cx: 385, cy: 535, rot: -45, label: "WETTEST YEAR" },
-  { pts: "300,600 150,600 150,450", cx: 215, cy: 535, rot: 45, label: "LOWEST TEMPERATURE EXPERIENCED" },
-  { pts: "0,450 0,300 150,450", cx: 65, cy: 385, rot: 45, label: "CHANGE IN SEA-LEVEL" },
-  { pts: "0,300 0,150 150,150", cx: 65, cy: 215, rot: -45, label: "HIGHEST TEMPERATURE EXPERIENCED" },
+  {
+    pts: "600,150 600,300 450,150",
+    cx: 535,
+    cy: 215,
+    rot: 45,
+    label: "BIRTH YEAR EMISSIONS",
+  },
+  {
+    pts: "600,300 600,450 450,450",
+    cx: 535,
+    cy: 385,
+    rot: -45,
+    label: "OCEAN-TEMPERATURE CHANGE",
+  },
+  {
+    pts: "450,600 300,600 450,450",
+    cx: 385,
+    cy: 535,
+    rot: -45,
+    label: "WETTEST YEAR",
+  },
+  {
+    pts: "300,600 150,600 150,450",
+    cx: 215,
+    cy: 535,
+    rot: 45,
+    label: "LOWEST TEMPERATURE EXPERIENCED",
+  },
+  {
+    pts: "0,450 0,300 150,450",
+    cx: 65,
+    cy: 385,
+    rot: 45,
+    label: "CHANGE IN SEA-LEVEL",
+  },
+  {
+    pts: "0,300 0,150 150,150",
+    cx: 65,
+    cy: 215,
+    rot: -45,
+    label: "HIGHEST TEMPERATURE EXPERIENCED",
+  },
 ];
 
 const FLAP_SHAPES = [
@@ -201,7 +253,13 @@ function buildPrintableRings(
     rings.push({
       year: point.year,
       precipMm: point.precipMm,
-      d: parallelAnnulusPath(RING_CENTER, RING_CENTER, inner, outer, wigglePerm),
+      d: parallelAnnulusPath(
+        RING_CENTER,
+        RING_CENTER,
+        inner,
+        outer,
+        wigglePerm,
+      ),
       color: ringWoodColor(norm),
     });
     radius = outer;
@@ -282,7 +340,9 @@ function buildPrintableFanBlades(
   const rOuter = 175;
   const rInner = 44;
 
-  const uniqueCities = Array.from(new Set(blades.map((b) => b.cityName ?? b.displayName)));
+  const uniqueCities = Array.from(
+    new Set(blades.map((b) => b.cityName ?? b.displayName)),
+  );
   const CITY_COLORS = ["#c45a3a", "#3d6b7a", "#7a5c2e", "#5c4a6b", "#2d5c45"];
 
   return blades.map((blade, idx) => {
@@ -300,7 +360,7 @@ function buildPrintableFanBlades(
     const dOutline = ringSlatPath(cx, cy, a0, a1, rInner, rOuter);
     const dHeat = ringSlatPath(cx, cy, a0, a1, rInner, heatFillR);
 
-    const rText = rInner + 0.50 * (rOuter - rInner);
+    const rText = rInner + 0.5 * (rOuter - rInner);
     const textX = cx + rText * Math.cos(midAngle);
     const textY = cy + rText * Math.sin(midAngle);
 
@@ -365,52 +425,71 @@ function shortPlace(dn?: string | null): string {
 
 // Just the city, no state/country/parenthetical (e.g. for "City, Year" lines).
 function cityName(dn?: string | null): string {
-  return (dn ?? "").split(",")[0].replace(/\s*\([^)]*\)/g, "").trim();
+  return (dn ?? "")
+    .split(",")[0]
+    .replace(/\s*\([^)]*\)/g, "")
+    .trim();
 }
 
 // Hard safety cap so an unusually long value can never run past the arm.
 const VALUE_MAX_CHARS = 20;
 function truncate(s: string): string {
-  return s.length > VALUE_MAX_CHARS ? `${s.slice(0, VALUE_MAX_CHARS - 1).trimEnd()}…` : s;
+  return s.length > VALUE_MAX_CHARS
+    ? `${s.slice(0, VALUE_MAX_CHARS - 1).trimEnd()}…`
+    : s;
 }
 
-  // Map an arm to its per-kundli value lines. Ocean-temperature change has data
-  // from globalContext.oceanTempRiseC. `birthPlace` overrides the city display if given.
-  function armValue(
-    label: ArmKey,
-    data: MonthlyDeltaResponse,
-    birthPlace?: string,
-  ): string[] {
-    switch (label) {
-      case "BIRTH PLACE":
-        return [shortPlace(birthPlace || data.city?.displayName || data.city?.name)].filter(Boolean);
-      case "BIRTH YEAR":
-        return data.birthYear ? [String(data.birthYear)] : [];
-      case "BIRTH YEAR EMISSIONS":
-        return data.indiaEmissions ? [`${Math.round(data.indiaEmissions.firstCo2Mt)} Mt`] : [];
-      case "OCEAN-TEMPERATURE CHANGE": {
-        const c = data.globalContext?.oceanTempRiseC;
-        if (c == null) return [];
-        const sign = c > 0 ? "+" : "";
-        return [`${sign}${c.toFixed(2)} °C`];
-      }
+// Map an arm to its per-kundli value lines. Ocean-temperature change has data
+// from globalContext.oceanTempRiseC. `birthPlace` overrides the city display if given.
+function armValue(
+  label: ArmKey,
+  data: MonthlyDeltaResponse,
+  birthPlace?: string,
+): string[] {
+  switch (label) {
+    case "BIRTH PLACE":
+      return [
+        shortPlace(birthPlace || data.city?.displayName || data.city?.name),
+      ].filter(Boolean);
+    case "BIRTH YEAR":
+      return data.birthYear ? [String(data.birthYear)] : [];
+    case "BIRTH YEAR EMISSIONS":
+      return data.indiaEmissions
+        ? [`${Math.round(data.indiaEmissions.firstCo2Mt)} Mt`]
+        : [];
+    case "OCEAN-TEMPERATURE CHANGE": {
+      const c = data.globalContext?.oceanTempRiseC;
+      if (c == null) return [];
+      const sign = c > 0 ? "+" : "";
+      return [`${sign}${c.toFixed(2)} °C`];
+    }
     case "WETTEST YEAR": {
-      let best: { displayName: string; year: number; precip: number } | null = null;
+      let best: { displayName: string; year: number; precip: number } | null =
+        null;
       for (const c of data.rainRings?.byCity ?? []) {
         for (const y of c.years) {
           if (!best || y.precipMm > best.precip) {
-            best = { displayName: c.displayName, year: y.year, precip: y.precipMm };
+            best = {
+              displayName: c.displayName,
+              year: y.year,
+              precip: y.precipMm,
+            };
           }
         }
       }
       if (!best) return [];
-      return [`${cityName(best.displayName)}, ${best.year}`, `${Math.round(best.precip)} mm`];
+      return [
+        `${cityName(best.displayName)}, ${best.year}`,
+        `${Math.round(best.precip)} mm`,
+      ];
     }
     case "LOWEST TEMPERATURE EXPERIENCED": {
       const tt = data.tempTimeline;
       if (!tt?.coolestYear) return [];
       const entry = tt.years?.find((y) => y.year === tt.coolestYear);
-      return [shortPlace(entry?.displayName), String(tt.coolestYear)].filter(Boolean);
+      return [shortPlace(entry?.displayName), String(tt.coolestYear)].filter(
+        Boolean,
+      );
     }
     case "CHANGE IN SEA-LEVEL": {
       const mm = data.globalContext?.seaLevelRiseMm;
@@ -420,34 +499,94 @@ function truncate(s: string): string {
       const blades = data.hottestYears?.blades ?? [];
       if (!blades.length) return [];
       const b = blades.reduce((m, x) => (x.peakTempC > m.peakTempC ? x : m));
-      return [`${Math.round(b.peakTempC)}°C`, shortPlace(b.displayName), String(b.year)];
+      return [
+        `${Math.round(b.peakTempC)}°C`,
+        shortPlace(b.displayName),
+        String(b.year),
+      ];
     }
     default:
       return [];
   }
 }
 
+/**
+ * Renders the shareable-link QR for the printed kundli. The URL is encoded
+ * directly into the QR (no redirect service), so it never expires or hits a
+ * scan limit. Rendered at 2x for a crisp print.
+ */
+function PrintQrCode({ url, size = 96 }: { url: string; size?: number }) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    QRCode.toDataURL(url, {
+      errorCorrectionLevel: "M",
+      margin: 0,
+      width: size * 2,
+      color: { dark: "#000000", light: "#ffffff" },
+    })
+      .then((src) => {
+        if (!cancelled) setDataUrl(src);
+      })
+      .catch(() => {
+        if (!cancelled) setDataUrl(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [url, size]);
+
+  if (!dataUrl) return null;
+
+  return (
+    <img
+      src={dataUrl}
+      width={size}
+      height={size}
+      alt="Scan to open this kundli"
+      style={{ display: "block" }}
+    />
+  );
+}
+
 type PrintableKundliProps = {
   data: MonthlyDeltaResponse;
   /** Overrides the birth-place display (e.g. record.birthCityDisplay). */
   birthPlace?: string;
+  /** Absolute shareable URL; when set, a QR to it is printed in the bottom strip. */
+  shareUrl?: string;
   /** Extra classes for the A4 sheet (sizing / positioning). */
   className?: string;
 };
 
-export function PrintableKundli({ data, birthPlace, className }: PrintableKundliProps) {
+export function PrintableKundli({
+  data,
+  birthPlace,
+  shareUrl,
+  className,
+}: PrintableKundliProps) {
   return (
     <div
       id="kundli-sheet"
       className={`bg-white flex flex-col relative select-none ${className ?? ""}`}
     >
       <div className="w-full aspect-square relative bg-white">
-        <svg viewBox="0 0 600 600" className="w-full h-full" style={{ display: "block" }}>
+        <svg
+          viewBox="0 0 600 600"
+          className="w-full h-full"
+          style={{ display: "block" }}
+        >
           {/* Clip each arm's value to its triangle so text can never spill out;
               clip the emissions plume to the right flap (just inside its outline). */}
           <defs>
             {ARMS.map((arm) => (
-              <clipPath key={arm.label} id={`arm-clip-${arm.label.replace(/\s+/g, "-")}`}>
+              <clipPath
+                key={arm.label}
+                id={`arm-clip-${arm.label.replace(/\s+/g, "-")}`}
+              >
                 <polygon points={insetPolygon(arm.pts, GUTTER)} />
               </clipPath>
             ))}
@@ -467,7 +606,11 @@ export function PrintableKundli({ data, birthPlace, className }: PrintableKundli
 
           {/* Black star-arms */}
           {ARMS.map((arm) => (
-            <polygon key={arm.label} points={insetPolygon(arm.pts, GUTTER)} fill="black" />
+            <polygon
+              key={arm.label}
+              points={insetPolygon(arm.pts, GUTTER)}
+              fill="black"
+            />
           ))}
 
           {/* White center flaps */}
@@ -483,205 +626,230 @@ export function PrintableKundli({ data, birthPlace, className }: PrintableKundli
           ))}
 
           {/* Record Hot Years Experienced (top flap), scaled + clipped to fit. */}
-          {data.hottestYears?.blades?.length ? (() => {
-            const fanBlades = buildPrintableFanBlades(data.hottestYears.blades);
+          {data.hottestYears?.blades?.length
+            ? (() => {
+                const fanBlades = buildPrintableFanBlades(
+                  data.hottestYears.blades,
+                );
 
-            return (
-              <g clipPath="url(#flap-clip-top)">
-                {/* Ribs (connector lines) between pivot and blades */}
-                {fanBlades.map((blade) => (
-                  <line
-                    key={`rib-${blade.year}`}
-                    x1={300}
-                    y1={272}
-                    x2={300 + Math.cos(blade.midAngle) * 175}
-                    y2={272 + Math.sin(blade.midAngle) * 175}
-                    stroke="#2a2418"
-                    strokeWidth={1.25}
-                    strokeLinecap="round"
-                  />
-                ))}
+                return (
+                  <g clipPath="url(#flap-clip-top)">
+                    {/* Ribs (connector lines) between pivot and blades */}
+                    {fanBlades.map((blade) => (
+                      <line
+                        key={`rib-${blade.year}`}
+                        x1={300}
+                        y1={272}
+                        x2={300 + Math.cos(blade.midAngle) * 175}
+                        y2={272 + Math.sin(blade.midAngle) * 175}
+                        stroke="#2a2418"
+                        strokeWidth={1.25}
+                        strokeLinecap="round"
+                      />
+                    ))}
 
-                {fanBlades.map((blade) => (
-                  <g key={blade.year}>
-                    {/* Outline / base slat */}
-                    <path
-                      d={blade.dOutline}
-                      fill="#faf7f2"
-                      stroke="#2a2418"
-                      strokeWidth={1.05}
-                      strokeLinejoin="round"
-                    />
-                    {/* Heat filled region */}
-                    <path
-                      d={blade.dHeat}
-                      fill={blade.color}
-                      fillOpacity={0.65}
-                      stroke="none"
-                    />
-                    {/* Year label written inside the blade */}
-                    <text
-                      x={blade.textX}
-                      y={blade.textY}
-                      transform={`rotate(${blade.rotDeg} ${blade.textX} ${blade.textY})`}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#334155"
-                      fontFamily={VALUE_FONT}
-                      fontSize={9}
-                      fontWeight={600}
-                    >
-                      {blade.year}
-                    </text>
-                    {/* Temperature label written near the outer edge */}
-                    <text
-                      x={blade.tempX}
-                      y={blade.tempY}
-                      transform={`rotate(${blade.rotDeg} ${blade.tempX} ${blade.tempY})`}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#1e293b"
-                      fontFamily={VALUE_FONT}
-                      fontSize={8}
-                      fontWeight={600}
-                    >
-                      {blade.peakTemp.toFixed(1)}°
-                    </text>
+                    {fanBlades.map((blade) => (
+                      <g key={blade.year}>
+                        {/* Outline / base slat */}
+                        <path
+                          d={blade.dOutline}
+                          fill="#faf7f2"
+                          stroke="#2a2418"
+                          strokeWidth={1.05}
+                          strokeLinejoin="round"
+                        />
+                        {/* Heat filled region */}
+                        <path
+                          d={blade.dHeat}
+                          fill={blade.color}
+                          fillOpacity={0.65}
+                          stroke="none"
+                        />
+                        {/* Year label written inside the blade */}
+                        <text
+                          x={blade.textX}
+                          y={blade.textY}
+                          transform={`rotate(${blade.rotDeg} ${blade.textX} ${blade.textY})`}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fill="#334155"
+                          fontFamily={VALUE_FONT}
+                          fontSize={9}
+                          fontWeight={600}
+                        >
+                          {blade.year}
+                        </text>
+                        {/* Temperature label written near the outer edge */}
+                        <text
+                          x={blade.tempX}
+                          y={blade.tempY}
+                          transform={`rotate(${blade.rotDeg} ${blade.tempX} ${blade.tempY})`}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fill="#1e293b"
+                          fontFamily={VALUE_FONT}
+                          fontSize={8}
+                          fontWeight={600}
+                        >
+                          {blade.peakTemp.toFixed(1)}°
+                        </text>
+                      </g>
+                    ))}
+                    {/* Pivot Pin */}
+                    <circle cx={300} cy={272} r={4.5} fill="#2a2418" />
                   </g>
-                ))}
-                {/* Pivot Pin */}
-                <circle cx={300} cy={272} r={4.5} fill="#2a2418" />
-              </g>
-            );
-          })() : null}
+                );
+              })()
+            : null}
 
           {/* Annual carbon emissions plume (right flap), scaled + clipped to fit. */}
           {data.indiaEmissions?.years?.length ? (
             <g clipPath="url(#flap-clip-right)">
-              <g transform={`translate(${PLUME_TX} ${PLUME_TY}) scale(${PLUME_SCALE})`}>
+              <g
+                transform={`translate(${PLUME_TX} ${PLUME_TY}) scale(${PLUME_SCALE})`}
+              >
                 <EmissionsPlume data={data.indiaEmissions} />
               </g>
             </g>
           ) : null}
 
           {/* Arctic ice summer minimum iceberg (left flap), scaled + clipped to fit. */}
-          {data.globalContext?.arcticIce ? (() => {
-            const arctic = data.globalContext.arcticIce;
-            const comparison = arctic.comparison;
-            const birthExtent = arctic.birthWindow.extentMkm2;
-            const meltFrac = birthExtent > 0 ? Math.min(0.85, Math.max(0.06, arctic.lostMkm2 / birthExtent)) : 0;
-            const TOP = 1;
-            const BOTTOM = 183;
-            const meltLine = TOP + meltFrac * (BOTTOM - TOP);
+          {data.globalContext?.arcticIce
+            ? (() => {
+                const arctic = data.globalContext.arcticIce;
+                const comparison = arctic.comparison;
+                const birthExtent = arctic.birthWindow.extentMkm2;
+                const meltFrac =
+                  birthExtent > 0
+                    ? Math.min(
+                        0.85,
+                        Math.max(0.06, arctic.lostMkm2 / birthExtent),
+                      )
+                    : 0;
+                const TOP = 1;
+                const BOTTOM = 183;
+                const meltLine = TOP + meltFrac * (BOTTOM - TOP);
 
-            return (
-              <g clipPath="url(#flap-clip-left)">
-                <g transform={`translate(${BERG_TX} ${BERG_TY}) scale(${BERG_SCALE})`}>
-                  <IcebergContent arctic={arctic} idPrefix="print-berg" />
-                  {comparison ? (
-                    <g>
-                      <text
-                        x={77}
-                        y={(meltLine / 2) - 1.5}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fontFamily={ARM_FONT}
-                        fontWeight="bold"
-                        fontSize={9 / BERG_SCALE}
-                        fill="#0f172a"
-                      >
-                        ~{Math.round(comparison.multiple * 100)}%
-                      </text>
-                      <text
-                        x={77}
-                        y={(meltLine / 2) + 9.5}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fontFamily={VALUE_FONT}
-                        fontSize={9 / BERG_SCALE}
-                        fill="#334155"
-                      >
-                        size of {comparison.name}
-                      </text>
+                return (
+                  <g clipPath="url(#flap-clip-left)">
+                    <g
+                      transform={`translate(${BERG_TX} ${BERG_TY}) scale(${BERG_SCALE})`}
+                    >
+                      <IcebergContent arctic={arctic} idPrefix="print-berg" />
+                      {comparison ? (
+                        <g>
+                          <text
+                            x={77}
+                            y={meltLine / 2 - 1.5}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fontFamily={ARM_FONT}
+                            fontWeight="bold"
+                            fontSize={9 / BERG_SCALE}
+                            fill="#0f172a"
+                          >
+                            ~{Math.round(comparison.multiple * 100)}%
+                          </text>
+                          <text
+                            x={77}
+                            y={meltLine / 2 + 9.5}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fontFamily={VALUE_FONT}
+                            fontSize={9 / BERG_SCALE}
+                            fill="#334155"
+                          >
+                            size of {comparison.name}
+                          </text>
+                        </g>
+                      ) : null}
                     </g>
-                  ) : null}
-                </g>
-              </g>
-            );
-          })() : null}
+                  </g>
+                );
+              })()
+            : null}
 
           {/* Monsoons Experienced (bottom flap), combined from all cities, scaled + clipped to fit. */}
-          {data.rainRings?.byCity?.length ? (() => {
-            const cities = data.rainRings.byCity;
-            const combinedYearsMap = new Map<number, number>();
-            for (const city of cities) {
-              for (const y of city.years) {
-                const existing = combinedYearsMap.get(y.year);
-                if (existing === undefined || y.precipMm > existing) {
-                  combinedYearsMap.set(y.year, y.precipMm);
+          {data.rainRings?.byCity?.length
+            ? (() => {
+                const cities = data.rainRings.byCity;
+                const combinedYearsMap = new Map<number, number>();
+                for (const city of cities) {
+                  for (const y of city.years) {
+                    const existing = combinedYearsMap.get(y.year);
+                    if (existing === undefined || y.precipMm > existing) {
+                      combinedYearsMap.set(y.year, y.precipMm);
+                    }
+                  }
                 }
-              }
-            }
-            const combinedYears = Array.from(combinedYearsMap.entries())
-              .map(([year, precipMm]) => ({ year, precipMm }))
-              .sort((a, b) => a.year - b.year);
+                const combinedYears = Array.from(combinedYearsMap.entries())
+                  .map(([year, precipMm]) => ({ year, precipMm }))
+                  .sort((a, b) => a.year - b.year);
 
-            if (combinedYears.length === 0) return null;
+                if (combinedYears.length === 0) return null;
 
-            const seedString = cities.map((c) => c.displayName).join(",");
-            const wigglePerm = permutationForSeed(hashLabel(seedString));
-            const rings = buildPrintableRings(combinedYears, wigglePerm);
-            const first = combinedYears[0];
+                const seedString = cities.map((c) => c.displayName).join(",");
+                const wigglePerm = permutationForSeed(hashLabel(seedString));
+                const rings = buildPrintableRings(combinedYears, wigglePerm);
+                const first = combinedYears[0];
 
-            const scale = 0.48;
-            const tx = 300 - RING_CENTER * scale;
-            const ty = 434 - RING_CENTER * scale;
+                const scale = 0.48;
+                const tx = 300 - RING_CENTER * scale;
+                const ty = 434 - RING_CENTER * scale;
 
-            return (
-              <g clipPath="url(#flap-clip-bottom)">
-                <g transform={`translate(${tx} ${ty}) scale(${scale})`}>
-                  {rings.map((ring) => (
-                    <path
-                      key={ring.year}
-                      d={ring.d}
-                      fill={ring.color}
-                      stroke="#2a2418"
-                      strokeWidth={0.35}
-                      strokeLinejoin="round"
-                    />
-                  ))}
+                return (
+                  <g clipPath="url(#flap-clip-bottom)">
+                    <g transform={`translate(${tx} ${ty}) scale(${scale})`}>
+                      {rings.map((ring) => (
+                        <path
+                          key={ring.year}
+                          d={ring.d}
+                          fill={ring.color}
+                          stroke="#2a2418"
+                          strokeWidth={0.35}
+                          strokeLinejoin="round"
+                        />
+                      ))}
 
-                  {/* Center label inside the rings */}
-                  <text
-                    x={RING_CENTER}
-                    y={RING_CENTER - 3}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill="#3d3020"
-                    fontSize={10}
-                    fontWeight={600}
-                  >
-                    {first?.year}
-                  </text>
-                  <text
-                    x={RING_CENTER}
-                    y={RING_CENTER + 11}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill="#3d302099"
-                    fontSize={8}
-                    className="tabular-nums"
-                  >
-                    {first ? `${first.precipMm} mm` : ""}
-                  </text>
-                </g>
-              </g>
-            );
-          })() : null}
+                      {/* Center label inside the rings */}
+                      <text
+                        x={RING_CENTER}
+                        y={RING_CENTER - 3}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill="#3d3020"
+                        fontSize={10}
+                        fontWeight={600}
+                      >
+                        {first?.year}
+                      </text>
+                      <text
+                        x={RING_CENTER}
+                        y={RING_CENTER + 11}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill="#3d302099"
+                        fontSize={8}
+                        className="tabular-nums"
+                      >
+                        {first ? `${first.precipMm} mm` : ""}
+                      </text>
+                    </g>
+                  </g>
+                );
+              })()
+            : null}
 
           {/* Corner element tiles */}
           {CORNERS.map((c) => (
-            <image key={c.href} href={c.href} x={c.x} y={c.y} width={TILE} height={TILE} />
+            <image
+              key={c.href}
+              href={c.href}
+              x={c.x}
+              y={c.y}
+              width={TILE}
+              height={TILE}
+            />
           ))}
 
           {/* Arm labels (along the diamond edge) + per-kundli values (toward the tile) */}
@@ -708,7 +876,9 @@ export function PrintableKundli({ data, birthPlace, className }: PrintableKundli
                   {arm.label}
                 </text>
                 {value.length ? (
-                  <g clipPath={`url(#arm-clip-${arm.label.replace(/\s+/g, "-")})`}>
+                  <g
+                    clipPath={`url(#arm-clip-${arm.label.replace(/\s+/g, "-")})`}
+                  >
                     <text
                       x={vx}
                       y={vy}
@@ -832,8 +1002,54 @@ export function PrintableKundli({ data, birthPlace, className }: PrintableKundli
         </svg>
       </div>
 
-      {/* Empty bottom strip (QR + upaay land here later). */}
-      <div className="w-full flex-1 bg-white" />
+      {/* Bottom strip: dotted top border marks where it starts. Concise upaay on
+          the left; name write-on line + QR on the right. */}
+      <div className="w-full flex-1 bg-white flex flex-row items-start justify-between gap-6 p-4 border-t border-dashed border-black/60">
+        {/* Concise, satirical remedies — trimmed to one line each so they never overflow. */}
+        <div className="flex flex-1 flex-col">
+          <span
+            className="mb-1.5 text-[9px] uppercase tracking-[0.2em] text-neutral-500"
+            style={{ fontFamily: "var(--font-alegreya-sans)" }}
+          >
+            Your upaay
+          </span>
+          <ul className="flex flex-col gap-1">
+            {buildRemedies(data)
+              .slice(0, 4)
+              .map((remedy, i) => (
+                <li
+                  key={remedy.title}
+                  className="flex gap-1.5 text-[10px] leading-snug text-black"
+                  style={{ fontFamily: "var(--font-alegreya)" }}
+                >
+                  <span className="text-neutral-500">{i + 1}.</span>
+                  <span className="line-clamp-2">{remedy.short}</span>
+                </li>
+              ))}
+          </ul>
+        </div>
+        {shareUrl ? (
+          <div className="flex shrink-0 flex-col items-center gap-3">
+            {/* Blank write-on line, matched to the QR width, for a visitor's name. */}
+            <div className="w-full flex flex-col gap-1">
+              <span
+                className="text-[8px] uppercase tracking-wider text-neutral-500"
+                style={{ fontFamily: "var(--font-alegreya-sans)" }}
+              >
+                Name
+              </span>
+              <div className="border-b border-neutral-400" />
+            </div>
+            <PrintQrCode url={shareUrl} />
+            <span
+              className="text-center text-[8px] uppercase tracking-wider text-black"
+              style={{ fontFamily: "var(--font-alegreya-sans)" }}
+            >
+              Scan to view your full kundli
+            </span>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

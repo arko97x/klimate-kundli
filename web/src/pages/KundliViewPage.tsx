@@ -83,6 +83,7 @@ export function KundliViewPage() {
                   <PrintableKundli
                     data={record.result}
                     birthPlace={record.birthCityDisplay}
+                    shareUrl={`${window.location.origin}/k/${slug}`}
                     className="w-full aspect-[210/297] border border-border shadow-sm"
                   />
                 </DialogContent>
