@@ -14,10 +14,12 @@ export interface StaticData {
   seaLevel: Map<number, number>;
   co2Ppm: Map<number, number>;
   arcticIce: Map<number, number>;
+  oceanTemp: Map<number, number>;
   latestEmissionsYear(country: string): number | null;
   latestSeaLevelYear(): number | null;
   latestCo2Year(): number | null;
   latestArcticYear(): number | null;
+  latestOceanTempYear(): number | null;
   lookupEmissions(country: string, year: number): StaticLookup;
   lookupEmissionsCategory(
     country: string,
@@ -27,6 +29,7 @@ export interface StaticData {
   lookupSeaLevel(year: number): StaticLookup;
   lookupCo2Ppm(year: number): StaticLookup;
   lookupArctic(year: number): StaticLookup;
+  lookupOceanTemp(year: number): StaticLookup;
 }
 
 export function loadStaticData(dataDir = join(process.cwd(), "src", "data")): StaticData {
@@ -34,17 +37,20 @@ export function loadStaticData(dataDir = join(process.cwd(), "src", "data")): St
   warnIfStale(join(dataDir, "sea_level.csv"));
   warnIfStale(join(dataDir, "co2_ppm.csv"));
   warnIfStale(join(dataDir, "arctic_ice.csv"));
+  warnIfStale(join(dataDir, "ocean_temp.csv"));
 
   const { co2Map, coalMap, oilMap, cementMap, gasMap, flaringMap } = loadEmissionsMaps(join(dataDir, "emissions.csv"));
   const seaLevel = loadSeries(join(dataDir, "sea_level.csv"), "mm");
   const co2Ppm = loadSeries(join(dataDir, "co2_ppm.csv"), "ppm");
   const arcticIce = loadSeries(join(dataDir, "arctic_ice.csv"), "extent_mkm2");
+  const oceanTemp = loadSeries(join(dataDir, "ocean_temp.csv"), "anomaly_c");
 
   return {
     emissions: co2Map,
     seaLevel,
     co2Ppm,
     arcticIce,
+    oceanTemp,
     latestEmissionsYear(country) {
       return latestYear(co2Map.get(country.toUpperCase()) ?? null);
     },
@@ -56,6 +62,9 @@ export function loadStaticData(dataDir = join(process.cwd(), "src", "data")): St
     },
     latestArcticYear() {
       return latestYear(arcticIce);
+    },
+    latestOceanTempYear() {
+      return latestYear(oceanTemp);
     },
     lookupEmissions(country, year) {
       const series = co2Map.get(country.toUpperCase());
@@ -93,6 +102,9 @@ export function loadStaticData(dataDir = join(process.cwd(), "src", "data")): St
     },
     lookupArctic(year) {
       return lookupSeries(arcticIce, year);
+    },
+    lookupOceanTemp(year) {
+      return lookupSeries(oceanTemp, year);
     },
   };
 }

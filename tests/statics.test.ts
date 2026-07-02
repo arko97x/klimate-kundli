@@ -35,6 +35,7 @@ function fixtureDir(): string {
   writeFileSync(join(dir, "sea_level.csv"), ["year,mm", "1993,0", "2023,99", ""].join("\n"));
   writeFileSync(join(dir, "co2_ppm.csv"), ["year,ppm", "1993,357.2", "2025,427.4", ""].join("\n"));
   writeFileSync(join(dir, "arctic_ice.csv"), ["year,extent_mkm2", "1993,6.2", "2025,4.3", ""].join("\n"));
+  writeFileSync(join(dir, "ocean_temp.csv"), ["year,anomaly_c", "1993,-0.12", "2025,0.82", ""].join("\n"));
   return dir;
 }
 
@@ -48,6 +49,7 @@ describe("static data loader", () => {
     expect(statics.lookupEmissionsCategory("IND", 1993, "cement")).toEqual({ value: 60, confidence: "high" });
     expect(statics.lookupSeaLevel(2023)).toEqual({ value: 99, confidence: "high" });
     expect(statics.lookupCo2Ppm(2025)).toEqual({ value: 427.4, confidence: "high" });
+    expect(statics.lookupOceanTemp(2025)).toEqual({ value: 0.82, confidence: "high" });
   });
 
   it("interpolates and bounds missing years with low confidence", () => {
@@ -56,6 +58,11 @@ describe("static data loader", () => {
     expect(statics.lookupSeaLevel(2008)).toEqual({ value: 49.5, confidence: "low", reason: "interpolated" });
     expect(statics.lookupCo2Ppm(1900)).toEqual({
       value: 357.2,
+      confidence: "low",
+      reason: "before-data-start",
+    });
+    expect(statics.lookupOceanTemp(1900)).toEqual({
+      value: -0.12,
       confidence: "low",
       reason: "before-data-start",
     });

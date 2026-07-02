@@ -228,10 +228,18 @@ function buildGlobalContext(
   const co2AtBirth = statics.lookupCo2Ppm(birthYear);
   const co2AtEnd = statics.lookupCo2Ppm(latestCompleteYear);
 
+  const oceanAtBirth = statics.lookupOceanTemp(birthYear);
+  const oceanAtEnd = statics.lookupOceanTemp(latestCompleteYear);
+  const oceanTempRiseC =
+    oceanAtBirth.confidence !== "unavailable" && oceanAtEnd.confidence !== "unavailable"
+      ? Math.round((oceanAtEnd.value - oceanAtBirth.value) * 100) / 100
+      : null;
+
   return {
     seaLevelRiseMm,
     co2PpmAtBirth: co2AtBirth.confidence !== "unavailable" ? Math.round(co2AtBirth.value * 10) / 10 : null,
     co2PpmNow: co2AtEnd.confidence !== "unavailable" ? Math.round(co2AtEnd.value * 10) / 10 : null,
+    oceanTempRiseC,
     arcticIce: buildArcticIce(statics, birthYear, latestCompleteYear, birthCountryCode),
   };
 }

@@ -374,22 +374,26 @@ function truncate(s: string): string {
   return s.length > VALUE_MAX_CHARS ? `${s.slice(0, VALUE_MAX_CHARS - 1).trimEnd()}…` : s;
 }
 
-// Map an arm to its per-kundli value lines. Ocean-temperature change has no data
-// source yet, so it stays blank. `birthPlace` overrides the city display if given.
-function armValue(
-  label: ArmKey,
-  data: MonthlyDeltaResponse,
-  birthPlace?: string,
-): string[] {
-  switch (label) {
-    case "BIRTH PLACE":
-      return [shortPlace(birthPlace || data.city?.displayName || data.city?.name)].filter(Boolean);
-    case "BIRTH YEAR":
-      return data.birthYear ? [String(data.birthYear)] : [];
-    case "BIRTH YEAR EMISSIONS":
-      return data.indiaEmissions ? [`${Math.round(data.indiaEmissions.firstCo2Mt)} Mt`] : [];
-    case "OCEAN-TEMPERATURE CHANGE":
-      return [];
+  // Map an arm to its per-kundli value lines. Ocean-temperature change has data
+  // from globalContext.oceanTempRiseC. `birthPlace` overrides the city display if given.
+  function armValue(
+    label: ArmKey,
+    data: MonthlyDeltaResponse,
+    birthPlace?: string,
+  ): string[] {
+    switch (label) {
+      case "BIRTH PLACE":
+        return [shortPlace(birthPlace || data.city?.displayName || data.city?.name)].filter(Boolean);
+      case "BIRTH YEAR":
+        return data.birthYear ? [String(data.birthYear)] : [];
+      case "BIRTH YEAR EMISSIONS":
+        return data.indiaEmissions ? [`${Math.round(data.indiaEmissions.firstCo2Mt)} Mt`] : [];
+      case "OCEAN-TEMPERATURE CHANGE": {
+        const c = data.globalContext?.oceanTempRiseC;
+        if (c == null) return [];
+        const sign = c > 0 ? "+" : "";
+        return [`${sign}${c.toFixed(2)} °C`];
+      }
     case "WETTEST YEAR": {
       let best: { displayName: string; year: number; precip: number } | null = null;
       for (const c of data.rainRings?.byCity ?? []) {

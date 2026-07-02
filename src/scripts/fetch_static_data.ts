@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rename, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseCsv, toCsv } from "../lib/csv.js";
@@ -12,34 +12,66 @@ const SOURCES = {
   co2Ppm: "https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_annmean_mlo.csv",
   // NSIDC Sea Ice Index v4.0 — Arctic September (summer-minimum) monthly-mean extent, million km^2.
   arcticIce: "https://noaadata.apps.nsidc.org/NOAA/G02135/north/monthly/data/N_09_extent_v4.0.csv",
+  oceanTemp: `https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series/globe/tavg/ocean/12/12/1880-${new Date().getFullYear()}/data.csv`,
 } as const;
 
 async function main(): Promise<void> {
   await mkdir(DATA_DIR, { recursive: true });
   const tempDir = await mkdtemp(join(tmpdir(), "klimate-static-"));
 
-  try {
-    const [emissionsRaw, seaLevelRaw, co2Raw, arcticRaw] = await Promise.all([
-      fetchText(SOURCES.emissions),
-      fetchText(SOURCES.seaLevel),
-      fetchText(SOURCES.co2Ppm),
-      fetchText(SOURCES.arcticIce),
-    ]);
-
-    const outputs = [
-      ["emissions.csv", cleanEmissions(emissionsRaw)],
-      ["sea_level.csv", cleanSeaLevel(seaLevelRaw)],
-      ["co2_ppm.csv", cleanCo2Ppm(co2Raw)],
-      ["arctic_ice.csv", cleanArcticIce(arcticRaw)],
-    ] as const;
-
-    for (const [name, content] of outputs) {
-      const tempPath = join(tempDir, name);
-      const finalPath = join(DATA_DIR, name);
-      await writeFile(tempPath, content, "utf8");
+  const processOrFallback = async (
+    key: keyof typeof SOURCES,
+    filename: string,
+    cleanFn: (raw: string) => string,
+  ): Promise<void> => {
+    try {
+      const url = SOURCES[key];
+      console.log(JSON.stringify({ t: new Date().toISOString(), msg: "fetching_static_data", key, url }));
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+      const res = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          "User-Agent": "KlimateKundli/1.0 (data refresh)",
+        },
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) {
+        throw new Error(`status ${res.status} ${res.statusText}`);
+      }
+      const rawText = await res.text();
+      const cleaned = cleanFn(rawText);
+      const tempPath = join(tempDir, filename);
+      const finalPath = join(DATA_DIR, filename);
+      await writeFile(tempPath, cleaned, "utf8");
       await rename(tempPath, finalPath);
       console.log(JSON.stringify({ t: new Date().toISOString(), msg: "static_csv_written", file: finalPath }));
+    } catch (err) {
+      console.warn(
+        JSON.stringify({
+          t: new Date().toISOString(),
+          level: "WARN",
+          msg: "fetch_failed_keeping_existing_local",
+          key,
+          error: String(err),
+        }),
+      );
+      try {
+        await access(join(DATA_DIR, filename));
+      } catch (accessErr) {
+        throw new Error(`Failed to fetch ${key} and no local file exists: ${String(err)}`);
+      }
     }
+  };
+
+  try {
+    await Promise.all([
+      processOrFallback("emissions", "emissions.csv", cleanEmissions),
+      processOrFallback("seaLevel", "sea_level.csv", cleanSeaLevel),
+      processOrFallback("co2Ppm", "co2_ppm.csv", cleanCo2Ppm),
+      processOrFallback("arcticIce", "arctic_ice.csv", cleanArcticIce),
+      processOrFallback("oceanTemp", "ocean_temp.csv", cleanOceanTemp),
+    ]);
   } finally {
     await rm(tempDir, { recursive: true, force: true });
   }
@@ -173,6 +205,29 @@ function cleanArcticIce(raw: string): string {
   return toCsv(
     ["year", "extent_mkm2"],
     rows.map((row) => [row.year, round(row.extent, 2)]),
+  );
+}
+
+function cleanOceanTemp(raw: string): string {
+  const rows = parseCsv(raw)
+    .map((row) => {
+      const yearKey = Object.keys(row).find((k) => k.toLowerCase() === "year") || "Year";
+      const anomalyKey = Object.keys(row).find((k) => k.toLowerCase().includes("departure")) || "Departure from Average";
+      return {
+        year: Number(row[yearKey]),
+        anomaly: Number(row[anomalyKey]),
+      };
+    })
+    .filter((row) => Number.isFinite(row.year) && Number.isFinite(row.anomaly))
+    .sort((a, b) => a.year - b.year);
+
+  if (rows.length < 100) {
+    throw new Error(`ocean temp validation failed: ${rows.length} rows`);
+  }
+
+  return toCsv(
+    ["year", "anomaly_c"],
+    rows.map((row) => [row.year, round(row.anomaly, 2)]),
   );
 }
 

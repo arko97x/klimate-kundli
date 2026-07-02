@@ -31,6 +31,7 @@ function fixtureStatics() {
   writeFileSync(join(dir, "sea_level.csv"), "year,mm\n1993,0\n2023,99\n");
   writeFileSync(join(dir, "co2_ppm.csv"), "year,ppm\n1993,357.2\n2025,427.4\n");
   writeFileSync(join(dir, "arctic_ice.csv"), "year,extent_mkm2\n1993,6.2\n2025,4.3\n");
+  writeFileSync(join(dir, "ocean_temp.csv"), "year,anomaly_c\n1993,-0.12\n2025,0.82\n");
   return loadStaticData(dir);
 }
 

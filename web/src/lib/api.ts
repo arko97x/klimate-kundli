@@ -118,6 +118,7 @@ export interface GlobalContext {
   seaLevelRiseMm: number | null
   co2PpmAtBirth: number | null
   co2PpmNow: number | null
+  oceanTempRiseC?: number | null
   /** Absent on kundlis saved before this feature shipped. */
   arcticIce?: ArcticIce | null
 }
