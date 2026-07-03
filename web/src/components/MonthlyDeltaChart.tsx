@@ -462,6 +462,7 @@ function HottestYearsSection({
   return (
     <section className="space-y-5 pb-4">
       <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">Record heat</p>
         <p className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
           You&apos;ve lived through{" "}
           <span className="text-[#d3674a]">{insight.count}</span> record-hot{" "}

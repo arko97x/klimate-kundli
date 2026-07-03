@@ -148,6 +148,7 @@ export function EmissionsRingsChart({ birthYear, data }: EmissionsRingsChartProp
   return (
     <section className="space-y-6 pb-6">
       <div className="space-y-3">
+        <p className="text-sm text-muted-foreground">Carbon legacy</p>
         <h3 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl text-pretty">
           India&apos;s carbon emissions across your lifetime
         </h3>
