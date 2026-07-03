@@ -44,7 +44,7 @@ export function LifeTempChart({ insight, source, confidence }: LifeTempChartProp
   return (
     <section className="space-y-6 pb-2">
       <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">Your climate trail</p>
+        <p className="text-sm text-muted-foreground">The trail your years left</p>
         <h3 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
           {headline.main}
         </h3>
@@ -372,12 +372,12 @@ function buildHeadline(insight: TempTimelineInsight): { main: string; sub: strin
   if (insight.lifeDeltaC != null && insight.lifeDeltaC >= 0.3) {
     if (movedEndpoints) {
       return {
-        main: 'Your trail trended warmer.',
+        main: 'Warmth followed you house to house.',
         sub: `${span} years across ${cityCount} cities. Your latest year (${endYear}, ${lastCity}) averaged ${insight.lifeDeltaC.toFixed(1)}°C above your first (${startYear}, ${firstCity}) — a mix of a warming climate and moving between cities.`,
       }
     }
     return {
-      main: 'The air got warmer year by year.',
+      main: 'The heat rose steadily in your chart.',
       sub: `Across ${span} years in ${cityCount === 1 ? shortCity(insight.cities[0]!.displayName) : `${cityCount} cities`}, annual mean temperature rose ${insight.lifeDeltaC.toFixed(1)}°C from ${startYear} to ${endYear}${insight.warmestYear != null ? ` — your warmest year so far was ${insight.warmestYear}` : ''}.`,
     }
   }
@@ -385,18 +385,18 @@ function buildHeadline(insight: TempTimelineInsight): { main: string; sub: strin
   if (insight.lifeDeltaC != null && insight.lifeDeltaC <= -0.3) {
     if (movedEndpoints) {
       return {
-        main: 'You landed somewhere cooler.',
+        main: 'You moved into a cooler house.',
         sub: `${span} years across ${cityCount} cities. Your latest year (${endYear}, ${lastCity}) averaged ${Math.abs(insight.lifeDeltaC).toFixed(1)}°C below your first (${startYear}, ${firstCity}) — largely because you moved, not because the climate cooled. Each city you lived in kept warming.`,
       }
     }
     return {
-      main: 'Your years ran slightly cooler on average.',
+      main: 'A cool current ran through your years.',
       sub: `${span} years tracked from ${startYear} to ${endYear}. Mean temperature fell ${Math.abs(insight.lifeDeltaC).toFixed(1)}°C over that span${insight.coolestYear != null ? ` — coolest was ${insight.coolestYear}` : ''}.`,
     }
   }
 
   return {
-    main: 'Temperature, year by year, where you lived.',
+    main: 'Every year you lived, read in degrees.',
     sub: `${span} years from ${startYear} to ${endYear}${cityCount > 1 ? ` across ${cityCount} cities` : ''}. Each dot is the mean temperature for that calendar year.`,
   }
 }

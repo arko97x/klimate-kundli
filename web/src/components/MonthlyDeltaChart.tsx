@@ -76,7 +76,7 @@ export function MonthlyDeltaChart({
     <>
       <header className="space-y-3 text-center sm:text-left">
         <p className="text-sm text-muted-foreground">
-          How does your childhood compare to the climate of today?
+          The sky you were born under
         </p>
         <h2 className="font-heading text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
           {headline.main}
@@ -462,11 +462,10 @@ function HottestYearsSection({
   return (
     <section className="space-y-5 pb-4">
       <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">Record heat</p>
+        <p className="text-sm text-muted-foreground">Fire sign</p>
         <p className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-          You&apos;ve lived through{" "}
-          <span className="text-[#d3674a]">{insight.count}</span> record-hot{" "}
-          {insight.count === 1 ? "year" : "years"}.
+          Fire has ruled{" "}
+          <span className="text-[#d3674a]">{insight.count}</span> of your years.
         </p>
         <p className="max-w-xl text-sm text-muted-foreground">
           Top {insight.topK} at each home since {insight.recordStartYear} ·
@@ -886,7 +885,7 @@ function buildHeadline(data: MonthlyDeltaResponse): {
 
   if (!data.largestDelta) {
     return {
-      main: `${cityName}, then and now.`,
+      main: `${cityName}, as it was written and as it reads now.`,
       sub: "Five-year monthly averages around your birth year compared with the last five years.",
     };
   }
@@ -897,20 +896,20 @@ function buildHeadline(data: MonthlyDeltaResponse): {
 
   if (delta >= 0.3) {
     return {
-      main: `${cityName} got hotter while you grew up.`,
+      main: `${cityName} warmed as your chart turned.`,
       sub: `An average ${monthLabel} is now ${abs}°C warmer than during ${birthRange}.`,
     };
   }
 
   if (delta <= -0.3) {
     return {
-      main: `${cityName} bucked the trend.`,
+      main: `${cityName} defied its own omens.`,
       sub: `An average ${monthLabel} now runs ${abs}°C cooler than during ${birthRange}.`,
     };
   }
 
   return {
-    main: `${cityName}, then and now.`,
+    main: `${cityName}, as it was written and as it reads now.`,
     sub: `Largest shift is in ${monthLabel} — ${abs}°C ${delta >= 0 ? "warmer" : "cooler"} than during ${birthRange}.`,
   };
 }

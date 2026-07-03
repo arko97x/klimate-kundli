@@ -23,7 +23,7 @@ export function ClimateMovedSection({ data }: ClimateMovedSectionProps) {
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">Your climate emigrated</p>
         <h2 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-          The {active.home.name} you were born into moved {active.distanceKm.toLocaleString()} km {active.direction}.
+          The {active.home.name} of your birth has drifted {active.distanceKm.toLocaleString()} km {active.direction}.
         </h2>
         <p className="max-w-2xl text-pretty text-muted-foreground">
           The climate of your childhood didn&rsquo;t stay put. Today it lives somewhere else &mdash; and

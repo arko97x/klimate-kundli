@@ -148,9 +148,9 @@ export function EmissionsRingsChart({ birthYear, data }: EmissionsRingsChartProp
   return (
     <section className="space-y-6 pb-6">
       <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">Carbon legacy</p>
+        <p className="text-sm text-muted-foreground">The debt line</p>
         <h3 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl text-pretty">
-          India&apos;s carbon emissions across your lifetime
+          The debt written in your name.
         </h3>
         <p className="max-w-3xl text-pretty text-sm text-muted-foreground leading-relaxed select-none">
           National CO₂ emissions from {data.startYear} to {data.endYear} by fuel and industry source. 

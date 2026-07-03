@@ -56,9 +56,9 @@ export function InsightsSection({ data }: InsightsSectionProps) {
   return (
     <section className="space-y-6 pb-4">
       <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">What the numbers mean</p>
+        <p className="text-sm text-muted-foreground">The reading</p>
         <h2 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-          Your climate story, interpreted.
+          Your chart, read line by line.
         </h2>
         <p className="max-w-2xl text-pretty text-muted-foreground">
           Numbers alone don't tell the story. Here's what changed across three generations in {city.name}.

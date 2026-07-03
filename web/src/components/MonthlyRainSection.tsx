@@ -52,7 +52,7 @@ export function MonthlyRainSection({ cityName, rainfall, source, confidence }: M
   return (
     <section className="space-y-6">
       <header className="space-y-2 text-center sm:text-left">
-        <p className="text-sm text-muted-foreground">Rain</p>
+        <p className="text-sm text-muted-foreground">Water sign</p>
         <h3 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
           {headline.main}
         </h3>
@@ -185,14 +185,14 @@ function buildRainHeadline(cityName: string, rain: RainfallInsight): { main: str
 
   if (deltaDays >= 0.5) {
     return {
-      main: 'Downpours are stacking up.',
+      main: 'The rain gods turned heavy-handed.',
       sub: `${cityName} now averages about ${rain.nowDaysPerYear.toFixed(1)} days per year with ${thresh}mm+ rain — up from ${rain.thenDaysPerYear.toFixed(1)} during ${thenRange}. Same calendar, harder hits.`,
     }
   }
 
   if (deltaDays <= -0.5) {
     return {
-      main: 'Extreme rain days eased.',
+      main: 'The cloudburst omens softened.',
       sub: `${cityName} sees about ${Math.abs(deltaDays).toFixed(1)} fewer ${thresh}mm+ days per year than during ${thenRange}.`,
     }
   }
@@ -200,7 +200,7 @@ function buildRainHeadline(cityName: string, rain: RainfallInsight): { main: str
   if (rain.monsoonPctChange != null && Math.abs(rain.monsoonPctChange) >= 5) {
     const dir = rain.monsoonPctChange > 0 ? 'wetter' : 'drier'
     return {
-      main: `Your monsoon rhythm shifted.`,
+      main: `The monsoon rewrote your fate line.`,
       sub: `June–September rainfall at ${cityName} is about ${Math.abs(rain.monsoonPctChange).toFixed(0)}% ${dir} now than during ${thenRange}.`,
     }
   }
@@ -210,7 +210,7 @@ function buildRainHeadline(cityName: string, rain: RainfallInsight): { main: str
     const label = monthName(month)
     const sign = delta >= 0 ? '+' : ''
     return {
-      main: `${cityName} rain is not the same month to month.`,
+      main: `${cityName}'s rains no longer keep their old vows.`,
       sub: `Biggest shift: ${label} averages ${sign}${delta.toFixed(0)}mm more rain per month now than during ${thenRange}.`,
     }
   }

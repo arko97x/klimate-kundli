@@ -123,7 +123,7 @@ function buildHeadline(city: RainRingsCity, birthYear: number): { main: string; 
     const wettestMm = city.years.find((y) => y.year === wettest)?.precipMm
     const median = Math.round(medianPrecipMm(city))
     return {
-      main: `Wet and dry years in ${label}.`,
+      main: `The wet and dry omens of ${label}.`,
       // Three stacked lines so the snapshot reads top-to-bottom without long
       // horizontal eye movement (visitor feedback).
       sub: (
@@ -139,7 +139,7 @@ function buildHeadline(city: RainRingsCity, birthYear: number): { main: string; 
   }
 
   return {
-    main: `Year by year, rain in ${label}.`,
+    main: `${label}'s rain, ring by ring.`,
     sub: `${span} rings — each band is total rainfall for a year you spent in that place.`,
   }
 }
