@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Printer } from 'lucide-react'
 
 import { MonthlyDeltaChart } from '@/components/MonthlyDeltaChart'
 import { PrintableKundli } from '@/components/PrintableKundli'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { KundliResultLayout } from '@/expt/KundliResultLayout'
 import { fetchKundliBySlug, type SavedKundliRecord } from '@/lib/api'
 import { useIsExhibition } from '@/lib/exhibition-context'
@@ -72,23 +72,47 @@ export function KundliViewPage() {
 
         {!loading && record ? (
           <>
+            {/* Print rules: exact A4, no margins. Hide the whole app and show only
+                the printable sheet (portaled to <body>, so it's a sibling of #root
+                — not a descendant of the tall result page). That keeps the output a
+                single A4 page instead of paginating the on-screen content. */}
+            <style>{`
+              @media print {
+                @page { size: A4 portrait; margin: 0; }
+                html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+                #root { display: none !important; }
+                #kundli-print-root { display: block !important; }
+                #kundli-sheet {
+                  position: fixed !important; top: 0; left: 0;
+                  width: 210mm; height: 297mm;
+                  box-shadow: none !important;
+                }
+              }
+            `}</style>
+
             <div className="mb-6 flex justify-end">
-              <Dialog>
-                <DialogTrigger render={<Button type="button" size="sm" className="gap-2" />}>
-                  <Printer className="size-4" />
-                  Print Kundli
-                </DialogTrigger>
-                <DialogContent className="max-w-[min(92vw,560px)] p-4">
-                  <DialogTitle className="sr-only">Printable kundli preview</DialogTitle>
-                  <PrintableKundli
-                    data={record.result}
-                    birthPlace={record.birthCityDisplay}
-                    shareUrl={`${window.location.origin}/k/${slug}`}
-                    className="w-full aspect-[210/297] border border-border shadow-sm"
-                  />
-                </DialogContent>
-              </Dialog>
+              <Button
+                type="button"
+                size="sm"
+                className="gap-2"
+                onClick={() => window.print()}
+              >
+                <Printer className="size-4" />
+                Print Kundli
+              </Button>
             </div>
+
+            {createPortal(
+              <div id="kundli-print-root" className="hidden">
+                <PrintableKundli
+                  data={record.result}
+                  birthPlace={record.birthCityDisplay}
+                  shareUrl={`${window.location.origin}/k/${slug}`}
+                  className="w-[210mm] h-[297mm] bg-white"
+                />
+              </div>,
+              document.body,
+            )}
 
             <MonthlyDeltaChart
               data={record.result}
