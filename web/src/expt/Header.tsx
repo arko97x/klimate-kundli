@@ -82,8 +82,8 @@ export function Header() {
       <div className="relative z-10 flex items-center px-4 py-4 sm:px-6 sm:py-6">
         <Link to={isExhibition ? '/exhibition' : '/'} className="shrink-0" aria-label="Klimate Kundli home">
           <img
-            src="/kk-icon-beta.svg"
-            alt="Klimate Kundli (Beta)"
+            src="/kk-icon.svg"
+            alt="Klimate Kundli"
             width={35}
             height={22}
             className="h-12 w-auto"
