@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { Header } from '@/expt/Header'
 import parrotUrl from '@/assets/parrot-white.svg'
 import parrotStep1Url from '@/assets/parrot-step1.svg'
 import parrotStep2Url from '@/assets/parrot-step2.svg'
@@ -31,6 +32,10 @@ export function KundliWizardLayout({
           font-family: 'Almendra SC', serif;
         }
       `}</style>
+
+      {/* Public header: logo left, Explore + New Kundli + hamburger right.
+          Sits in-flow above the composition; hides its nav in exhibition mode. */}
+      {step === 'landing' && <Header />}
 
       {/* ================= LANDING BACKGROUND (GRID LINES) ================= */}
       {step === 'landing' && (

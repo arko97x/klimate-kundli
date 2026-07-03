@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Printer } from 'lucide-react'
 
 import { MonthlyDeltaChart } from '@/components/MonthlyDeltaChart'
 import { PrintableKundli } from '@/components/PrintableKundli'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { KundliResultLayout } from '@/expt/KundliResultLayout'
 import { fetchKundliBySlug, type SavedKundliRecord } from '@/lib/api'
 import { useIsExhibition } from '@/lib/exhibition-context'
@@ -52,8 +52,28 @@ export function KundliViewPage() {
     }
   }, [slug])
 
+  // Slug-page header actions: Print (native to this kundli, only once it's
+  // loaded) as the primary button, and New Kundli as an outline button.
+  const headerActions = (
+    <>
+      {!loading && record ? (
+        <Button
+          type="button"
+          className="gap-2"
+          onClick={() => window.print()}
+        >
+          <Printer className="size-4" />
+          Print Kundli
+        </Button>
+      ) : null}
+      <Link to="/exhibition" className={buttonVariants({ variant: 'outline' })}>
+        New Kundli
+      </Link>
+    </>
+  )
+
   return (
-    <KundliResultLayout>
+    <KundliResultLayout headerActions={headerActions}>
       <div>
         {loading ? (
           <p className="text-sm text-muted-foreground">Loading kundli...</p>
@@ -90,18 +110,6 @@ export function KundliViewPage() {
               }
             `}</style>
 
-            <div className="mb-6 flex justify-end">
-              <Button
-                type="button"
-                size="sm"
-                className="gap-2"
-                onClick={() => window.print()}
-              >
-                <Printer className="size-4" />
-                Print Kundli
-              </Button>
-            </div>
-
             {createPortal(
               <div id="kundli-print-root" className="hidden">
                 <PrintableKundli
@@ -118,7 +126,7 @@ export function KundliViewPage() {
               data={record.result}
               livedCities={record.livedCities}
               shareUrl={`${window.location.origin}/k/${slug}`}
-              onReset={() => navigate(isExhibition ? '/exhibition' : '/')}
+              onReset={() => navigate('/exhibition')}
             />
           </>
         ) : null}

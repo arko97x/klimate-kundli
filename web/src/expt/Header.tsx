@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { MenuIcon } from 'lucide-react'
 
@@ -8,11 +8,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { buildWavyRectPath, WAVE_BORDER_PAD, wavyBorderViewBox } from '@/expt/wavy-border'
 import { useIsExhibition } from '@/lib/exhibition-context'
 import { cn } from '@/lib/utils'
-
-type FrameSize = { width: number; height: number }
 
 const MENU_ITEMS = [
   { label: 'About', path: '/about' },
@@ -48,85 +45,40 @@ export function HeaderMenu({ className }: { className?: string }) {
   )
 }
 
-export function Header() {
+export function Header({ actions }: { actions?: ReactNode }) {
   const isExhibition = useIsExhibition()
-  const headerRef = useRef<HTMLElement>(null)
-  const [frameSize, setFrameSize] = useState<FrameSize>(() => ({
-    width: 0,
-    height: 80,
-  }))
 
-  useLayoutEffect(() => {
-    const header = headerRef.current
-    if (!header) return
-
-    const update = () => {
-      const { width, height } = header.getBoundingClientRect()
-      setFrameSize({ width, height })
-    }
-
-    update()
-    const observer = new ResizeObserver(update)
-    observer.observe(header)
-    return () => observer.disconnect()
-  }, [])
-
-  const viewBox = wavyBorderViewBox(frameSize.width, frameSize.height)
-  const pad = WAVE_BORDER_PAD
+  // No header at all on the exhibition landing.
+  if (isExhibition) return null
 
   return (
-    <header
-      ref={headerRef}
-      className="relative z-10 w-full shrink-0 overflow-visible bg-transparent"
-    >
-      <div className="relative z-10 flex items-center px-4 py-4 sm:px-6 sm:py-6">
-        <Link to={isExhibition ? '/exhibition' : '/'} className="shrink-0" aria-label="Klimate Kundli home">
-          <img
-            src="/kk-icon.svg"
-            alt="Klimate Kundli"
-            width={35}
-            height={22}
-            className="h-12 w-auto"
-          />
-        </Link>
-        {!isExhibition && (
-          <nav className="ml-auto flex items-center gap-2 sm:gap-3">
-            <Link
-              to="/gallery"
-              className="text-sm font-medium text-foreground transition-colors hover:text-foreground/70"
-            >
-              Explore
-            </Link>
-            <Link to="/" className={buttonVariants()}>
-              New Kundli
-            </Link>
-            <HeaderMenu />
-          </nav>
-        )}
-      </div>
-      {frameSize.width > 0 ? (
-        <svg
-          aria-hidden
-          viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
-          className="pointer-events-none absolute text-[#0A9396]"
-          style={{
-            top: -pad,
-            left: -pad,
-            width: frameSize.width + pad * 2,
-            height: frameSize.height + pad * 2,
-          }}
+    <header className="relative z-40 w-full shrink-0 bg-white border-b border-neutral-200">
+      <div className="flex items-center px-4 py-3 sm:px-6 sm:py-4">
+        <Link
+          to="/"
+          className="shrink-0 text-xl sm:text-2xl leading-none tracking-tight text-foreground"
+          style={{ fontFamily: 'var(--font-alegreya)' }}
+          aria-label="Klimate Kundli home"
         >
-          <path
-            d={buildWavyRectPath(frameSize.width, frameSize.height)}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
-      ) : null}
+          klimate kundli
+        </Link>
+        <nav className="ml-auto flex items-center gap-2 sm:gap-3">
+          {actions ?? (
+            <>
+              <Link
+                to="/gallery"
+                className="text-sm font-medium text-foreground transition-colors hover:text-foreground/70"
+              >
+                Explore
+              </Link>
+              <Link to="/" className={buttonVariants()}>
+                New Kundli
+              </Link>
+              <HeaderMenu />
+            </>
+          )}
+        </nav>
+      </div>
     </header>
   )
 }
