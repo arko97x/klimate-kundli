@@ -1004,22 +1004,26 @@ export function PrintableKundli({
 
       {/* Bottom strip: dotted top border marks where it starts. Concise upaay on
           the left; name write-on line + QR on the right. */}
-      <div className="w-full flex-1 bg-white flex flex-row items-start justify-between gap-6 p-4 border-t border-dashed border-black/60">
+      <div className="w-full flex-1 bg-white flex flex-col justify-center px-6 py-7 border-t border-dashed border-black/60">
+        {/* Upaay + QR share one group whose columns are top-aligned (so YOUR UPAAY
+            and NAME always sit on the same line). The group is centered in the
+            strip and drifts upward only when the upaay list grows tall. */}
+        <div className="flex flex-row items-start justify-between gap-10">
         {/* Concise, satirical remedies — trimmed to one line each so they never overflow. */}
         <div className="flex flex-1 flex-col">
           <span
-            className="mb-1.5 text-[9px] uppercase tracking-[0.2em] text-neutral-500"
+            className="mb-3 text-[13px] uppercase tracking-[0.2em] text-neutral-500"
             style={{ fontFamily: "var(--font-alegreya-sans)" }}
           >
             Your upaay
           </span>
-          <ul className="flex flex-col gap-1">
+          <ul className="flex flex-col gap-3">
             {buildRemedies(data)
               .slice(0, 4)
               .map((remedy, i) => (
                 <li
                   key={remedy.title}
-                  className="flex gap-1.5 text-[10px] leading-snug text-black"
+                  className="flex gap-2.5 text-[15px] leading-snug text-black"
                   style={{ fontFamily: "var(--font-alegreya)" }}
                 >
                   <span className="text-neutral-500">{i + 1}.</span>
@@ -1029,26 +1033,27 @@ export function PrintableKundli({
           </ul>
         </div>
         {shareUrl ? (
-          <div className="flex shrink-0 flex-col items-center gap-3">
+          <div className="flex shrink-0 flex-col items-center gap-4">
             {/* Blank write-on line, matched to the QR width, for a visitor's name. */}
-            <div className="w-full flex flex-col gap-1">
+            <div className="w-full flex flex-col gap-1.5">
               <span
-                className="text-[8px] uppercase tracking-wider text-neutral-500"
+                className="text-[11px] uppercase tracking-wider text-neutral-500"
                 style={{ fontFamily: "var(--font-alegreya-sans)" }}
               >
                 Name
               </span>
               <div className="border-b border-neutral-400" />
             </div>
-            <PrintQrCode url={shareUrl} />
+            <PrintQrCode url={shareUrl} size={150} />
             <span
-              className="text-center text-[8px] uppercase tracking-wider text-black"
+              className="text-center text-[11px] uppercase tracking-wider text-black"
               style={{ fontFamily: "var(--font-alegreya-sans)" }}
             >
               Scan to view your full kundli
             </span>
           </div>
         ) : null}
+        </div>
       </div>
     </div>
   );
