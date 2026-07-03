@@ -112,6 +112,10 @@ export interface ArcticIce {
   lostMkm2: number
   /** null when no net loss or the birth country's area is unknown. */
   comparison: ArcticIceComparison | null
+  /** True when the birth year precedes the satellite record, so the baseline is
+   * anchored at the data start (1979). The UI reads "since <startYear>" rather
+   * than "since you were born". */
+  baselineIsDataStart: boolean
 }
 
 export interface GlobalContext {

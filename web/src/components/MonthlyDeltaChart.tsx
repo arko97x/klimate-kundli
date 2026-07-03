@@ -329,6 +329,9 @@ function ArcticIceSection({ arctic }: { arctic: ArcticIce }) {
   const { birthWindow, recentWindow, lostMkm2, comparison } = arctic;
   const lostText = `${lostMkm2.toFixed(2)} million km²`;
   const hasBerg = arctic.lostKm2 > 0;
+  // Born before the satellite record starts: baseline is the data start (1979),
+  // so phrase everything "since <year>" instead of "since you were born".
+  const sinceYear = arctic.baselineIsDataStart;
   const bigStat = comparison
     ? comparison.multiple >= 1
       ? `${comparison.multiple.toFixed(comparison.multiple >= 10 ? 0 : 1)}× ${comparison.name}`
@@ -340,7 +343,9 @@ function ArcticIceSection({ arctic }: { arctic: ArcticIce }) {
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">The melting north</p>
         <h2 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-          The Arctic you were born into is gone.
+          {sinceYear
+            ? `The Arctic of ${birthWindow.startYear} is gone.`
+            : 'The Arctic you were born into is gone.'}
         </h2>
       </div>
 
@@ -384,7 +389,9 @@ function ArcticIceSection({ arctic }: { arctic: ArcticIce }) {
                 {bigStat}
               </p>
               <p className="text-pretty text-base text-foreground">
-                gone in your lifetime.
+                {sinceYear
+                  ? `gone since ${birthWindow.startYear}.`
+                  : 'gone in your lifetime.'}
               </p>
             </div>
           ) : (

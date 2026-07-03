@@ -261,8 +261,19 @@ function buildArcticIce(
   const dataStart = Math.min(...series.keys());
   const dataEnd = Math.min(latestCompleteYear, Math.max(...series.keys()));
 
-  const birthStart = Math.max(dataStart, birthYear - BIRTH_WINDOW_HALF);
-  const birthEnd = Math.min(dataEnd, birthYear + BIRTH_WINDOW_HALF);
+  let birthStart = Math.max(dataStart, birthYear - BIRTH_WINDOW_HALF);
+  let birthEnd = Math.min(dataEnd, birthYear + BIRTH_WINDOW_HALF);
+
+  // The satellite sea-ice record starts at dataStart (1979). For anyone born
+  // before it, the birth window is entirely pre-record and empty. Rather than
+  // drop the card, anchor the baseline at the earliest available window and flag
+  // it so the UI reads "since <dataStart>" instead of "since you were born".
+  const baselineIsDataStart = birthEnd < birthStart;
+  if (baselineIsDataStart) {
+    birthStart = dataStart;
+    birthEnd = Math.min(dataEnd, dataStart + BIRTH_WINDOW_HALF * 2);
+  }
+
   const recentEnd = dataEnd;
   const recentStart = Math.max(dataStart, recentEnd - RECENT_WINDOW_SIZE + 1);
 
@@ -295,6 +306,7 @@ function buildArcticIce(
     lostKm2,
     lostMkm2: round2(lostMkm2),
     comparison,
+    baselineIsDataStart,
   };
 }
 
