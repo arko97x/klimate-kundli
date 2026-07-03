@@ -101,9 +101,9 @@ export function InsightsSection({ data }: InsightsSectionProps) {
           {generationalDelta != null && (
             <p className="text-sm text-muted-foreground">
               Across {birthYear - (parentsBirthWindow.startYear + 2) + (recentWindow.endYear - birthYear)} years,{' '}
-              {city.name} warmed by{' '}
-              <span className="font-semibold text-[#d3674a]">
-                {generationalDelta > 0 ? '+' : ''}{generationalDelta.toFixed(2)}°C
+              {city.name} {generationalDelta >= 0 ? 'warmed' : 'cooled'} by{' '}
+              <span className={`font-semibold ${generationalDelta >= 0 ? 'text-[#d3674a]' : 'text-[#6b8eb8]'}`}>
+                {Math.abs(generationalDelta).toFixed(2)}°C
               </span>{' '}
               on average — from your parents' era to today.
             </p>
