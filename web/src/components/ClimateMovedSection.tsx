@@ -131,6 +131,9 @@ function MigrationArrow({ bearingDeg }: { bearingDeg: number }) {
   const size = 108;
   const c = size / 2;
   const r = 38;
+  // Cardinal labels sit at radius r+15, past the box edge; pad the viewBox so
+  // they aren't clipped (footprint stays 108px — the compass just scales down).
+  const pad = 14;
   // Screen space: north is up. bearing 0° → (0,-1), 90° → (+1,0).
   const rad = (bearingDeg * Math.PI) / 180;
   const tipX = c + r * Math.sin(rad);
@@ -139,7 +142,7 @@ function MigrationArrow({ bearingDeg }: { bearingDeg: number }) {
   const tailY = c + r * 0.55 * Math.cos(rad);
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`Direction ${Math.round(bearingDeg)}°`}>
+    <svg width={size} height={size} viewBox={`${-pad} ${-pad} ${size + pad * 2} ${size + pad * 2}`} role="img" aria-label={`Direction ${Math.round(bearingDeg)}°`}>
       <defs>
         <marker id="cm-head" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
           <path d="M0,0 L7,3.5 L0,7 Z" fill={COLOR_NOW} />
