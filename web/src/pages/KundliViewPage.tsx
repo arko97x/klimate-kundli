@@ -95,15 +95,29 @@ export function KundliViewPage() {
             {/* Print rules: exact A4, no margins. Hide the whole app and show only
                 the printable sheet (portaled to <body>, so it's a sibling of #root
                 — not a descendant of the tall result page). That keeps the output a
-                single A4 page instead of paginating the on-screen content. */}
+                single A4 page instead of paginating the on-screen content.
+
+                iOS Safari note: its print engine snapshots what's already been
+                painted, so we must NOT use `display:none → block` or `position:fixed`
+                for the sheet — either one yields a blank PDF and wild zoom on iPad.
+                Instead the sheet stays in the render tree, parked off-screen with a
+                fixed position (no flow impact, no scrollbars), and prints in static
+                flow. */}
             <style>{`
+              #kundli-print-root {
+                position: fixed;
+                top: 0;
+                left: -9999px;
+              }
               @media print {
                 @page { size: A4 portrait; margin: 0; }
                 html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
                 #root { display: none !important; }
-                #kundli-print-root { display: block !important; }
+                #kundli-print-root {
+                  position: static !important;
+                  left: 0 !important;
+                }
                 #kundli-sheet {
-                  position: fixed !important; top: 0; left: 0;
                   width: 210mm; height: 297mm;
                   box-shadow: none !important;
                 }
@@ -111,7 +125,7 @@ export function KundliViewPage() {
             `}</style>
 
             {createPortal(
-              <div id="kundli-print-root" className="hidden">
+              <div id="kundli-print-root">
                 <PrintableKundli
                   data={record.result}
                   birthPlace={record.birthCityDisplay}
