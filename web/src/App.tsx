@@ -18,7 +18,6 @@ function App() {
           {/* --- EXHIBITION LAYOUT (Distraction-Free) --- */}
           <Route element={<ExhibitionLayout />}>
             <Route path="/exhibition" element={<KundliApp />} />
-            <Route path="/exhibition/k/:slug" element={<KundliViewPage />} />
           </Route>
 
           {/* --- PUBLIC SITE LAYOUT (Full Access) --- */}

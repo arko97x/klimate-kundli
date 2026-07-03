@@ -14,7 +14,6 @@ import {
 import { addMyKundliSlug } from '@/lib/my-kundlis'
 import { latestCompleteYearUtc, MIN_BIRTH_YEAR } from '@/lib/years'
 import type { City, ResidenceRow } from '@/types'
-import { useIsExhibition } from '@/lib/exhibition-context'
 
 type Step = 'landing' | 'birth' | 'lived'
 
@@ -35,7 +34,6 @@ function initialBirthYear(): number {
 
 export default function KundliApp() {
   const navigate = useNavigate()
-  const isExhibition = useIsExhibition()
   const latestCompleteYear = useMemo(() => latestCompleteYearUtc(), [])
   const [step, setStep] = useState<Step>('landing')
   const [birthCity, setBirthCity] = useState<City | null>(null)
@@ -71,7 +69,9 @@ export default function KundliApp() {
         result,
       })
       addMyKundliSlug(saved.slug)
-      navigate(isExhibition ? `/exhibition/k/${saved.slug}` : `/k/${saved.slug}`)
+      // Generated kundlis always live at the public /k/<slug> URL, even when
+      // created from the /exhibition kiosk flow, so the shareable link is clean.
+      navigate(`/k/${saved.slug}`)
     } catch (err) {
       setError(
         err instanceof Error
