@@ -573,7 +573,10 @@ export function PrintableKundli({
       id="kundli-sheet"
       className={`bg-white flex flex-col relative select-none ${className ?? ""}`}
     >
-      <div className="w-full aspect-square relative bg-white">
+      {/* mb adds breathing room between the grid and the dashed fold line.
+          Tune this single value to taste — it borrows height from the bottom
+          strip (flex-1), so it never changes the sheet's overall A4 size. */}
+      <div className="w-full aspect-square relative bg-white mb-[3mm]">
         <svg
           viewBox="0 0 600 600"
           className="w-full h-full"
