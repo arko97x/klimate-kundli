@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, type ReactNode } from 'react'
 
 import type { RainRingsCity, RainRingsInsight } from '@/lib/api'
 import { parallelAnnulusPath, permutationForSeed } from '@/lib/organicTreeRing'
@@ -103,7 +103,17 @@ export function RainRingsChart({ insight, source }: RainRingsChartProps) {
   )
 }
 
-function buildHeadline(city: RainRingsCity, birthYear: number): { main: string; sub: string } {
+/** Standard median of a city's annual rainfall — matches the backend's
+ *  medianValue() so the displayed figure agrees with "% above median". */
+function medianPrecipMm(city: RainRingsCity): number {
+  const sorted = city.years.map((y) => y.precipMm).sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  return sorted.length % 2 === 1
+    ? sorted[mid]!
+    : (sorted[mid - 1]! + sorted[mid]!) / 2
+}
+
+function buildHeadline(city: RainRingsCity, birthYear: number): { main: string; sub: ReactNode } {
   const label = shortCity(city.displayName)
   const span = city.years.length
   const wettest = city.wettestYear
@@ -111,9 +121,20 @@ function buildHeadline(city: RainRingsCity, birthYear: number): { main: string; 
 
   if (wettest != null && city.driestYear != null && city.years.length >= 4) {
     const wettestMm = city.years.find((y) => y.year === wettest)?.precipMm
+    const median = Math.round(medianPrecipMm(city))
     return {
       main: `Wet and dry years in ${label}.`,
-      sub: `You lived through ${span} rainy seasons there since ${birthYear}. ${pctWet}% of those years were wetter than your own median — your soggiest was ${wettest}${wettestMm != null ? ` (${wettestMm.toLocaleString()} mm)` : ''}, your driest ${city.driestYear}.`,
+      // Three stacked lines so the snapshot reads top-to-bottom without long
+      // horizontal eye movement (visitor feedback).
+      sub: (
+        <>
+          <span className="block">You lived through {span} rainy seasons there since {birthYear}.</span>
+          <span className="block">{pctWet}% of those years were wetter than your own median ({median.toLocaleString()} mm).</span>
+          <span className="block">
+            Your soggiest was {wettest}{wettestMm != null ? ` (${wettestMm.toLocaleString()} mm)` : ''}, your driest {city.driestYear}.
+          </span>
+        </>
+      ),
     }
   }
 
