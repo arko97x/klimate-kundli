@@ -111,14 +111,18 @@ export function KundliViewPage() {
               }
               @media print {
                 @page { size: A4 portrait; margin: 0; }
-                html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+                html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; height: auto !important; }
                 #root { display: none !important; }
                 #kundli-print-root {
                   position: static !important;
                   left: 0 !important;
+                  overflow: hidden !important;
                 }
+                /* height a hair under 297mm: an exact-A4 box gets tipped onto a
+                   blank second page by sub-pixel mm→px rounding (worst on iOS). */
                 #kundli-sheet {
-                  width: 210mm; height: 297mm;
+                  width: 210mm; height: 296mm;
+                  overflow: hidden !important;
                   box-shadow: none !important;
                 }
               }
