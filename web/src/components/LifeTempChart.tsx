@@ -354,12 +354,28 @@ function niceStep(rough: number): number {
 }
 
 function buildHeadline(insight: TempTimelineInsight): { main: string; sub: string } {
-  const startYear = insight.years[0]!.year
-  const endYear = insight.years[insight.years.length - 1]!.year
+  const firstPoint = insight.years[0]!
+  const lastPoint = insight.years[insight.years.length - 1]!
+  const startYear = firstPoint.year
+  const endYear = lastPoint.year
   const span = insight.years.length
   const cityCount = insight.cities.length
 
+  // lifeDeltaC compares the first tracked year to the last. When those two
+  // years are in different cities, the difference mostly reflects the move
+  // (e.g. Kanpur → higher, cooler Bengaluru), not the climate warming or
+  // cooling. Reword those cases so we don't imply a climate trend.
+  const firstCity = shortCity(firstPoint.displayName)
+  const lastCity = shortCity(lastPoint.displayName)
+  const movedEndpoints = firstPoint.cityName !== lastPoint.cityName
+
   if (insight.lifeDeltaC != null && insight.lifeDeltaC >= 0.3) {
+    if (movedEndpoints) {
+      return {
+        main: 'Your trail trended warmer.',
+        sub: `${span} years across ${cityCount} cities. Your latest year (${endYear}, ${lastCity}) averaged ${insight.lifeDeltaC.toFixed(1)}°C above your first (${startYear}, ${firstCity}) — a mix of a warming climate and moving between cities.`,
+      }
+    }
     return {
       main: 'The air got warmer year by year.',
       sub: `Across ${span} years in ${cityCount === 1 ? shortCity(insight.cities[0]!.displayName) : `${cityCount} cities`}, annual mean temperature rose ${insight.lifeDeltaC.toFixed(1)}°C from ${startYear} to ${endYear}${insight.warmestYear != null ? ` — your warmest year so far was ${insight.warmestYear}` : ''}.`,
@@ -367,6 +383,12 @@ function buildHeadline(insight: TempTimelineInsight): { main: string; sub: strin
   }
 
   if (insight.lifeDeltaC != null && insight.lifeDeltaC <= -0.3) {
+    if (movedEndpoints) {
+      return {
+        main: 'You landed somewhere cooler.',
+        sub: `${span} years across ${cityCount} cities. Your latest year (${endYear}, ${lastCity}) averaged ${Math.abs(insight.lifeDeltaC).toFixed(1)}°C below your first (${startYear}, ${firstCity}) — largely because you moved, not because the climate cooled. Each city you lived in kept warming.`,
+      }
+    }
     return {
       main: 'Your years ran slightly cooler on average.',
       sub: `${span} years tracked from ${startYear} to ${endYear}. Mean temperature fell ${Math.abs(insight.lifeDeltaC).toFixed(1)}°C over that span${insight.coolestYear != null ? ` — coolest was ${insight.coolestYear}` : ''}.`,
