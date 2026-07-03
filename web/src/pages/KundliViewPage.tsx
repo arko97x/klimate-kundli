@@ -111,15 +111,26 @@ export function KundliViewPage() {
               }
               @media print {
                 @page { size: A4 portrait; margin: 0; }
-                html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; height: auto !important; }
+                /* Pin the print viewport to exactly one A4 page and clip the rest.
+                   iOS Safari ignores @page margin:0 and reserves its own printable
+                   margin, so overflowing content wraps to a phantom second page —
+                   constraining body to a single page height removes anything for it
+                   to paginate onto. */
+                html, body {
+                  margin: 0 !important; padding: 0 !important;
+                  width: 210mm !important; height: 297mm !important;
+                  overflow: hidden !important;
+                  background: #fff !important;
+                }
                 #root { display: none !important; }
                 #kundli-print-root {
                   position: static !important;
                   left: 0 !important;
+                  width: 210mm !important; height: 297mm !important;
                   overflow: hidden !important;
                 }
                 /* height a hair under 297mm: an exact-A4 box gets tipped onto a
-                   blank second page by sub-pixel mm→px rounding (worst on iOS). */
+                   blank second page by sub-pixel mm→px rounding. */
                 #kundli-sheet {
                   width: 210mm; height: 296mm;
                   overflow: hidden !important;
