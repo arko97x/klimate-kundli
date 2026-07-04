@@ -6,6 +6,7 @@ import { Printer } from 'lucide-react'
 import { MonthlyDeltaChart } from '@/components/MonthlyDeltaChart'
 import { PrintableKundli } from '@/components/PrintableKundli'
 import { Button, buttonVariants } from '@/components/ui/button'
+import { HeaderMenu } from '@/expt/Header'
 import { KundliResultLayout } from '@/expt/KundliResultLayout'
 import { fetchKundliBySlug, type SavedKundliRecord } from '@/lib/api'
 import { useIsExhibition } from '@/lib/exhibition-context'
@@ -53,22 +54,25 @@ export function KundliViewPage() {
   }, [slug])
 
   // Slug-page header actions: Print (native to this kundli, only once it's
-  // loaded) as the primary button, and New Kundli as an outline button.
+  // loaded) as an outline button, New Kundli as the primary button, and the
+  // menu as a ghost hamburger to the far right.
   const headerActions = (
     <>
       {!loading && record ? (
         <Button
           type="button"
-          className="gap-2"
+          variant="outline"
+          className="hidden gap-2 sm:inline-flex"
           onClick={() => window.print()}
         >
           <Printer className="size-4" />
           Print Kundli
         </Button>
       ) : null}
-      <Link to="/exhibition" className={buttonVariants({ variant: 'outline' })}>
+      <Link to="/exhibition" className={buttonVariants()}>
         New Kundli
       </Link>
+      <HeaderMenu variant="ghost" />
     </>
   )
 

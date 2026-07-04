@@ -18,11 +18,17 @@ const MENU_ITEMS = [
   { label: 'Climate Twin', path: '/klimate-twin' },
 ] as const
 
-export function HeaderMenu({ className }: { className?: string }) {
+export function HeaderMenu({
+  className,
+  variant = 'outline',
+}: {
+  className?: string
+  variant?: 'outline' | 'ghost'
+}) {
   return (
     <Popover>
       <PopoverTrigger
-        className={cn(buttonVariants({ variant: 'outline', size: 'icon' }), className)}
+        className={cn(buttonVariants({ variant, size: 'icon' }), className)}
         aria-label="Open menu"
       >
         <MenuIcon className="size-5" />
