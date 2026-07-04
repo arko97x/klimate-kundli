@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { MenuIcon } from 'lucide-react'
 
@@ -54,11 +54,35 @@ export function HeaderMenu({
 export function Header({ actions }: { actions?: ReactNode }) {
   const isExhibition = useIsExhibition()
 
+  // Smart header: hide when scrolling down (immersive reading), slide back in
+  // when scrolling up. Sticky (not fixed) so it needs no spacer and never
+  // jumps the layout — it just translates out of and into view.
+  const [hidden, setHidden] = useState(false)
+  useEffect(() => {
+    if (isExhibition) return
+    let lastY = window.scrollY
+    const onScroll = () => {
+      const y = window.scrollY
+      const delta = y - lastY
+      if (y < 64) {
+        setHidden(false) // always visible near the top
+      } else if (Math.abs(delta) > 6) {
+        setHidden(delta > 0) // down → hide, up → show; ignore tiny jitters
+      }
+      lastY = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [isExhibition])
+
   // No header at all on the exhibition landing.
   if (isExhibition) return null
 
   return (
-    <header className="relative z-40 w-full shrink-0 bg-white border-b border-neutral-200">
+    <header
+      className="sticky top-0 z-40 w-full shrink-0 bg-white border-b border-neutral-200 transition-transform duration-300 motion-reduce:transition-none"
+      style={{ transform: hidden ? 'translateY(-100%)' : 'translateY(0)' }}
+    >
       <div className="flex items-center px-4 py-3 sm:px-6 sm:py-4">
         <Link
           to="/"
