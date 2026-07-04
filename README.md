@@ -2,15 +2,15 @@
 
 A climate horoscope. You tell it when you were born and which cities you have lived in, and it reads your life back to you through the planet's recent weather: the year you arrived, the monsoons you have sat through, the ice that thinned while you grew up, the carbon that piled up under your name.
 
-I made it for *Data, Otherwise*, the exhibition at VizChitra 2026. Someone walks up to a screen, types in a birthday and a few cities, and walks away with twelve cards and a printed fold-out to take home. That is the whole thing.
+We made it for *Data, Otherwise*, the exhibition at VizChitra 2026. Someone walks up to a screen, types in a birthday and a few cities, and walks away with twelve cards and a printed fold-out to take home. That is the whole thing.
 
 ## Why a kundli
 
 A kundli is a birth chart. In the version a lot of us grew up around, an astrologer takes the exact moment and place you were born, maps where the planets sat in that sky, and tells you what kind of life that arrangement supposedly wrote for you. The premise is that your fate was set by the heavens the instant you arrived, and that a trained reader can recover it.
 
-I wanted the shape of that and none of the planets. So the graha here are climate signals. Where an astrologer would read Saturn or the Moon, this reads the temperature of your birth year, the drift of your monsoon, the height of the sea, the debt of a country's emissions.
+The concept is Nithya's: the shape of a kundli with none of the planets. So the graha here are climate signals. Where an astrologer would read Saturn or the Moon, this one reads the temperature of your birth year, the drift of your monsoon, the height of the sea, the debt of a country's emissions.
 
-The joke only works because it is half true. Astrology says the sky at your birth decided your life. On a warming planet, the sky you were born under did quietly set some terms you never agreed to: a hotter baseline than your parents got, a monsoon already shifting, a coastline already on the move. None of it was your doing, and all of it is now part of your chart. The satire and the fact live in the same sentence, which is the only reason I felt it was worth building.
+The joke only works because it is half true. Astrology says the sky at your birth decided your life. On a warming planet, the sky you were born under did quietly set some terms you never agreed to: a hotter baseline than your parents got, a monsoon already shifting, a coastline already on the move. None of it was your doing, and all of it is now part of your chart. The satire and the fact live in the same sentence, which is the reason it was worth building.
 
 ## What a visitor gets
 
@@ -34,8 +34,12 @@ Every card carries its source and a confidence label, because a piece that dress
 
 I rebuilt this more times than I would like to admit. It started as a localhost toy that called weather APIs live, became a precomputed database, and eventually turned into the exhibit that exists now, with its own kiosk mode, frozen shareable snapshots, and a print pipeline that fought me at every step. The app carries an internal documentation page that logs the whole march, version by version, including the ideas that got retired. That page was for me. This note is for you.
 
+## Who made this
+
+Nithya conceptualised Klimate Kundli! She came up with the concept, did the heavy lifting on the visual design, built the exhibition space it lives in, and set the whole vibe of the piece. The way the reading looks and feels, the way it holds a room, is her work. I wrote the code and wired up the data behind it. This project would not exist without her, and it would not be worth looking at without her and countless other people; we're in the process of updating our acknowledgements.
+
 ## About this repo
 
-The code is public, and it is not looking for contributors. This is a personal exhibition project, not a product or a framework, and I am keeping it open so it can be read rather than forked and run. Poke around if you are curious how a climate reading gets assembled from a birthday and a list of cities. That is the interesting part, and it is all here.
+The code is public, and it is not looking for contributors. This is a two-person exhibition project, not a product or a framework, and we are keeping it open so it can be read rather than forked and run. Poke around if you are curious how a climate reading gets assembled from a birthday and a list of cities. That is the interesting part, and it is all here.
 
-Built with React and a small Node service. The climate data belongs to the organisations named above; the reading, and the liberties it takes, are mine.
+Built with React and a small Node service. The climate data belongs to the organisations named above; the reading, and the liberties it takes, are ours.
