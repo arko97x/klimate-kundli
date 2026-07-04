@@ -28,6 +28,23 @@
   top: var(--stack-top);
   /* later cards pin slightly lower, revealing the edge of the ones beneath */
   padding-top: calc(var(--index) * var(--stack-offset));
+  /* later cards always paint above earlier ones, sticky or not */
+  z-index: var(--index);
+}
+
+/*
+ * A card taller than the viewport can't be pinned without clipping its lower
+ * half. `is-tall` (set from JS after measuring) drops it out of the sticky
+ * stack so it scrolls to its end before the next card begins to pile on.
+ */
+.stack-card.is-tall {
+  position: relative;
+  padding-top: 0;
+}
+
+.stack-card.is-tall .stack-card__inner {
+  animation: none;
+  transform: none;
 }
 
 .stack-card__inner {

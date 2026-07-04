@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, type CSSProperties, type ReactNode } from "react";
 
 import "@/expt/stacking-cards.css";
 import { ArcticIcebergChart } from "@/components/ArcticIcebergChart";
@@ -69,6 +69,49 @@ export function MonthlyDeltaChart({
 }: MonthlyDeltaChartProps) {
   const geometry = useMemo(() => buildGeometry(data), [data]);
   const headline = buildHeadline(data);
+
+  // Sticky-stacking cuts off any card taller than the screen: it pins at the
+  // top and the next card slides over its lower half. So we measure each card
+  // and let the tall ones scroll normally (class `is-tall`) — they reveal fully
+  // before the next card starts stacking. Purely a layout/scroll concern.
+  const stackRef = useRef<HTMLUListElement>(null);
+  useEffect(() => {
+    const ul = stackRef.current;
+    if (!ul) return;
+    const items = Array.from(ul.querySelectorAll<HTMLLIElement>(".stack-card"));
+
+    // These mirror --stack-top (1.5rem) and --stack-offset (0.75rem) in
+    // stacking-cards.css: where a card pins, and its per-card staircase peek.
+    const STACK_TOP = 24;
+    const STACK_OFFSET = 12;
+
+    const measure = () => {
+      const vh = window.innerHeight;
+      for (const li of items) {
+        const inner = li.querySelector<HTMLElement>(".stack-card__inner");
+        // Use the (stable) content height plus the offsets the card carries
+        // when pinned. Deriving the offset from --index rather than the live
+        // padding keeps this decision from flip-flopping as is-tall toggles it.
+        const innerH = inner?.offsetHeight ?? li.offsetHeight;
+        const index = Number(li.style.getPropertyValue("--index")) || 0;
+        const pinnedExtent = STACK_TOP + index * STACK_OFFSET + innerH;
+        li.classList.toggle("is-tall", pinnedExtent > vh);
+      }
+    };
+
+    measure();
+    // Card heights settle as charts/images load, so re-measure on any resize.
+    const ro = new ResizeObserver(measure);
+    for (const li of items) {
+      const inner = li.querySelector(".stack-card__inner");
+      if (inner) ro.observe(inner);
+    }
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [data]);
 
   const cards: ReactNode[] = [];
 
@@ -292,6 +335,7 @@ export function MonthlyDeltaChart({
   return (
     <div className="mx-auto w-full max-w-4xl">
       <ul
+        ref={stackRef}
         className="stack-cards"
         style={{ ["--numcards" as string]: cards.length } as CSSProperties}
       >
