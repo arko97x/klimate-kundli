@@ -71,7 +71,7 @@ export function InsightsSection({ data }: InsightsSectionProps) {
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
             Three-generation temperature arc · {city.name}
           </p>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <GenTempCard
               era="Your parents' childhood"
               years={`${parentsBirthWindow.startYear}–${parentsBirthWindow.endYear}`}
