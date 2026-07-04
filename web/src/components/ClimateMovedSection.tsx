@@ -92,7 +92,7 @@ function MigrationBlock({ migration, lead = false }: { migration: ClimateMigrati
         </p>
 
         {homeNow ? (
-          <dl className="grid grid-cols-3 gap-3 text-sm">
+          <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
             <ThenNow label="Hottest day" then={childhood.heatCeiling} now={homeNow.heatCeiling} unit="°C" />
             <ThenNow label="Coldest night" then={childhood.coldFloor} now={homeNow.coldFloor} unit="°C" />
             <ThenNow label="Yearly rain" then={childhood.wetness} now={homeNow.wetness} unit="mm" />
