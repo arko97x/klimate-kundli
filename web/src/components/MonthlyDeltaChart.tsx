@@ -70,10 +70,12 @@ export function MonthlyDeltaChart({
   const geometry = useMemo(() => buildGeometry(data), [data]);
   const headline = buildHeadline(data);
 
-  // Sticky-stacking cuts off any card taller than the screen: it pins at the
-  // top and the next card slides over its lower half. So we measure each card
-  // and let the tall ones scroll normally (class `is-tall`) — they reveal fully
-  // before the next card starts stacking. Purely a layout/scroll concern.
+  // Sticky-stacking can't pin a card taller than the screen without clipping
+  // it, so those scroll normally (class `is-tall`). But a *pinned* card sitting
+  // directly above a free-scrolling one pokes its bottom out below it (the
+  // "sandwich" artifact). To avoid that, once a card is too tall to pin, every
+  // card above it scrolls too — leaving only clean boundaries, while the
+  // trailing short cards still stack. Purely a layout/scroll concern.
   const stackRef = useRef<HTMLUListElement>(null);
   useEffect(() => {
     const ul = stackRef.current;
@@ -87,29 +89,36 @@ export function MonthlyDeltaChart({
 
     const measure = () => {
       const vh = window.innerHeight;
-      for (const li of items) {
+      // A card can't pin cleanly if its (stable) content height plus the offsets
+      // it carries when pinned would run past the viewport. Deriving the offset
+      // from --index rather than the live padding keeps this from flip-flopping
+      // as is-tall toggles the padding.
+      const flow = items.map((li) => {
         const inner = li.querySelector<HTMLElement>(".stack-card__inner");
-        // Use the (stable) content height plus the offsets the card carries
-        // when pinned. Deriving the offset from --index rather than the live
-        // padding keeps this decision from flip-flopping as is-tall toggles it.
         const innerH = inner?.offsetHeight ?? li.offsetHeight;
         const index = Number(li.style.getPropertyValue("--index")) || 0;
-        const pinnedExtent = STACK_TOP + index * STACK_OFFSET + innerH;
-        li.classList.toggle("is-tall", pinnedExtent > vh);
+        return STACK_TOP + index * STACK_OFFSET + innerH > vh;
+      });
+      // Propagate upward: anything above a scrolling card must scroll too.
+      for (let i = flow.length - 2; i >= 0; i--) {
+        if (flow[i + 1]) flow[i] = true;
       }
+      items.forEach((li, i) => li.classList.toggle("is-tall", flow[i]));
     };
 
     measure();
-    // Card heights settle as charts/images load, so re-measure on any resize.
+    // Card heights settle as charts/images load; zoom changes the viewport.
     const ro = new ResizeObserver(measure);
     for (const li of items) {
       const inner = li.querySelector(".stack-card__inner");
       if (inner) ro.observe(inner);
     }
     window.addEventListener("resize", measure);
+    window.visualViewport?.addEventListener("resize", measure);
     return () => {
       ro.disconnect();
       window.removeEventListener("resize", measure);
+      window.visualViewport?.removeEventListener("resize", measure);
     };
   }, [data]);
 
