@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { KundliResultLayout } from '@/expt/KundliResultLayout'
-import { fetchKundliList, type SavedKundliSummary } from '@/lib/api'
+import { fetchAllKundliList, type SavedKundliSummary } from '@/lib/api'
 import { isMyKundli } from '@/lib/my-kundlis'
 
 function formatCreatedAt(iso: string): string {
@@ -51,7 +51,7 @@ export function GalleryPage() {
   useEffect(() => {
     let cancelled = false
 
-    fetchKundliList()
+    fetchAllKundliList()
       .then((next) => {
         if (!cancelled) {
           setItems(next)

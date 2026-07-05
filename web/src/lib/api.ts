@@ -326,3 +326,22 @@ export async function fetchKundliList(
   const body = (await res.json()) as { items: SavedKundliSummary[] }
   return body.items ?? []
 }
+
+/**
+ * Fetch every saved kundli by paging through the list endpoint, which caps a
+ * single request at 100. Stops when a page comes back short (the last page),
+ * with a hard ceiling as a runaway guard.
+ */
+export async function fetchAllKundliList(): Promise<SavedKundliSummary[]> {
+  const pageSize = 100
+  const maxItems = 5000
+  const all: SavedKundliSummary[] = []
+
+  for (let offset = 0; offset < maxItems; offset += pageSize) {
+    const page = await fetchKundliList(pageSize, offset)
+    all.push(...page)
+    if (page.length < pageSize) break
+  }
+
+  return all
+}
