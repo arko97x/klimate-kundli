@@ -536,7 +536,7 @@ function HottestYearsSection({
       ) : null}
 
       {insight.byCity.length > 0 ? (
-        <ul className="grid gap-2 sm:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {insight.byCity.map((city) => (
             <li
               key={city.cityName}

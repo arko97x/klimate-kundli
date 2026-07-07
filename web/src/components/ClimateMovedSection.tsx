@@ -66,7 +66,7 @@ function MigrationBlock({ migration, lead = false }: { migration: ClimateMigrati
   const place = [analog.name, analog.admin1].filter(Boolean).join(", ");
 
   return (
-    <div className="grid gap-5 rounded-xl border border-border bg-muted/30 p-5 sm:grid-cols-[132px_1fr] sm:items-center">
+    <div className="grid grid-cols-1 gap-5 rounded-xl border border-border bg-muted/30 p-5 sm:grid-cols-[132px_1fr] sm:items-center">
       <div className="flex flex-col items-center gap-2">
         <MigrationArrow bearingDeg={migration.bearingDeg} />
         <div className="text-center">

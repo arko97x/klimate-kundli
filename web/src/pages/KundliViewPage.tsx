@@ -55,9 +55,16 @@ export function KundliViewPage() {
 
   // Slug-page header actions: Print (native to this kundli, only once it's
   // loaded) as an outline button, New Kundli as the primary button, and the
-  // menu as a ghost hamburger to the far right.
+  // menu as a ghost hamburger to the far right. On mobile the print button is
+  // hidden, so a Gallery link takes its place.
   const headerActions = (
     <>
+      <Link
+        to="/gallery"
+        className="text-sm font-medium text-foreground transition-colors hover:text-foreground/70 sm:hidden"
+      >
+        Gallery
+      </Link>
       {!loading && record ? (
         <Button
           type="button"

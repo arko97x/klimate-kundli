@@ -161,7 +161,7 @@ export function EmissionsRingsChart({ birthYear, data }: EmissionsRingsChartProp
 
       <div className="mt-6 space-y-6">
         {/* Chart + milestone timeline, side by side */}
-        <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
           {/* Diamond Matchstick Visualization */}
           <div className="flex flex-col items-center select-none">
           <div className="relative w-full max-w-sm aspect-square flex items-center justify-center">

@@ -16,7 +16,7 @@ export function WizardLayout({
   const contentScrolls = scrollContent || footer != null
 
   return (
-    <div className="grid min-h-dvh lg:h-dvh lg:max-h-dvh lg:grid-cols-3 lg:overflow-hidden">
+    <div className="grid grid-cols-1 min-h-dvh lg:h-dvh lg:max-h-dvh lg:grid-cols-3 lg:overflow-hidden">
       <aside className="flex shrink-0 items-center justify-center bg-muted px-8 py-12 lg:col-span-1 lg:h-full lg:overflow-hidden lg:px-12">
         <div className="max-w-sm space-y-3 text-center">
           <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
