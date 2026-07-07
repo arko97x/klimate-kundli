@@ -32,9 +32,11 @@ function KundliCard({ item }: { item: SavedKundliSummary }) {
           <p className="truncate font-medium">{item.birthCityDisplay}</p>
           <p className="text-sm text-muted-foreground">Born {item.birthYear}</p>
         </div>
-        <span className="shrink-0 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-          {mine ? "You" : "Someone"}
-        </span>
+        {mine ? (
+          <span className="shrink-0 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+            You
+          </span>
+        ) : null}
       </div>
       {createdLabel ? (
         <p className="mt-3 text-xs text-muted-foreground">{createdLabel}</p>

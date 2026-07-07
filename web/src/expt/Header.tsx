@@ -53,7 +53,10 @@ export function HeaderMenu({
 
 export function Header({ actions }: { actions?: ReactNode }) {
   const isExhibition = useIsExhibition();
-  const onGallery = useLocation().pathname === "/gallery";
+  const { pathname } = useLocation();
+  const onGallery = pathname === "/gallery";
+  // The landing page already has its own "Get started" CTA.
+  const onHome = pathname === "/";
 
   // Smart header: hide when scrolling down (immersive reading), slide back in
   // when scrolling up. Sticky (not fixed) so it needs no spacer and never
@@ -104,9 +107,11 @@ export function Header({ actions }: { actions?: ReactNode }) {
                   Gallery
                 </Link>
               ) : null}
-              <Link to="/" className={buttonVariants()}>
-                New Kundli
-              </Link>
+              {!onHome ? (
+                <Link to="/" className={buttonVariants()}>
+                  New Kundli
+                </Link>
+              ) : null}
               <HeaderMenu />
             </>
           )}
