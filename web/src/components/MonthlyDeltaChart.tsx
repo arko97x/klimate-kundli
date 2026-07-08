@@ -369,7 +369,13 @@ export function MonthlyDeltaChart({
 
       {onReset ? (
         <div className="flex justify-start pt-8 pb-4">
-          <Button type="button" variant="outline" size="sm" onClick={onReset}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onReset}
+            data-umami-event="try-another-city"
+          >
             Try another city
           </Button>
         </div>

@@ -5,6 +5,7 @@ import { BirthStep } from '@/components/BirthStep'
 import { LivedCitiesStep } from '@/components/LivedCitiesStep'
 import { defaultBirthYear } from '@/components/BirthYearPicker'
 import { KundliWizardLayout } from '@/expt/KundliWizardLayout'
+import { track } from '@/lib/analytics'
 import { fetchMonthlyDelta, saveKundli } from '@/lib/api'
 import {
   createInitialRows,
@@ -69,6 +70,9 @@ export default function KundliApp() {
         result,
       })
       addMyKundliSlug(saved.slug)
+      // Count successful creations only — a click on Generate that fails
+      // validation or the API is not a created kundli.
+      track('kundli-created', { livedCities: livedCities.length })
       // Generated kundlis always live at the public /k/<slug> URL, even when
       // created from the /exhibition kiosk flow, so the shareable link is clean.
       navigate(`/k/${saved.slug}`)

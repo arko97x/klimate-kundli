@@ -71,12 +71,18 @@ export function KundliViewPage() {
           variant="outline"
           className="hidden gap-2 sm:inline-flex"
           onClick={() => window.print()}
+          data-umami-event="print-kundli"
         >
           <Printer className="size-4" />
           Print Kundli
         </Button>
       ) : null}
-      <Link to="/" className={buttonVariants()}>
+      <Link
+        to="/"
+        className={buttonVariants()}
+        data-umami-event="new-kundli"
+        data-umami-event-location="kundli-page"
+      >
         New Kundli
       </Link>
       <HeaderMenu variant="ghost" />

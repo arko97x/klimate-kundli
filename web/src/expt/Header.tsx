@@ -108,7 +108,12 @@ export function Header({ actions }: { actions?: ReactNode }) {
                 </Link>
               ) : null}
               {!onHome ? (
-                <Link to="/" className={buttonVariants()}>
+                <Link
+                  to="/"
+                  className={buttonVariants()}
+                  data-umami-event="new-kundli"
+                  data-umami-event-location="header"
+                >
                   New Kundli
                 </Link>
               ) : null}

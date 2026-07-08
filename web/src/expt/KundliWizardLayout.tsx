@@ -411,6 +411,7 @@ export function KundliWizardLayout({
 
           <Button
             onClick={onStart}
+            data-umami-event="get-started"
             className="bg-black text-white hover:bg-black/90 rounded-none font-semibold tracking-wider shadow-lg pointer-events-auto w-[180px] h-[44px] sm:w-[240px] sm:h-[52px] text-xs sm:text-sm xl:text-base uppercase transition-all hover:scale-[1.02] z-20"
           >
             Get Started
