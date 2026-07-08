@@ -8,7 +8,13 @@ import App from './App.tsx'
 // dev servers and preview deploys never pollute the stats. To exclude your
 // own browser on the live site, run once in the console:
 //   localStorage.setItem('umami.disabled', '1')
+// or, on devices without a console (phones), open the site once as:
+//   https://klimatekundli.com/#kk-optout
 if (import.meta.env.PROD) {
+  if (window.location.hash === '#kk-optout') {
+    localStorage.setItem('umami.disabled', '1')
+    window.alert('Analytics disabled for this browser.')
+  }
   const script = document.createElement('script')
   script.defer = true
   script.src = 'https://analytics.klimatekundli.com/script.js'
