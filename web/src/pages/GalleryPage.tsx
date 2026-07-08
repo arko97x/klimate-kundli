@@ -33,7 +33,7 @@ function KundliCard({ item }: { item: SavedKundliSummary }) {
           <p className="text-sm text-muted-foreground">Born {item.birthYear}</p>
         </div>
         {mine ? (
-          <span className="shrink-0 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+          <span className="shrink-0 rounded-full bg-linear-to-b from-[#180033] to-[#bd005d] px-2.5 py-0.5 text-xs font-medium text-white">
             You
           </span>
         ) : null}
