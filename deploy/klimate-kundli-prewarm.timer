@@ -1,0 +1,13 @@
+[Unit]
+Description=Daily resume of the Klimate Kundli prewarm
+
+[Timer]
+# Droplet runs on UTC (Etc/UTC), and Open-Meteo's daily quota refills at 00:00 UTC.
+# 00:15 gives the reset a few minutes of margin.
+OnCalendar=*-*-* 00:15:00
+# If the droplet was down at 00:15, run as soon as it is back.
+Persistent=true
+Unit=klimate-kundli-prewarm.service
+
+[Install]
+WantedBy=timers.target

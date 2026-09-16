@@ -1,0 +1,11 @@
+[Unit]
+Description=Klimate Kundli — resume Open-Meteo cache prewarm
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/root/klimate-kundli/deploy/prewarm-daily.sh
+# A full run is ~30 min/city and can exceed 20 hours. Without this, systemd's
+# default 90s start timeout would kill it a minute and a half in.
+TimeoutStartSec=0
