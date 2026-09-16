@@ -1,13 +1,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createCache } from "../cache/store.js";
+import { writeAnnualStats } from "../lib/annual-stats.js";
 import { Budget } from "../lib/budget.js";
-import { gridKey } from "../lib/grid.js";
-import {
-  createHistoricalResolver,
-  isHistoricalCacheWarm,
-  type WeatherDaily,
-} from "../resolvers/historical.js";
+import { createHistoricalResolver, isHistoricalCacheWarm } from "../resolvers/historical.js";
 import type { City } from "../types.js";
 
 const START_YEAR = 1940;
@@ -99,38 +95,6 @@ async function main(): Promise<void> {
   }
 
   log({ msg: "prewarm_done", total: cities.length, fetched, skipped, failed, skipRate: cities.length ? skipped / cities.length : 0 });
-}
-
-function writeAnnualStats(cache: ReturnType<typeof createCache>, city: City, daily: WeatherDaily[]): void {
-  const grouped = new Map<number, WeatherDaily[]>();
-
-  for (const day of daily) {
-    const year = Number(day.date.slice(0, 4));
-    grouped.set(year, [...(grouped.get(year) ?? []), day]);
-  }
-
-  for (const [year, days] of grouped) {
-    cache.set(`hist:stats:v1:${gridKey(city.lat, city.lon)}:${year}`, {
-      tmaxMax: max(days.map((day) => day.tmax)),
-      tminMin: min(days.map((day) => day.tmin)),
-      precipTotal: sum(days.map((day) => day.precip)),
-      sourceDays: days.length,
-    });
-  }
-}
-
-function max(values: Array<number | null>): number | null {
-  const finite = values.filter((value): value is number => value !== null);
-  return finite.length ? Math.max(...finite) : null;
-}
-
-function min(values: Array<number | null>): number | null {
-  const finite = values.filter((value): value is number => value !== null);
-  return finite.length ? Math.min(...finite) : null;
-}
-
-function sum(values: Array<number | null>): number {
-  return values.reduce<number>((total, value) => total + (value ?? 0), 0);
 }
 
 function log(payload: Record<string, unknown>): void {

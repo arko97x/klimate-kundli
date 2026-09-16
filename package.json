@@ -17,7 +17,8 @@
     "imd:diagnose": "tsx src/scripts/imd-diagnose.ts",
     "imd:build-station-map": "tsx src/scripts/imd-build-station-map.ts",
     "imd:ingest": "./.venv/bin/python scripts/imd-ingest.py",
-    "capture:docs": "node scripts/capture/capture.mjs"
+    "capture:docs": "node scripts/capture/capture.mjs",
+    "backfill:annual-stats": "tsx src/scripts/backfill-annual-stats.ts"
   },
   "dependencies": {
     "@fontsource-variable/alegreya": "^5.2.8",
