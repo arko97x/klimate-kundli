@@ -7389,5 +7389,780 @@
     "lat": 39.0211,
     "lon": 117.6469,
     "country": "CN"
+  },
+  {
+    "name": "Kanpur",
+    "displayName": "Kanpur, Uttar Pradesh, India",
+    "lat": 26.46523,
+    "lon": 80.34975,
+    "country": "IN",
+    "admin1": "Uttar Pradesh"
+  },
+  {
+    "name": "Kozhikode",
+    "displayName": "Kozhikode, Kerala, India",
+    "lat": 11.24802,
+    "lon": 75.7804,
+    "country": "IN",
+    "admin1": "Kerala"
+  },
+  {
+    "name": "Noida",
+    "displayName": "Noida, Uttar Pradesh, India",
+    "lat": 28.58,
+    "lon": 77.33,
+    "country": "IN",
+    "admin1": "Uttar Pradesh"
+  },
+  {
+    "name": "Manipal",
+    "displayName": "Manipal, Karnataka, India",
+    "lat": 13.35,
+    "lon": 74.78333,
+    "country": "IN",
+    "admin1": "Karnataka"
+  },
+  {
+    "name": "Ropar",
+    "displayName": "Ropar, Punjab, India",
+    "lat": 30.96896,
+    "lon": 76.52695,
+    "country": "IN",
+    "admin1": "Punjab"
+  },
+  {
+    "name": "Kurukshetra",
+    "displayName": "Kurukshetra, Haryana, India",
+    "lat": 29.9657,
+    "lon": 76.837,
+    "country": "IN",
+    "admin1": "Haryana"
+  },
+  {
+    "name": "Gandhinagar",
+    "displayName": "Gandhinagar, Gujarat, India",
+    "lat": 23.21667,
+    "lon": 72.68333,
+    "country": "IN",
+    "admin1": "Gujarat"
+  },
+  {
+    "name": "Panagudi",
+    "displayName": "Panagudi, Tamil Nadu, India",
+    "lat": 8.323179,
+    "lon": 77.5787258,
+    "country": "IN",
+    "admin1": "Tamil Nadu"
+  },
+  {
+    "name": "Golāghāt",
+    "displayName": "Golāghāt, Assam, India",
+    "lat": 26.51167,
+    "lon": 93.95951,
+    "country": "IN",
+    "admin1": "Assam"
+  },
+  {
+    "name": "Coorg",
+    "displayName": "Coorg, Karnataka, India",
+    "lat": 12.3827332,
+    "lon": 75.6640715,
+    "country": "IN",
+    "admin1": "Karnataka"
+  },
+  {
+    "name": "Mayiladuthurai",
+    "displayName": "Mayiladuthurai, Tamil Nadu, India",
+    "lat": 11.10354,
+    "lon": 79.655,
+    "country": "IN",
+    "admin1": "Tamil Nadu"
+  },
+  {
+    "name": "Mahuva",
+    "displayName": "Mahuva, Gujarat, India",
+    "lat": 21.09007,
+    "lon": 71.76904,
+    "country": "IN",
+    "admin1": "Gujarat"
+  },
+  {
+    "name": "Raebareli",
+    "displayName": "Raebareli, Uttar Pradesh, India",
+    "lat": 26.2309,
+    "lon": 81.23315,
+    "country": "IN",
+    "admin1": "Uttar Pradesh"
+  },
+  {
+    "name": "Hat Yai",
+    "displayName": "Hat Yai, Songkhla, Thailand",
+    "lat": 7.00836,
+    "lon": 100.47668,
+    "country": "TH",
+    "admin1": "Songkhla"
+  },
+  {
+    "name": "Hinganghāt",
+    "displayName": "Hinganghāt, Maharashtra, India",
+    "lat": 20.54875,
+    "lon": 78.83978,
+    "country": "IN",
+    "admin1": "Maharashtra"
+  },
+  {
+    "name": "Madhyamgram",
+    "displayName": "Madhyamgram, West Bengal, India",
+    "lat": 22.68944,
+    "lon": 88.44594,
+    "country": "IN",
+    "admin1": "West Bengal"
+  },
+  {
+    "name": "Dharashiv",
+    "displayName": "Dharashiv, Maharashtra, India",
+    "lat": 18.18158,
+    "lon": 76.03889,
+    "country": "IN",
+    "admin1": "Maharashtra"
+  },
+  {
+    "name": "Pākyong",
+    "displayName": "Pākyong, Sikkim, India",
+    "lat": 27.24184,
+    "lon": 88.59838,
+    "country": "IN",
+    "admin1": "Sikkim"
+  },
+  {
+    "name": "Pilāni",
+    "displayName": "Pilāni, Rajasthan, India",
+    "lat": 28.36725,
+    "lon": 75.60352,
+    "country": "IN",
+    "admin1": "Rajasthan"
+  },
+  {
+    "name": "Khambhāliya",
+    "displayName": "Khambhāliya, Gujarat, India",
+    "lat": 22.20685,
+    "lon": 69.65031,
+    "country": "IN",
+    "admin1": "Gujarat"
+  },
+  {
+    "name": "Rājsamand",
+    "displayName": "Rājsamand, Rajasthan, India",
+    "lat": 25.07145,
+    "lon": 73.8798,
+    "country": "IN",
+    "admin1": "Rajasthan"
+  },
+  {
+    "name": "Manmād",
+    "displayName": "Manmād, Maharashtra, India",
+    "lat": 20.25334,
+    "lon": 74.43755,
+    "country": "IN",
+    "admin1": "Maharashtra"
+  },
+  {
+    "name": "Robertsganj",
+    "displayName": "Robertsganj, Uttar Pradesh, India",
+    "lat": 24.6886,
+    "lon": 83.06784,
+    "country": "IN",
+    "admin1": "Uttar Pradesh"
+  },
+  {
+    "name": "Batāla",
+    "displayName": "Batāla, Punjab, India",
+    "lat": 31.80921,
+    "lon": 75.20294,
+    "country": "IN",
+    "admin1": "Punjab"
+  },
+  {
+    "name": "Beed",
+    "displayName": "Beed, Maharashtra, India",
+    "lat": 18.98921,
+    "lon": 75.75634,
+    "country": "IN",
+    "admin1": "Maharashtra"
+  },
+  {
+    "name": "Khopoli",
+    "displayName": "Khopoli, Maharashtra, India",
+    "lat": 18.78562,
+    "lon": 73.34589,
+    "country": "IN",
+    "admin1": "Maharashtra"
+  },
+  {
+    "name": "Kota",
+    "displayName": "Kota, Rajasthan, India",
+    "lat": 25.18254,
+    "lon": 75.83907,
+    "country": "IN",
+    "admin1": "Rajasthan"
+  },
+  {
+    "name": "Haverhill",
+    "displayName": "Haverhill, Massachusetts, United States",
+    "lat": 42.7762,
+    "lon": -71.07728,
+    "country": "US",
+    "admin1": "Massachusetts"
+  },
+  {
+    "name": "Raipur",
+    "displayName": "Raipur, Chhattisgarh, India",
+    "lat": 21.23333,
+    "lon": 81.63333,
+    "country": "IN",
+    "admin1": "Chhattisgarh"
+  },
+  {
+    "name": "Gondiā",
+    "displayName": "Gondiā, Maharashtra, India",
+    "lat": 21.46026,
+    "lon": 80.19205,
+    "country": "IN",
+    "admin1": "Maharashtra"
+  },
+  {
+    "name": "Kolenchery",
+    "displayName": "Kolenchery, Kerala, India",
+    "lat": 9.97814,
+    "lon": 76.47403,
+    "country": "IN",
+    "admin1": "Kerala"
+  },
+  {
+    "name": "Parola",
+    "displayName": "Parola, Maharashtra, India",
+    "lat": 20.88098,
+    "lon": 75.11937,
+    "country": "IN",
+    "admin1": "Maharashtra"
+  },
+  {
+    "name": "Hindupur",
+    "displayName": "Hindupur, Andhra Pradesh, India",
+    "lat": 13.82807,
+    "lon": 77.49143,
+    "country": "IN",
+    "admin1": "Andhra Pradesh"
+  },
+  {
+    "name": "Narnaul",
+    "displayName": "Narnaul, Haryana, India",
+    "lat": 28.04444,
+    "lon": 76.10833,
+    "country": "IN",
+    "admin1": "Haryana"
+  },
+  {
+    "name": "Karaikudi",
+    "displayName": "Karaikudi, Tamil Nadu, India",
+    "lat": 10.06615,
+    "lon": 78.76784,
+    "country": "IN",
+    "admin1": "Tamil Nadu"
+  },
+  {
+    "name": "Raleigh",
+    "displayName": "Raleigh, North Carolina, United States",
+    "lat": 35.7721,
+    "lon": -78.63861,
+    "country": "US",
+    "admin1": "North Carolina"
+  },
+  {
+    "name": "Suriāpet",
+    "displayName": "Suriāpet, Telangana, India",
+    "lat": 17.14054,
+    "lon": 79.62045,
+    "country": "IN",
+    "admin1": "Telangana"
+  },
+  {
+    "name": "Keonjhargarh",
+    "displayName": "Keonjhargarh, Odisha, India",
+    "lat": 21.6318,
+    "lon": 85.59686,
+    "country": "IN",
+    "admin1": "Odisha"
+  },
+  {
+    "name": "Nāraura",
+    "displayName": "Nāraura, Uttar Pradesh, India",
+    "lat": 27.51107,
+    "lon": 78.44051,
+    "country": "IN",
+    "admin1": "Uttar Pradesh"
+  },
+  {
+    "name": "Chamoli",
+    "displayName": "Chamoli, Uttarakhand, India",
+    "lat": 30.40271,
+    "lon": 79.33303,
+    "country": "IN",
+    "admin1": "Uttarakhand"
+  },
+  {
+    "name": "Ernākulam",
+    "displayName": "Ernākulam, Kerala, India",
+    "lat": 9.96714,
+    "lon": 76.29036,
+    "country": "IN",
+    "admin1": "Kerala"
+  },
+  {
+    "name": "Mavelikkara",
+    "displayName": "Mavelikkara, Kerala, India",
+    "lat": 9.25929,
+    "lon": 76.55642,
+    "country": "IN",
+    "admin1": "Kerala"
+  },
+  {
+    "name": "Sunnyvale",
+    "displayName": "Sunnyvale, California, United States",
+    "lat": 37.36883,
+    "lon": -122.03635,
+    "country": "US",
+    "admin1": "California"
+  },
+  {
+    "name": "Vallethode Market",
+    "displayName": "Vallethode Market, Kerala, India",
+    "lat": 9.7938744,
+    "lon": 76.3024675,
+    "country": "IN",
+    "admin1": "Kerala"
+  },
+  {
+    "name": "Bhadravati",
+    "displayName": "Bhadravati, Karnataka, India",
+    "lat": 13.84846,
+    "lon": 75.70502,
+    "country": "IN",
+    "admin1": "Karnataka"
+  },
+  {
+    "name": "Najībābād",
+    "displayName": "Najībābād, Uttar Pradesh, India",
+    "lat": 29.61194,
+    "lon": 78.34274,
+    "country": "IN",
+    "admin1": "Uttar Pradesh"
+  },
+  {
+    "name": "North Brunswick",
+    "displayName": "North Brunswick, New Jersey, United States",
+    "lat": 40.454,
+    "lon": -74.482,
+    "country": "US",
+    "admin1": "New Jersey"
+  },
+  {
+    "name": "Bongaigaon",
+    "displayName": "Bongaigaon, Assam, India",
+    "lat": 26.47703,
+    "lon": 90.55815,
+    "country": "IN",
+    "admin1": "Assam"
+  },
+  {
+    "name": "Federal Way",
+    "displayName": "Federal Way, Washington, United States",
+    "lat": 47.32232,
+    "lon": -122.31262,
+    "country": "US",
+    "admin1": "Washington"
+  },
+  {
+    "name": "Hingoli",
+    "displayName": "Hingoli, Maharashtra, India",
+    "lat": 19.71464,
+    "lon": 77.14238,
+    "country": "IN",
+    "admin1": "Maharashtra"
+  },
+  {
+    "name": "Swaroopganj",
+    "displayName": "Swaroopganj, Rajasthan, India",
+    "lat": 24.6593048,
+    "lon": 72.9304449,
+    "country": "IN",
+    "admin1": "Rajasthan"
+  },
+  {
+    "name": "Karad",
+    "displayName": "Karad, Maharashtra, India",
+    "lat": 17.28937,
+    "lon": 74.18183,
+    "country": "IN",
+    "admin1": "Maharashtra"
+  },
+  {
+    "name": "Chittaranjan",
+    "displayName": "Chittaranjan, West Bengal, India",
+    "lat": 23.85681,
+    "lon": 86.90324,
+    "country": "IN",
+    "admin1": "West Bengal"
+  },
+  {
+    "name": "Dhenkānāl",
+    "displayName": "Dhenkānāl, Odisha, India",
+    "lat": 20.65744,
+    "lon": 85.59693,
+    "country": "IN",
+    "admin1": "Odisha"
+  },
+  {
+    "name": "Chūru",
+    "displayName": "Chūru, Rajasthan, India",
+    "lat": 28.30415,
+    "lon": 74.96718,
+    "country": "IN",
+    "admin1": "Rajasthan"
+  },
+  {
+    "name": "Avanigadda",
+    "displayName": "Avanigadda, Andhra Pradesh, India",
+    "lat": 16.02148,
+    "lon": 80.91808,
+    "country": "IN",
+    "admin1": "Andhra Pradesh"
+  },
+  {
+    "name": "Vuyyūru",
+    "displayName": "Vuyyūru, Andhra Pradesh, India",
+    "lat": 16.36307,
+    "lon": 80.84406,
+    "country": "IN",
+    "admin1": "Andhra Pradesh"
+  },
+  {
+    "name": "Yelahanka",
+    "displayName": "Yelahanka, Karnataka, India",
+    "lat": 13.10073,
+    "lon": 77.59632,
+    "country": "IN",
+    "admin1": "Karnataka"
+  },
+  {
+    "name": "Umred",
+    "displayName": "Umred, Maharashtra, India",
+    "lat": 20.85396,
+    "lon": 79.32466,
+    "country": "IN",
+    "admin1": "Maharashtra"
+  },
+  {
+    "name": "Lonavala",
+    "displayName": "Lonavala, Maharashtra, India",
+    "lat": 18.7503694,
+    "lon": 73.4069436,
+    "country": "IN",
+    "admin1": "Maharashtra"
+  },
+  {
+    "name": "Ludwigshafen am Rhein",
+    "displayName": "Ludwigshafen am Rhein, Rhineland-Palatinate, Germany",
+    "lat": 49.48121,
+    "lon": 8.44641,
+    "country": "DE",
+    "admin1": "Rhineland-Palatinate"
+  },
+  {
+    "name": "Berkeley",
+    "displayName": "Berkeley, California, United States",
+    "lat": 37.87159,
+    "lon": -122.27275,
+    "country": "US",
+    "admin1": "California"
+  },
+  {
+    "name": "Waukegan",
+    "displayName": "Waukegan, Illinois, United States",
+    "lat": 42.36363,
+    "lon": -87.84479,
+    "country": "US",
+    "admin1": "Illinois"
+  },
+  {
+    "name": "Farīdkot",
+    "displayName": "Farīdkot, Punjab, India",
+    "lat": 30.67399,
+    "lon": 74.75579,
+    "country": "IN",
+    "admin1": "Punjab"
+  },
+  {
+    "name": "Oxford",
+    "displayName": "Oxford, England, United Kingdom",
+    "lat": 51.75222,
+    "lon": -1.25596,
+    "country": "GB",
+    "admin1": "England"
+  },
+  {
+    "name": "Surathkal",
+    "displayName": "Surathkal, Karnataka, India",
+    "lat": 12.9893484,
+    "lon": 74.8002073,
+    "country": "IN",
+    "admin1": "Karnataka"
+  },
+  {
+    "name": "Kishangarh",
+    "displayName": "Kishangarh, Rajasthan, India",
+    "lat": 26.59006,
+    "lon": 74.85397,
+    "country": "IN",
+    "admin1": "Rajasthan"
+  },
+  {
+    "name": "Badlapur",
+    "displayName": "Badlapur, Maharashtra, India",
+    "lat": 19.15516,
+    "lon": 73.26553,
+    "country": "IN",
+    "admin1": "Maharashtra"
+  },
+  {
+    "name": "Chittagong",
+    "displayName": "Chittagong, Chittagong, Bangladesh",
+    "lat": 22.3384,
+    "lon": 91.83168,
+    "country": "BD",
+    "admin1": "Chittagong"
+  },
+  {
+    "name": "Karanja Lad",
+    "displayName": "Karanja Lad, Maharashtra, India",
+    "lat": 20.4820707,
+    "lon": 77.489234,
+    "country": "IN",
+    "admin1": "Maharashtra"
+  },
+  {
+    "name": "Salt Lake City",
+    "displayName": "Salt Lake City, Utah, United States",
+    "lat": 40.76078,
+    "lon": -111.89105,
+    "country": "US",
+    "admin1": "Utah"
+  },
+  {
+    "name": "Una",
+    "displayName": "Una, Himachal Pradesh, India",
+    "lat": 31.46493,
+    "lon": 76.26914,
+    "country": "IN",
+    "admin1": "Himachal Pradesh"
+  },
+  {
+    "name": "Jodhpur",
+    "displayName": "Jodhpur, Rajasthan, India",
+    "lat": 26.26841,
+    "lon": 73.00594,
+    "country": "IN",
+    "admin1": "Rajasthan"
+  },
+  {
+    "name": "Malmö",
+    "displayName": "Malmö, Skåne County, Sweden",
+    "lat": 55.60587,
+    "lon": 13.00073,
+    "country": "SE",
+    "admin1": "Skåne County"
+  },
+  {
+    "name": "Zurich",
+    "displayName": "Zurich, Canton of Zurich, Switzerland",
+    "lat": 47.36667,
+    "lon": 8.55,
+    "country": "CH",
+    "admin1": "Canton of Zurich"
+  },
+  {
+    "name": "Palani",
+    "displayName": "Palani, Tamil Nadu, India",
+    "lat": 10.45034,
+    "lon": 77.5209,
+    "country": "IN",
+    "admin1": "Tamil Nadu"
+  },
+  {
+    "name": "Millbrook",
+    "displayName": "Millbrook, New York, United States",
+    "lat": 41.78509,
+    "lon": -73.69402,
+    "country": "US",
+    "admin1": "New York"
+  },
+  {
+    "name": "Canterbury",
+    "displayName": "Canterbury, England, United Kingdom",
+    "lat": 51.27904,
+    "lon": 1.07992,
+    "country": "GB",
+    "admin1": "England"
+  },
+  {
+    "name": "Kāraikāl",
+    "displayName": "Kāraikāl, Puducherry, India",
+    "lat": 10.91667,
+    "lon": 79.83333,
+    "country": "IN",
+    "admin1": "Puducherry"
+  },
+  {
+    "name": "Jhānsi",
+    "displayName": "Jhānsi, Uttar Pradesh, India",
+    "lat": 25.45887,
+    "lon": 78.57994,
+    "country": "IN",
+    "admin1": "Uttar Pradesh"
+  },
+  {
+    "name": "Singapore",
+    "displayName": "Singapore, Singapore",
+    "lat": 1.28967,
+    "lon": 103.85007,
+    "country": "SG"
+  },
+  {
+    "name": "Sirsi",
+    "displayName": "Sirsi, Karnataka, India",
+    "lat": 14.62072,
+    "lon": 74.83554,
+    "country": "IN",
+    "admin1": "Karnataka"
+  },
+  {
+    "name": "Kotagiri",
+    "displayName": "Kotagiri, Tamil Nadu, India",
+    "lat": 11.42072,
+    "lon": 76.86035,
+    "country": "IN",
+    "admin1": "Tamil Nadu"
+  },
+  {
+    "name": "Bīna",
+    "displayName": "Bīna, Madhya Pradesh, India",
+    "lat": 24.17161,
+    "lon": 78.18755,
+    "country": "IN",
+    "admin1": "Madhya Pradesh"
+  },
+  {
+    "name": "Edmonton",
+    "displayName": "Edmonton, Alberta, Canada",
+    "lat": 53.55014,
+    "lon": -113.46871,
+    "country": "CA",
+    "admin1": "Alberta"
+  },
+  {
+    "name": "Greater Noida",
+    "displayName": "Greater Noida, Uttar Pradesh, India",
+    "lat": 28.49615,
+    "lon": 77.53601,
+    "country": "IN",
+    "admin1": "Uttar Pradesh"
+  },
+  {
+    "name": "Tempe",
+    "displayName": "Tempe, Arizona, United States",
+    "lat": 33.41477,
+    "lon": -111.90931,
+    "country": "US",
+    "admin1": "Arizona"
+  },
+  {
+    "name": "Koramangala",
+    "displayName": "Koramangala, Karnataka, India",
+    "lat": 12.93204,
+    "lon": 77.6227,
+    "country": "IN",
+    "admin1": "Karnataka"
+  },
+  {
+    "name": "Kadūr",
+    "displayName": "Kadūr, Karnataka, India",
+    "lat": 13.55285,
+    "lon": 76.01164,
+    "country": "IN",
+    "admin1": "Karnataka"
+  },
+  {
+    "name": "Hanover",
+    "displayName": "Hanover, Lower Saxony, Germany",
+    "lat": 52.37052,
+    "lon": 9.73322,
+    "country": "DE",
+    "admin1": "Lower Saxony"
+  },
+  {
+    "name": "Chāndpur",
+    "displayName": "Chāndpur, Uttar Pradesh, India",
+    "lat": 29.13489,
+    "lon": 78.27187,
+    "country": "IN",
+    "admin1": "Uttar Pradesh"
+  },
+  {
+    "name": "Andaman Islands",
+    "displayName": "Andaman Islands, Andaman and Nicobar, India",
+    "lat": 12.41647,
+    "lon": 92.7831,
+    "country": "IN",
+    "admin1": "Andaman and Nicobar"
+  },
+  {
+    "name": "Jeypore",
+    "displayName": "Jeypore, Odisha, India",
+    "lat": 18.8563,
+    "lon": 82.5716,
+    "country": "IN",
+    "admin1": "Odisha"
+  },
+  {
+    "name": "Bālāghāt",
+    "displayName": "Bālāghāt, Madhya Pradesh, India",
+    "lat": 21.8156,
+    "lon": 80.18845,
+    "country": "IN",
+    "admin1": "Madhya Pradesh"
+  },
+  {
+    "name": "Kalyani",
+    "displayName": "Kalyani, West Bengal, India",
+    "lat": 22.9757,
+    "lon": 88.4337,
+    "country": "IN",
+    "admin1": "West Bengal"
+  },
+  {
+    "name": "Firozpur",
+    "displayName": "Firozpur, Punjab, India",
+    "lat": 30.92574,
+    "lon": 74.61311,
+    "country": "IN",
+    "admin1": "Punjab"
+  },
+  {
+    "name": "Mostar",
+    "displayName": "Mostar, Federation of Bosnia and Herzegovina, Bosnia and Herzegovina",
+    "lat": 43.34333,
+    "lon": 17.80806,
+    "country": "BA",
+    "admin1": "Federation of Bosnia and Herzegovina"
   }
 ]
