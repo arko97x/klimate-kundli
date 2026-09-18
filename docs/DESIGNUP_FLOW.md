@@ -6,9 +6,12 @@ During the conference, the booth devices will use:
 
 `designup26.klimatekundli.com`
 
-After the conference, the permanent DesignUp pages will live at:
+After the conference, the cleaned-up DesignUp Kundlis will live at:
 
-`klimatekundli.com/designup26`
+`klimatekundli.com/designup26/k/<slug>`
+
+There will not be a separate permanent DesignUp homepage. The old event homepage
+will redirect to the main Klimate Kundli homepage.
 
 For example:
 
@@ -96,5 +99,5 @@ The event homepage should also redirect:
 
 ```text
 designup26.klimatekundli.com
-→ klimatekundli.com/designup26
+→ klimatekundli.com
 ```
