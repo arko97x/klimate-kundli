@@ -9,3 +9,7 @@ data/cache.sqlite-*
 data/imd-spike-report.json
 *.log
 .DS_Store
+
+# Kundli dumps for analysis/ — birth year + ordered city list is identifying
+analysis/*.json
+analysis/dump*
