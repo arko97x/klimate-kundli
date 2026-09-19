@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { LinenPaper } from "@/components/LinenPaper";
 import { Button } from "@/components/ui/button";
 import { PrintedInk } from "@/components/PrintedInk";
-import { Star } from "@/expt/KundliWizardLayout";
+import { TwinklingStar } from "@/dup-test/TwinklingStar";
+import { TWINKLE_CSS } from "@/dup-test/twinkle";
 import parrotUrl from "@/assets/parrot-white.svg";
 
 // Shapes and star positions mirror the landing composition in
@@ -55,71 +56,15 @@ const GRID_LINES: [string, string][] = [
   ["83.333%", "hidden xl:block"],
 ];
 
-// Twinkle modelled on a classic glint loop, played rarely: each star rests at
-// full size, then briefly twists away to --twinkle-min (0 vanishes, 0.3 dips
-// to a pinprick) and pops back from it still turning clockwise, a thinner
-// diagonal star flashing as it overshoots. The twinkle is the first ~14% of a
-// long 7–13s cycle (see TWINKLE_TIMING), so nearly every star is visible at
-// any moment. The rotation jumps 45deg -> -45deg at the smallest point; for a
-// four-point star that's a quarter turn, so it doesn't read as a snap.
-// Tailwind v4's translate utilities use the standalone `translate` property,
-// so animating `transform` doesn't fight the centring.
-const TWINKLE_CSS = `
-.dup-star { --twinkle-min: 0; }
-@keyframes dup-twinkle {
-  0%    { transform: scale(1) rotate(0deg); }
-  5%    { transform: scale(var(--twinkle-min)) rotate(45deg); animation-timing-function: step-end; }
-  5.01% { transform: scale(var(--twinkle-min)) rotate(-45deg); }
-  10%   { transform: scale(1.08) rotate(-6deg); }
-  14%, 100% { transform: scale(1) rotate(0deg); }
-}
-@keyframes dup-glint {
-  0%, 7%, 13%, 100% { transform: rotate(40deg) scale(0); }
-  10% { transform: rotate(55deg) scale(0.6); }
-}
-.dup-star > .dup-star-main { animation: dup-twinkle var(--twinkle-dur) ease-in-out var(--twinkle-delay) infinite backwards; }
-.dup-star > .dup-star-glint { transform: scale(0); opacity: 0.75; animation: dup-glint var(--twinkle-dur) ease-in-out var(--twinkle-delay) infinite backwards; }
-@media (prefers-reduced-motion: reduce) {
-  .dup-star > .dup-star-main, .dup-star > .dup-star-glint { animation: none; }
-}
-`;
-
-// Per-star [cycle length, first twinkle after load], in seconds. Hand-spread
-// so no two stars start together; the unequal cycles keep them drifting
-// apart afterwards rather than falling into a rhythm.
-const TWINKLE_TIMING: [number, number][] = [
-  [9.1, 1.2],
-  [11.7, 4.6],
-  [7.9, 7.4],
-  [12.9, 2.8],
-  [8.3, 5.9],
-  [10.1, 0.5],
-  [11.1, 8.6],
-  [7.3, 3.7],
-  [9.7, 6.6],
-];
-
 function Stars({ stars, className }: { stars: StarSpec[]; className: string }) {
-  return stars.map(([left, top, width, color], i) => {
-    const [dur, first] = TWINKLE_TIMING[i % TWINKLE_TIMING.length];
-    return (
-      <div
-        key={`${left}-${top}`}
-        className={`${className} dup-star absolute -translate-x-1/2 -translate-y-1/2 ${color}`}
-        style={{
-          left,
-          top,
-          width,
-          aspectRatio: "105/116",
-          ["--twinkle-dur" as string]: `${dur}s`,
-          ["--twinkle-delay" as string]: `${first}s`,
-        }}
-      >
-        <Star className="dup-star-main absolute inset-0 h-full w-full" />
-        <Star className="dup-star-glint absolute inset-0 h-full w-full" />
-      </div>
-    );
-  });
+  return stars.map(([left, top, width, color], i) => (
+    <TwinklingStar
+      key={`${left}-${top}`}
+      index={i}
+      className={`${className} ${color}`}
+      style={{ left, top, width }}
+    />
+  ));
 }
 
 export function DupTestPage() {
