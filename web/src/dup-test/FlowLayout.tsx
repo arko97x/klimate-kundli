@@ -3,9 +3,10 @@ import type { ReactNode } from 'react'
 
 import { LinenPaper } from '@/components/LinenPaper'
 import { cn } from '@/lib/utils'
-import parrotStep1Url from '@/assets/parrot-step1.svg'
-import parrotStep2Url from '@/assets/parrot-step2.svg'
 
+import { CreaseLines } from './CreaseLines'
+import { FillingParrot } from './FillingParrot'
+import { TWINKLE_CSS } from './twinkle'
 import { BASE, STEPS, firstIncompleteStep, stepIndex, stepPath, type StepKey } from './flow'
 import { useFlow } from './FlowProvider'
 
@@ -27,11 +28,15 @@ function currentStep(pathname: string): StepKey | 'done' | null {
 export function FlowLayout() {
   const { pathname } = useLocation()
   const step = currentStep(pathname)
-  const parrot = step === 'places' || step === 'done' ? parrotStep2Url : parrotStep1Url
+  // The crystal ball fills as the visitor goes, rising smoothly between steps.
+  const ballLevel =
+    step === 'photo' ? 0.2 : step === 'birth' ? 0.35 : step === 'places' || step === 'done' ? 0.85 : 0
 
   return (
-    <LinenPaper className="relative min-h-svh">
-      <style>{FLOW_CSS}</style>
+    // isolate: lets CreaseLines sit at -z-10 above the paper but under content.
+    <LinenPaper className="relative isolate min-h-svh">
+      <style>{FLOW_CSS + TWINKLE_CSS}</style>
+      <CreaseLines />
       <a
         href="#flow-main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-10 focus:bg-black focus:px-4 focus:py-2 focus:text-white"
@@ -59,10 +64,8 @@ export function FlowLayout() {
         <Outlet />
       </main>
 
-      <img
-        src={parrot}
-        alt=""
-        aria-hidden
+      <FillingParrot
+        level={ballLevel}
         className="pointer-events-none absolute bottom-6 right-6 hidden w-[140px] mix-blend-multiply xl:block"
       />
     </LinenPaper>
