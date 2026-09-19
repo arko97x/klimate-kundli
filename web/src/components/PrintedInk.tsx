@@ -1,4 +1,4 @@
-import { useId, type ComponentProps } from "react";
+import { useId, type ComponentProps, type ReactNode } from "react";
 
 import { LINEN_DEFAULT_TILE_SIZE } from "@/components/LinenPaper";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,15 @@ type PrintedInkProps = ComponentProps<"div"> & {
   bleed?: number;
   /** Match the LinenPaper tileSize underneath so the grain lines up. */
   tileSize?: number;
+  /**
+   * Content printed in the same ink layer but outside the edge-bleed filter,
+   * drawn above children. Use it for anything that animates: the filter spans
+   * the whole layer, so motion inside it re-runs the filter every frame. It
+   * fills the component's box, positioned like children, and ignores the
+   * pointer so it never blocks children underneath (add pointer-events-auto
+   * to anything inside that needs clicks).
+   */
+  crisp?: ReactNode;
 };
 
 /**
@@ -33,6 +42,7 @@ export function PrintedInk({
   tooth = 0.35,
   bleed = 1.2,
   tileSize = LINEN_DEFAULT_TILE_SIZE,
+  crisp,
   className,
   children,
   ...props
@@ -55,6 +65,7 @@ export function PrintedInk({
       >
         {children}
       </div>
+      {crisp && <div className="pointer-events-none absolute inset-0">{crisp}</div>}
       {tooth > 0 && (
         <div
           aria-hidden
