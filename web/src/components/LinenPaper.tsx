@@ -8,7 +8,7 @@ function linenSvg(color: string) {
 }
 
 export const LINEN_DEFAULT_COLOR = "#faf8f3";
-export const LINEN_DEFAULT_TILE_SIZE = 300;
+export const LINEN_DEFAULT_TILE_SIZE = 200;
 
 type LinenPaperProps = ComponentProps<"div"> & {
   /** Base paper colour. Any CSS colour the SVG accepts. */
