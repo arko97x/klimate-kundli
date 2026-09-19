@@ -4,7 +4,7 @@ import parrotUrl from "@/assets/parrot-white.svg";
 import parrotStep1Url from "@/assets/parrot-step1.svg";
 import parrotStep2Url from "@/assets/parrot-step2.svg";
 
-const Star = ({
+export const Star = ({
   className,
   style,
 }: {

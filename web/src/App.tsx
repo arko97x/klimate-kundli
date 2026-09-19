@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import KundliApp from '@/KundliApp'
 import { DocumentationPage } from '@/documentation/DocumentationPage'
+import { DupTestPage } from '@/pages/DupTestPage'
 import { GalleryPage } from '@/pages/GalleryPage'
 import { IceLabPage } from '@/pages/IceLabPage'
 import { KundliViewPage } from '@/pages/KundliViewPage'
@@ -32,6 +33,7 @@ function App() {
             <Route path="/klimate-twin" element={<KlimateTwinPage />} />
             <Route path="/ice-lab" element={<IceLabPage />} />
             <Route path="/new" element={<NewDesignExperimentPage />} />
+            <Route path="/dup-test" element={<DupTestPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
