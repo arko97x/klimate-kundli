@@ -15,11 +15,22 @@ if (import.meta.env.PROD) {
     localStorage.setItem('umami.disabled', '1')
     window.alert('Analytics disabled for this browser.')
   }
+  // Scratch/experiment routes that shouldn't show up in the stats. The
+  // tracker calls this before every send; a falsy return drops the event.
+  const untrackedPaths = ['/dup-test']
+  const w = window as unknown as Record<string, unknown>
+  w.umamiBeforeSend = (_type: string, payload: { url?: string }) => {
+    const path = new URL(payload.url ?? '/', window.location.origin).pathname
+    return untrackedPaths.some((p) => path === p || path.startsWith(`${p}/`))
+      ? null
+      : payload
+  }
   const script = document.createElement('script')
   script.defer = true
   script.src = 'https://analytics.klimatekundli.com/script.js'
   script.dataset.websiteId = '4eb14e56-36ec-4364-bb8d-eda0df7860e3'
   script.dataset.domains = 'klimatekundli.com'
+  script.dataset.beforeSend = 'umamiBeforeSend'
   document.head.appendChild(script)
 }
 
