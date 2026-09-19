@@ -1,8 +1,8 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import KundliApp from '@/KundliApp'
 import { DocumentationPage } from '@/documentation/DocumentationPage'
-import { DupTestPage } from '@/pages/DupTestPage'
 import { GalleryPage } from '@/pages/GalleryPage'
 import { IceLabPage } from '@/pages/IceLabPage'
 import { KundliViewPage } from '@/pages/KundliViewPage'
@@ -10,6 +10,9 @@ import { NewDesignExperimentPage } from '@/pages/NewDesignExperimentPage'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ExhibitionLayout, PublicLayout } from '@/components/Layouts'
 import { AboutPage, DisclaimerPage, KlimateTwinPage, PrivacyPage } from '@/pages/StubPages'
+
+// Experimental DesignUp flow; lazy so it adds nothing to the public pages' bundle.
+const DupTestRoutes = lazy(() => import('@/dup-test/DupTestRoutes'))
 
 function App() {
   return (
@@ -33,7 +36,14 @@ function App() {
             <Route path="/klimate-twin" element={<KlimateTwinPage />} />
             <Route path="/ice-lab" element={<IceLabPage />} />
             <Route path="/new" element={<NewDesignExperimentPage />} />
-            <Route path="/dup-test" element={<DupTestPage />} />
+            <Route
+              path="/dup-test/*"
+              element={
+                <Suspense fallback={null}>
+                  <DupTestRoutes />
+                </Suspense>
+              }
+            />
           </Route>
         </Routes>
       </BrowserRouter>

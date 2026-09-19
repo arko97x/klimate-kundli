@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { LinenPaper } from "@/components/LinenPaper";
 import { Button } from "@/components/ui/button";
@@ -122,6 +123,7 @@ function Stars({ stars, className }: { stars: StarSpec[]; className: string }) {
 }
 
 export function DupTestPage() {
+  const navigate = useNavigate();
   return (
     <LinenPaper className="relative h-dvh overflow-hidden">
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Almendra+SC&display=swap');${TWINKLE_CSS}`}</style>
@@ -187,7 +189,7 @@ export function DupTestPage() {
           <div className="relative z-10 aspect-[215/257] w-[115px] -translate-x-[80%] translate-y-[32%] xl:w-[130px] xl:-translate-x-[95%]">
             <img src={parrotUrl} alt="Parrot" className="h-full w-full" />
           </div>
-          <Button className="h-[44px] w-[180px] rounded-none bg-black text-xs font-semibold uppercase tracking-wider text-white shadow-lg transition-all hover:scale-[1.02] hover:bg-black/90 sm:h-[52px] sm:w-[240px] sm:text-sm xl:text-base">
+          <Button onClick={() => navigate("/dup-test/linkedin")} className="h-[44px] w-[180px] rounded-none bg-black text-xs font-semibold uppercase tracking-wider text-white shadow-lg transition-all hover:scale-[1.02] hover:bg-black/90 sm:h-[52px] sm:w-[240px] sm:text-sm xl:text-base">
             Get Started
           </Button>
         </div>
