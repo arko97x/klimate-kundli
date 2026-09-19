@@ -1,8 +1,10 @@
 import type { CSSProperties } from "react";
 
 import { LinenPaper } from "@/components/LinenPaper";
+import { Button } from "@/components/ui/button";
 import { PrintedInk } from "@/components/PrintedInk";
 import { Star } from "@/expt/KundliWizardLayout";
+import parrotUrl from "@/assets/parrot-white.svg";
 
 // Shapes and star positions mirror the landing composition in
 // KundliWizardLayout: a full-width box at 1:1 (mobile), 2:1 (sm), 3:1 (xl).
@@ -38,55 +40,157 @@ const DESKTOP_STARS: StarSpec[] = [
   ["90%", "92%", "2.5%", "text-neutral-300"],
 ];
 
+// Vertical grid lines: [left, visibility classes]. Right edge sits at
+// calc(100% - 1px) to match the landing page's right-0 line.
+const GRID_LINES: [string, string][] = [
+  ["0", ""],
+  ["50%", ""],
+  ["calc(100% - 1px)", ""],
+  ["25%", "hidden sm:block xl:hidden"],
+  ["75%", "hidden sm:block xl:hidden"],
+  ["16.667%", "hidden xl:block"],
+  ["33.333%", "hidden xl:block"],
+  ["66.667%", "hidden xl:block"],
+  ["83.333%", "hidden xl:block"],
+];
+
+// Twinkle modelled on a classic glint loop, played rarely: each star rests at
+// full size, then briefly twists away to --twinkle-min (0 vanishes, 0.3 dips
+// to a pinprick) and pops back from it still turning clockwise, a thinner
+// diagonal star flashing as it overshoots. The twinkle is the first ~14% of a
+// long 7–13s cycle (see TWINKLE_TIMING), so nearly every star is visible at
+// any moment. The rotation jumps 45deg -> -45deg at the smallest point; for a
+// four-point star that's a quarter turn, so it doesn't read as a snap.
+// Tailwind v4's translate utilities use the standalone `translate` property,
+// so animating `transform` doesn't fight the centring.
+const TWINKLE_CSS = `
+.dup-star { --twinkle-min: 0; }
+@keyframes dup-twinkle {
+  0%    { transform: scale(1) rotate(0deg); }
+  5%    { transform: scale(var(--twinkle-min)) rotate(45deg); animation-timing-function: step-end; }
+  5.01% { transform: scale(var(--twinkle-min)) rotate(-45deg); }
+  10%   { transform: scale(1.08) rotate(-6deg); }
+  14%, 100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes dup-glint {
+  0%, 7%, 13%, 100% { transform: rotate(40deg) scale(0); }
+  10% { transform: rotate(55deg) scale(0.6); }
+}
+.dup-star > .dup-star-main { animation: dup-twinkle var(--twinkle-dur) ease-in-out var(--twinkle-delay) infinite backwards; }
+.dup-star > .dup-star-glint { transform: scale(0); opacity: 0.75; animation: dup-glint var(--twinkle-dur) ease-in-out var(--twinkle-delay) infinite backwards; }
+@media (prefers-reduced-motion: reduce) {
+  .dup-star > .dup-star-main, .dup-star > .dup-star-glint { animation: none; }
+}
+`;
+
+// Per-star [cycle length, first twinkle after load], in seconds. Hand-spread
+// so no two stars start together; the unequal cycles keep them drifting
+// apart afterwards rather than falling into a rhythm.
+const TWINKLE_TIMING: [number, number][] = [
+  [9.1, 1.2],
+  [11.7, 4.6],
+  [7.9, 7.4],
+  [12.9, 2.8],
+  [8.3, 5.9],
+  [10.1, 0.5],
+  [11.1, 8.6],
+  [7.3, 3.7],
+  [9.7, 6.6],
+];
+
 function Stars({ stars, className }: { stars: StarSpec[]; className: string }) {
-  return stars.map(([left, top, width, color]) => (
-    <Star
-      key={`${left}-${top}`}
-      className={`${className} absolute -translate-x-1/2 -translate-y-1/2 ${color}`}
-      style={{ left, top, width, aspectRatio: "105/116" }}
-    />
-  ));
+  return stars.map(([left, top, width, color], i) => {
+    const [dur, first] = TWINKLE_TIMING[i % TWINKLE_TIMING.length];
+    return (
+      <div
+        key={`${left}-${top}`}
+        className={`${className} dup-star absolute -translate-x-1/2 -translate-y-1/2 ${color}`}
+        style={{
+          left,
+          top,
+          width,
+          aspectRatio: "105/116",
+          ["--twinkle-dur" as string]: `${dur}s`,
+          ["--twinkle-delay" as string]: `${first}s`,
+        }}
+      >
+        <Star className="dup-star-main absolute inset-0 h-full w-full" />
+        <Star className="dup-star-glint absolute inset-0 h-full w-full" />
+      </div>
+    );
+  });
 }
 
 export function DupTestPage() {
   return (
-    <LinenPaper className="min-h-dvh">
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Almendra+SC&display=swap');`}</style>
-      <PrintedInk className="mx-auto mt-8 aspect-square w-full sm:mt-0 sm:aspect-[2/1] xl:aspect-[3/1]">
-        {/* Left: half-triangle (sm), full diamond (xl) */}
-        <div
-          className="absolute left-0 top-0 hidden h-full w-1/4 bg-black sm:block xl:hidden"
-          style={{ clipPath: "polygon(0 0, 100% 50%, 0 100%)" }}
-        />
-        <div className="absolute left-0 top-0 hidden h-full w-1/3 bg-black xl:block" style={DIAMOND} />
-
-        {/* Right: half-triangle (sm), full diamond (xl) */}
-        <div
-          className="absolute right-0 top-0 hidden h-full w-1/4 bg-black sm:block xl:hidden"
-          style={{ clipPath: "polygon(100% 0, 0 50%, 100% 100%)" }}
-        />
-        <div
-          className="absolute top-0 hidden h-full w-1/3 bg-black xl:block"
-          style={{ ...DIAMOND, left: "66.667%" }}
-        />
-
-        {/* Centre gradient diamond */}
-        <div
-          className="absolute left-0 right-0 top-0 flex h-full flex-col items-center justify-center bg-gradient-to-b from-[#180033] to-[#bd005d] p-4 sm:left-1/4 sm:right-1/4 xl:left-1/3 xl:right-1/3"
-          style={DIAMOND}
-        >
-          <h1
-            className="text-center text-4xl font-normal leading-tighter tracking-wider text-white sm:text-5xl xl:text-6xl"
-            style={{ fontFamily: "'Almendra SC', serif" }}
-          >
-            Klimate
-            <br />
-            Kundli
-          </h1>
+    <LinenPaper className="relative h-dvh overflow-hidden">
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Almendra+SC&display=swap');${TWINKLE_CSS}`}</style>
+      <PrintedInk
+        className="h-full w-full"
+        crisp={
+          // Twinkling stars stay out of the edge-bleed filter (see PrintedInk).
+          <div className="relative mx-auto mt-8 aspect-square w-full sm:mt-0 sm:aspect-[2/1] xl:aspect-[3/1]">
+            <Stars stars={TABLET_STARS} className="hidden sm:block xl:hidden" />
+            <Stars stars={DESKTOP_STARS} className="hidden xl:block" />
+          </div>
+        }
+      >
+        {/* Full-height vertical grid lines, behind the shapes */}
+        <div className="pointer-events-none absolute inset-0">
+          {GRID_LINES.map(([left, visibility]) => (
+            <div
+              key={`${left}-${visibility}`}
+              className={`absolute inset-y-0 w-px bg-neutral-200 ${visibility}`}
+              style={{ left }}
+            />
+          ))}
         </div>
 
-        <Stars stars={TABLET_STARS} className="hidden sm:block xl:hidden" />
-        <Stars stars={DESKTOP_STARS} className="hidden xl:block" />
+        <div className="relative mx-auto mt-8 aspect-square w-full sm:mt-0 sm:aspect-[2/1] xl:aspect-[3/1]">
+          {/* Left: half-triangle (sm), full diamond (xl) */}
+          <div
+            className="absolute left-0 top-0 hidden h-full w-1/4 bg-black sm:block xl:hidden"
+            style={{ clipPath: "polygon(0 0, 100% 50%, 0 100%)" }}
+          />
+          <div className="absolute left-0 top-0 hidden h-full w-1/3 bg-black xl:block" style={DIAMOND} />
+
+          {/* Right: half-triangle (sm), full diamond (xl) */}
+          <div
+            className="absolute right-0 top-0 hidden h-full w-1/4 bg-black sm:block xl:hidden"
+            style={{ clipPath: "polygon(100% 0, 0 50%, 100% 100%)" }}
+          />
+          <div
+            className="absolute top-0 hidden h-full w-1/3 bg-black xl:block"
+            style={{ ...DIAMOND, left: "66.667%" }}
+          />
+
+          {/* Centre gradient diamond */}
+          <div
+            className="absolute left-0 right-0 top-0 flex h-full flex-col items-center justify-center bg-gradient-to-b from-[#180033] to-[#bd005d] p-4 sm:left-1/4 sm:right-1/4 xl:left-1/3 xl:right-1/3"
+            style={DIAMOND}
+          >
+            <h1
+              className="text-center text-4xl font-normal leading-tighter tracking-wider text-white sm:text-5xl xl:text-6xl"
+              style={{ fontFamily: "'Almendra SC', serif" }}
+            >
+              Klimate
+              <br />
+              Kundli
+            </h1>
+          </div>
+
+        </div>
+
+        {/* Get Started, pinned to the screen bottom as on the landing page */}
+        <div className="absolute bottom-[6%] left-1/2 flex -translate-x-1/2 flex-col items-center">
+          {/* White parrot perched on the button */}
+          <div className="relative z-10 aspect-[215/257] w-[115px] -translate-x-[80%] translate-y-[32%] xl:w-[130px] xl:-translate-x-[95%]">
+            <img src={parrotUrl} alt="Parrot" className="h-full w-full" />
+          </div>
+          <Button className="h-[44px] w-[180px] rounded-none bg-black text-xs font-semibold uppercase tracking-wider text-white shadow-lg transition-all hover:scale-[1.02] hover:bg-black/90 sm:h-[52px] sm:w-[240px] sm:text-sm xl:text-base">
+            Get Started
+          </Button>
+        </div>
       </PrintedInk>
     </LinenPaper>
   );
